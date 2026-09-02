@@ -1,0 +1,14 @@
+/* ================================================================
+   GYM PRO v5.2 — CSS entry point
+   Split modular: cada archivo tiene una responsabilidad clara.
+   Orden importa: tokens → base → layout → components → utilities.
+   ================================================================ */
+
+@import './tokens.css';
+@import './base.css';
+@import './layout.css';
+@import './navigation.css';
+@import './components.css';
+@import './dashboard.css';
+@import './utilities.css';
+@import './exercise-guide.css';

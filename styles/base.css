@@ -1,0 +1,109 @@
+/* ========== BASE ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Helvetica Neue', -apple-system, system-ui, sans-serif;
+}
+
+html {
+    /* Base estándar: respeta la preferencia de tamaño de fuente del navegador/SO.
+       El escalado fluido ya vive en cada componente (h1, .card h2, botones, etc.),
+       así que no hace falta —ni conviene— tocar el tamaño raíz por viewport. */
+    font-size: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    background: var(--canvas);
+    color: var(--text-primary);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    min-height: 100dvh; /* dynamic viewport for mobile browsers */
+    /* Fluid padding with safe bottom clearance for fixed bottom navigation */
+    padding: clamp(0.5rem, 2.5vw, 2.5rem) clamp(0.75rem, 2vw, 1.5rem) calc(5.5rem + env(safe-area-inset-bottom, 0px));
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden; /* no horizontal scroll on mobile */
+}
+
+.app {
+    max-width: 1300px;
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    /* Fluid inset padding: collapses on phones, opens up on desktop. */
+    padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1.5rem, 3vw, 2.5rem);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+}
+
+h1 {
+    font-weight: 700;
+    /* Fluid display size */
+    font-size: clamp(1.4rem, 1rem + 2.5vw, 2.1rem);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: clamp(1.25rem, 3vw, 2rem);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: clamp(0.9rem, 2vw, 1.25rem);
+    flex-wrap: wrap;
+}
+h1 span {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: 'SF Mono', 'Geist Mono', monospace;
+    font-size: clamp(0.62rem, 0.55rem + 0.4vw, 0.75rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.3rem 0.85rem;
+    border-radius: var(--radius-tag);
+    border: 1px solid rgba(198, 255, 61, 0.3);
+}
+/* Subtitle inside h1 (the <small> tag) — fits dark theme instead of hardcoded #7e95ae */
+h1 small {
+    font-size: clamp(0.62rem, 0.55rem + 0.5vw, 0.8rem) !important;
+    color: var(--text-secondary) !important;
+    margin-left: auto;
+    font-weight: 400;
+}
+
+/* ========== RESPONSIVE MOBILE ==========
+   On phones the app sheds its "boxed card" look and becomes full-bleed so it
+   reads as a native app instead of a shrunken desktop page. */
+@media (max-width: 640px) {
+    body {
+        /* Near-zero gutters so content fills the screen width */
+        padding: 0 0 calc(5.5rem + env(safe-area-inset-bottom, 0px));
+    }
+    .app {
+        max-width: 100%;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        border-top: none;
+        box-shadow: none;
+        padding: 0.75rem 0.9rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+    }
+    h1 {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+    }
+}
+
+/* Prevent any child from blowing the viewport width wide on small screens. */
+img,
+canvas,
+svg,
+video {
+    max-width: 100%;
+    height: auto;
+}

@@ -1,0 +1,57 @@
+/* ========== DESIGN TOKENS ==========
+   Aesthetic direction: "Performance Athletic"
+   Dark, energetic gym interface with a high-impact acid-lime accent.
+   All numeric/metric text uses tabular-figures so values don't dance.
+*/
+:root {
+    /* Surfaces — deep athletic charcoal, not pure black (warmer, less harsh) */
+    --canvas: #0B0E14;
+    --surface: #131822;
+    --surface-alt: #1A2030;
+    --surface-raised: #20283B;
+
+    /* Text on dark */
+    --text-primary: #F4F6FB;
+    --text-secondary: #9AA4BD;
+    --text-tertiary: #77829C;
+
+    /* Structural borders on dark */
+    --border: rgba(255, 255, 255, 0.07);
+    --border-strong: rgba(255, 255, 255, 0.14);
+
+    /* Accent — acid lime: energetic, performance-coded, unmistakable on dark */
+    --accent: #C6FF3D;
+    --accent-hover: #D7FF66;
+    --accent-contrast: #0B0E14;
+    --accent-soft: rgba(198, 255, 61, 0.14);
+
+    /* Semantic states (vivid on dark for clarity) */
+    --info-bg: rgba(86, 156, 255, 0.16);
+    --info-text: #7DB7FF;
+    --success-bg: rgba(72, 209, 122, 0.16);
+    --success-text: #54E08A;
+    --danger-bg: rgba(255, 95, 95, 0.16);
+    --danger-text: #FF7A7A;
+    --warning-bg: rgba(255, 196, 0, 0.16);
+    --warning-text: #FFCB52;
+
+    /* Legacy aliases kept for inline styles in index.html */
+    --pastel-blue-bg: var(--info-bg);
+    --pastel-blue-text: var(--info-text);
+    --pastel-green-bg: var(--success-bg);
+    --pastel-green-text: var(--success-text);
+    --pastel-red-bg: var(--danger-bg);
+    --pastel-red-text: var(--danger-text);
+    --pastel-yellow-bg: var(--warning-bg);
+    --pastel-yellow-text: var(--warning-text);
+
+    /* Fluid radii & spacing scale */
+    --radius-card: clamp(14px, 2vw, 18px);
+    --radius-control: clamp(8px, 1vw, 10px);
+    --radius-tag: 9999px;
+
+    /* Z-index scale (managed per ui-ux-pro-max guidance) */
+    --z-base: 10;
+    --z-sticky: 20;
+    --z-overlay: 50;
+}

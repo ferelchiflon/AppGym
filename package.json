@@ -1,0 +1,31 @@
+{
+  "name": "gym-pro",
+  "private": true,
+  "version": "5.1.0",
+  "type": "module",
+  "description": "Registro de entrenamiento, periodización y seguimiento de progreso.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .js",
+    "format": "prettier --write \"src/**/*.{js,css}\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^2.1.9",
+    "eslint": "^9.13.0",
+    "globals": "^15.11.0",
+    "jsdom": "^25.0.1",
+    "prettier": "^3.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^5.4.10",
+    "vitest": "^2.1.9"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.1",
+    "terser": "^5.50.0"
+  }
+}

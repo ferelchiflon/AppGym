@@ -1,0 +1,751 @@
+/* ========== FORM ELEMENTS ========== */
+label {
+    display: block;
+    font-family: 'SF Mono', 'Geist Mono', monospace;
+    font-size: clamp(0.62rem, 0.55rem + 0.2vw, 0.7rem);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin-top: 1rem;
+    margin-bottom: 0.35rem;
+}
+
+input,
+select,
+button,
+textarea {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-control);
+    color: var(--text-primary);
+    font-size: clamp(0.85rem, 0.8rem + 0.3vw, 0.9rem);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    /* Touch-friendly: never smaller than 40px tall in practice → floor at tap height. */
+    min-height: 44px;
+}
+
+select {
+    /* Option dropdowns render from OS; only style the select box */
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239AA4BD' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+    padding-right: 2.25rem;
+    cursor: pointer;
+}
+
+textarea {
+    border-radius: var(--radius-control);
+    resize: vertical;
+    font-family: inherit;
+    min-height: auto;
+}
+
+/* Keep numeric/metric inputs visually aligned */
+input[type="number"] {
+    font-variant-numeric: tabular-nums;
+}
+
+::placeholder {
+    color: var(--text-tertiary);
+    opacity: 0.75;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    background: var(--surface);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* ========== BUTTONS ========== */
+button {
+    /* Acid-lime primary: dark text on lime = striking, professional, on-brand for performance/energy. */
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    font-weight: 700;
+    font-size: clamp(0.78rem, 0.72rem + 0.25vw, 0.85rem);
+    color: var(--accent-contrast);
+    cursor: pointer; /* per ui-ux-pro-max: explicit cursor on clickable */
+    margin-top: clamp(0.6rem, 1.5vw, 0.9rem);
+    min-height: 44px; /* touch-target floor */
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    letter-spacing: 0.01em;
+}
+button:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    /* color feedback only — no scale transform to avoid layout shift (ui-ux-pro-max) */
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+button:active {
+    opacity: 0.85;
+}
+/* Visible focus ring for keyboard nav (accessibility) */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+button.secondary {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+}
+button.secondary:hover {
+    background: var(--surface-alt);
+    border-color: var(--text-tertiary);
+    box-shadow: none;
+}
+
+button.danger {
+    background: var(--danger-bg);
+    border: 1px solid rgba(255, 122, 122, 0.35);
+    color: var(--danger-text);
+}
+button.danger:hover {
+    background: rgba(255, 95, 95, 0.26);
+    border-color: rgba(255, 122, 122, 0.5);
+    box-shadow: none;
+}
+
+button.success {
+    background: var(--success-bg);
+    border: 1px solid rgba(84, 224, 138, 0.35);
+    color: var(--success-text);
+}
+button.success:hover {
+    background: rgba(72, 209, 122, 0.26);
+    border-color: rgba(84, 224, 138, 0.5);
+    box-shadow: none;
+}
+
+.row-buttons {
+    display: flex;
+    gap: clamp(0.4rem, 1vw, 0.6rem);
+    flex-wrap: wrap;
+}
+.row-buttons button {
+    flex: 1 1 140px; /* grow, shrink, sensible base width → stacks gracefully */
+    margin-top: 0.5rem;
+    min-width: 0; /* allow flexbox to shrink content without overflow */
+}
+
+/* Stack tight into a single column on very narrow phones to keep targets full-width. */
+@media (max-width: 380px) {
+    .row-buttons {
+        flex-direction: column;
+    }
+    .row-buttons button {
+        flex: none;
+        width: 100%;
+    }
+}
+
+/* ========== LISTS & BADGES ========== */
+.badge-list {
+    margin-top: 1rem;
+    max-height: 220px;
+    max-height: 32vh; /* viewport-relative so long lists don't dominate short screens */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding-right: 0.4rem;
+    /* Dark scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+}
+.badge-list::-webkit-scrollbar {
+    width: 5px;
+}
+.badge-list::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 12px;
+}
+.badge-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.ejercicio-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.55rem 0.9rem;
+    border-radius: var(--radius-control);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: clamp(0.8rem, 0.74rem + 0.3vw, 0.88rem);
+    /* Rail neutro: el lime queda reservado para CTAs y métricas hero,
+       así conserva su peso de señal en vez de repetirse en cada item. */
+    border-left: 3px solid var(--border-strong);
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    transition: border-color 0.18s ease, background 0.18s ease;
+}
+.ejercicio-item:hover {
+    border-color: var(--border-strong);
+    border-left-color: var(--accent);
+    background: var(--surface-alt);
+}
+.ejercicio-item .nombre {
+    font-weight: 600;
+}
+.ejercicio-item .detalle {
+    color: var(--info-text);
+    font-size: 0.68rem;
+    font-family: 'SF Mono', 'Geist Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: var(--info-bg);
+    padding: 0.15rem 0.7rem;
+    border-radius: var(--radius-tag);
+    white-space: nowrap;
+}
+
+/* ========== STATS ========== */
+.stats-grid {
+    display: grid;
+    /* Mobile-first: stack; expand to 3 cols on wider cards. */
+    grid-template-columns: 1fr;
+    gap: clamp(0.4rem, 1.2vw, 0.6rem);
+    margin-top: 0.75rem;
+}
+@media (min-width: 420px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+.stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    padding: clamp(0.6rem, 2vw, 0.9rem) clamp(0.3rem, 1vw, 0.4rem);
+    text-align: center;
+}
+.stat-box .number {
+    font-family: 'SF Mono', 'Geist Mono', monospace;
+    font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem);
+    font-weight: 600;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+.stat-box .label {
+    font-family: 'SF Mono', 'Geist Mono', monospace;
+    font-size: clamp(0.52rem, 0.46rem + 0.2vw, 0.58rem);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    letter-spacing: 0.04em;
+    margin-top: 0.2rem;
+}
+
+/* ========== MEASUREMENTS ========== */
+.medidas-grid {
+    display: grid;
+    /* Mobile: single column; >=480px: three across. */
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+}
+@media (min-width: 480px) {
+    .medidas-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.5rem;
+    }
+}
+.medidas-grid input {
+    padding: clamp(0.4rem, 1.5vw, 0.55rem) clamp(0.3rem, 1vw, 0.5rem);
+    text-align: center;
+    font-size: clamp(0.78rem, 0.72rem + 0.3vw, 0.85rem);
+    min-height: 40px;
+}
+
+.small-note {
+    font-size: 0.68rem;
+    color: var(--text-tertiary);
+    margin-top: 0.4rem;
+    text-align: right;
+}
+
+.empty-message {
+    color: var(--text-tertiary);
+    text-align: center;
+    padding: 1.25rem 0;
+    font-style: italic;
+    font-size: clamp(0.78rem, 0.72rem + 0.2vw, 0.88rem);
+}
+
+/* ========== SETS / SERIES ==========
+   serie-row is a 5-col grid by default; collapses to a 2-col wrapping layout on phones. */
+.serie-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 0.8fr 1.5fr auto;
+    gap: 0.4rem;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: clamp(0.4rem, 1.2vw, 0.6rem) clamp(0.5rem, 1.5vw, 0.7rem);
+    border-radius: var(--radius-control);
+    margin-top: 0.35rem;
+    font-size: clamp(0.78rem, 0.72rem + 0.25vw, 0.85rem);
+}
+.serie-row input,
+.serie-row select {
+    padding: 0.35rem 0.4rem;
+    border-radius: 6px;
+    font-size: clamp(0.74rem, 0.68rem + 0.25vw, 0.8rem);
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    min-width: 0; /* prevent grid blowout */
+    min-height: 38px;
+}
+.serie-row .btn-remove-serie {
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0 0.4rem;
+    width: auto;
+    margin: 0;
+    min-height: 38px;
+    line-height: 1;
+}
+.serie-row .btn-remove-serie:hover {
+    color: var(--danger-text);
+    background: var(--danger-bg);
+    border-radius: 6px;
+}
+
+/* On phones the 5-col grid is too tight → collapse into 2 cols, notes field + remove button span full width. */
+@media (max-width: 560px) {
+    .serie-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+    .serie-row > :nth-child(4) {
+        grid-column: 1 / -1;
+    }
+    .serie-row .btn-remove-serie {
+        grid-column: 1 / -1;
+        margin-top: 0.1rem;
+    }
+}
+
+/* ========== HISTORY ========== */
+.historial-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    padding: clamp(0.55rem, 1.5vw, 0.7rem) clamp(0.7rem, 2vw, 1rem);
+    margin-top: 0.4rem;
+    /* Rail neutro, consistente con .ejercicio-item: el lime se reserva
+       para CTAs y métricas hero, no para decorar cada fila de una lista. */
+    border-left: 3px solid var(--border-strong);
+    font-size: clamp(0.78rem, 0.72rem + 0.25vw, 0.85rem);
+}
+.historial-item .fecha {
+    color: var(--text-tertiary);
+    font-family: 'SF Mono', 'Geist Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+/* ========== TIMER ========== */
+.timer-display {
+    font-family: 'SF Mono', 'Geist Mono', monospace;
+    font-size: clamp(1.6rem, 1.2rem + 2.5vw, 2.4rem);
+    font-weight: 600;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    padding: 0.4rem 0;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+}
+
+/* ========== QUICK STEPPERS ========== */
+.input-stepper-wrap {
+    display: flex;
+    flex-direction: column;
+}
+
+.stepper-chips {
+    display: flex;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.stepper-chip {
+    background: var(--surface-alt);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    font-family: 'SF Mono', 'Geist Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.3rem 0.55rem;
+    min-height: 34px;
+    margin: 0;
+    border-radius: var(--radius-control);
+    cursor: pointer;
+    flex: 1;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.stepper-chip:hover {
+    background: var(--surface);
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: none;
+}
+
+.stepper-chip:active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    transform: scale(0.96);
+}
+
+/* ========== CHART WRAPPERS ==========
+   Chart.js usa maintainAspectRatio:false + responsive:true, así que el
+   contenedor necesita una altura explícita (si no, el canvas colapsa a 0
+   o desborda el ancho en móvil). */
+.chart-wrap {
+    position: relative;
+    width: 100%;
+    height: clamp(230px, 44vw, 320px);
+    margin-top: 0.75rem;
+}
+.chart-wrap-sm {
+    height: clamp(190px, 36vw, 250px);
+}
+.chart-wrap canvas {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Contador "Rutina de hoy" → pill de acento */
+.count-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: 'SF Mono', 'Geist Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.15rem 0.6rem;
+    border-radius: 9999px;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
+/* Notas inline (warm-up, subtítulos de landmarks) */
+.small-note-inline {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-top: 0.35rem;
+}
+
+/* Chips/badges dentro de .badge-list (calculadora de discos) */
+.badge-list .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    align-self: flex-start;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font-family: 'SF Mono', 'Geist Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.3rem 0.7rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+}
+
+/* Insights de correlación wellness ↔ rendimiento */
+.insight-linea {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    padding: 0.4rem 0;
+    border-bottom: 1px dashed var(--border);
+}
+.insight-linea:last-child {
+    border-bottom: none;
+}
+.insight-linea strong {
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Botón "subir archivo" estilado para que parezca un botón secundario */
+.btn-file-label {
+    flex: 1 1 140px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    padding: 0.65rem 0.85rem;
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-control);
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: clamp(0.78rem, 0.72rem + 0.25vw, 0.85rem);
+    cursor: pointer;
+    margin-top: 0.5rem;
+    text-align: center;
+    user-select: none;
+    transition: background 0.18s ease, border-color 0.18s ease;
+}
+.btn-file-label:hover {
+    background: var(--surface-alt);
+    border-color: var(--text-tertiary);
+}
+
+/* ========== iOS ZOOM PREVENTION ==========
+   Safari de iOS hace zoom automático al enfocar un campo cuya fuente mide
+   menos de 16px, lo que "rompe" el scroll y aleja la vista. Fijamos 16px
+   en pantallas táctiles → el input enfocado ya no dispara el zoom. */
+@media (max-width: 767px) {
+    input,
+    select,
+    textarea {
+        font-size: 16px;
+    }
+}
+
+/* ========== PLANTILLAS DE RUTINA ========== */
+.plantillas-titulo {
+    font-size: clamp(0.9rem, 0.82rem + 0.5vw, 1.02rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: clamp(1rem, 2vw, 1.4rem) 0 0;
+    color: var(--text-primary);
+}
+.plantilla-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border-strong);
+    border-radius: var(--radius-control);
+    padding: 0.55rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    transition: border-color 0.18s ease, background 0.18s ease;
+}
+.plantilla-item:hover {
+    border-color: var(--border-strong);
+    border-left-color: var(--accent);
+    background: var(--surface-alt);
+}
+.plantilla-info {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+.plantilla-nombre {
+    font-weight: 600;
+    font-size: clamp(0.82rem, 0.76rem + 0.3vw, 0.92rem);
+}
+.plantilla-detalle {
+    color: var(--info-text);
+    font-size: 0.68rem;
+    font-family: 'SF Mono', 'Geist Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: var(--info-bg);
+    padding: 0.15rem 0.7rem;
+    border-radius: var(--radius-tag);
+    white-space: nowrap;
+}
+.plantilla-ejercicios {
+    color: var(--text-secondary);
+    font-size: clamp(0.74rem, 0.7rem + 0.2vw, 0.8rem);
+    line-height: 1.45;
+}
+.plantilla-acciones {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-top: 0.15rem;
+}
+.plantilla-acciones button {
+    flex: 0 1 auto;
+    min-width: 0;
+    margin-top: 0;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.78rem;
+}
+
+/* ========== VOLUME LANDMARKS THERMOMETER ========== */
+.vl-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.vl-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.vl-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.vl-muscle-name {
+    font-weight: 600;
+    font-size: clamp(0.78rem, 0.72rem + 0.25vw, 0.85rem);
+    color: var(--text-primary);
+}
+
+.vl-series-count {
+    font-family: 'SF Mono', 'Geist Mono', monospace;
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.vl-bar-wrap {
+    position: relative;
+    width: 100%;
+    height: 14px;
+    border-radius: 7px;
+    overflow: visible; /* allow triangle indicator to overflow */
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.vl-zone {
+    height: 100%;
+    min-width: 2px;
+    transition: width 0.3s ease;
+}
+.vl-zone:first-child {
+    border-radius: 7px 0 0 7px;
+}
+.vl-zone:last-child {
+    border-radius: 0 7px 7px 0;
+}
+
+/* Zone colors — subtle on dark UI */
+.vl-zone--sub {
+    background: rgba(255, 255, 255, 0.08);
+}
+.vl-zone--mev {
+    background: rgba(86, 156, 255, 0.35);
+}
+.vl-zone--mav {
+    background: rgba(255, 170, 50, 0.35);
+}
+.vl-zone--mrv {
+    background: rgba(255, 95, 95, 0.30);
+}
+
+/* SVG triangle indicator */
+.vl-indicator {
+    position: absolute;
+    top: -6px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 2;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+    transition: left 0.3s ease;
+}
+
+/* Legend ticks under bar */
+.vl-ticks {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'SF Mono', 'Geist Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--text-tertiary);
+    padding: 0 2px;
+    margin-top: 1px;
+}
+
+/* Status label */
+.vl-status {
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-top: 0.1rem;
+}
+.vl-status--sub_mev  { color: var(--warning-text); }
+.vl-status--en_mev   { color: var(--info-text); }
+.vl-status--en_mav   { color: var(--success-text); }
+.vl-status--sobre_mrv { color: var(--danger-text); }
+
+/* Legend row */
+.vl-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+}
+.vl-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+}
+.vl-legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+/* Toggle "ver todos" */
+.vl-toggle {
+    background: transparent;
+    border: 1px dashed var(--border-strong);
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.5rem;
+    width: 100%;
+    text-align: center;
+    margin-top: 0.5rem;
+    min-height: 38px;
+    border-radius: var(--radius-control);
+    transition: background 0.18s ease, color 0.18s ease;
+}
+.vl-toggle:hover {
+    background: var(--surface-alt);
+    color: var(--text-primary);
+    box-shadow: none;
+}
+

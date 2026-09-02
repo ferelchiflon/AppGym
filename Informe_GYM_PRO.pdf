@@ -1,0 +1,153 @@
+%PDF-1.4
+%âãÏÓ
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 5 0 R >>
+stream
+BT
+/F1 12 Tf
+50 800 Td
+(Informe de auditoría GYM PRO – Resumen ejecutivo) Tj
+0 -20 Td
+(Calificación general: 5/10) Tj
+0 -20 Td
+(3 fortalezas: Modularidad inicial, Persistencia en localStorage, Uso de ES2020+) Tj
+0 -20 Td
+(3 debilidades críticas: Acoplamiento fuerte a UI, Gestión de estado inconsistente, Ausencia de pruebas) Tj
+0 -20 Td
+() Tj
+0 -20 Td
+(Análisis por áreas) Tj
+0 -18 Td
+(Arquitectura y estructura) Tj
+0 -16 Td
+(✅ Bien: módulos separados) Tj
+0 -16 Td
+(⚠️ Mejora: reducir acoplamiento UI‑lógica) Tj
+0 -16 Td
+(❌ Falta: patrón MVC/Clean, separación de capas) Tj
+0 -16 Td
+(Recomendación: adoptar Clean Architecture con capas: UI, dominio, infraestructura) Tj
+0 -18 Td
+(Calidad del código) Tj
+0 -16 Td
+(✅ Bien: nombres claros, clases) Tj
+0 -16 Td
+(⚠️ Mejora: complejidad en GestorRutina, duplicación de lógica) Tj
+0 -16 Td
+(❌ Falta: linting, pruebas unitarias) Tj
+0 -16 Td
+(Recomendación: ESLint + Prettier, Jest/Vitest, coverage >80%) Tj
+0 -18 Td
+(Gestión de estado) Tj
+0 -16 Td
+(✅ Bien: estado en objetos) Tj
+0 -16 Td
+(⚠️ Mejora: no hay eventos/reactividad) Tj
+0 -16 Td
+(❌ Falta: store centralizado, observables) Tj
+0 -16 Td
+(Recomendación: usar library ligera como nano‑stores o RxJS) Tj
+0 -18 Td
+(Persistencia) Tj
+0 -16 Td
+(✅ Bien: usa localStorage) Tj
+0 -16 Td
+(⚠️ Mejora: datos no normalizados, riesgo de pérdida) Tj
+0 -16 Td
+(❌ Falta: backup, IndexedDB opcional) Tj
+0 -16 Td
+(Recomendación: migrar a IndexedDB para sesiones y rutinas) Tj
+0 -18 Td
+(UX/UI y accesibilidad) Tj
+0 -16 Td
+(✅ Bien: diseño responsive básico) Tj
+0 -16 Td
+(⚠️ Mejora: falta ARIA, foco, contrastes) Tj
+0 -16 Td
+(❌ Falta: feedback audiovisual, estados de carga) Tj
+0 -16 Td
+(Recomendación: aplicar WCAG 2.1, usar toast y animaciones) Tj
+0 -18 Td
+(Pruebas y calidad) Tj
+0 -16 Td
+(✅ Nada implementado) Tj
+0 -16 Td
+(⚠️ Mejora: necesidad urgente de pruebas) Tj
+0 -16 Td
+(❌ Falta: suite de tests) Tj
+0 -16 Td
+(Recomendación: Jest + React‑Testing‑Library o Vitest) Tj
+0 -18 Td
+(Deuda técnica) Tj
+0 -16 Td
+(Crítico: errores de import/export, UI acoplada) Tj
+0 -16 Td
+(Urgente: corregir API pública, crear eventos) Tj
+0 -16 Td
+(Deseable: refactor a framework) Tj
+0 -18 Td
+(Plan de mejora por fases) Tj
+0 -16 Td
+(Fase 1 – Correcciones urgentes) Tj
+0 -14 Td
+- Arreglar nomenclatura de métodos (cargar → getProfile) 
+- Unificar API de GestorRutina (addExerciseToRoutine, getRoutine, getSeries) 
+- Añadir eventos custom (dispatchEvent) para sincronizar UI 
+- Añadir validaciones y sanitización de inputs 
+- Implementar manejo de errores y fallback al storage 
+0 -18 Td
+(Fase 2 – Refactor estructural) Tj
+0 -14 Td
+- Adoptar Clean Architecture: carpetas /ui, /domain, /infra 
+- Reescribir módulos como “use‑case” y “repository” 
+- Introducir store central (nano‑stores) 
+- Reemplazar acceso directo a DOM por componentes UI
+0 -18 Td
+(Fase 3 – UX/UI) Tj
+0 -14 Td
+- Aplicar WCAG, roles ARIA, foco visible 
+- Toasts y barra de carga, animaciones suaves 
+- Theme dark/light, uso de CSS variables 
+0 -18 Td
+(Fase 4 – Features avanzadas) Tj
+0 -14 Td
+- Gráficos de progreso (Chart.js) 
+- Periodización visual (Gantt) 
+- Exportar/importar JSON, backup en Drive 
+- PWA con Service Worker, sync offline 
+0 -18 Td
+(Fase 5 – Tests & docs) Tj
+0 -14 Td
+- Jest + Vitest + coverage 
+- Cypress E2E 
+- Documentar API con JSDoc, README completa, guía de contribución 
+0 -20 Td
+(✔️ Fin del informe) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Length 2360 >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000010 00000 n 
+0000000062 00000 n 
+0000000117 00000 n 
+0000000362 00000 n 
+0000000600 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+783
+%%EOF
