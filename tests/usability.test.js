@@ -14,6 +14,16 @@ describe("Usabilidad: Modo Gimnasio, atajos de teclado e i18n", () => {
   beforeAll(async () => {
     const html = readFileSync(process.cwd() + "/index.html", "utf8");
     document.documentElement.innerHTML = html;
+
+    // index.html ya no contiene el markup completo: se ensambla desde
+    // src/views/* en #app (igual que hace src/main.js) ANTES de instanciar,
+    // porque el binding centralizado por ID de AppGymPro requiere ese DOM.
+    const root = document.getElementById("app");
+    if (root) {
+      const { default: appLayout } = await import("../src/views/index.js");
+      root.innerHTML = appLayout.join("\n");
+    }
+
     const { Toast } = await import("../src/toast.js");
     Toast.init();
     const { AppGymPro } = await import("../src/app.js");

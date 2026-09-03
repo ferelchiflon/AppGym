@@ -780,13 +780,13 @@ export class DashboardController {
     }
 
     const ajFatiga = qs("#fatigaAjustarBtn");
-    if (ajFatiga) ajFatiga.addEventListener("click", () => this._ir("perfil", true));
+    if (ajFatiga) ajFatiga.addEventListener("click", () => this._ir("profile", true));
     const ajWell = qs("#wellnessAjustarBtn");
-    if (ajWell) ajWell.addEventListener("click", () => this._ir("perfil", true));
+    if (ajWell) ajWell.addEventListener("click", () => this._ir("profile", true));
 
     // Botón del estado vacío: navega al formulario de wellness (tab perfil).
     const irRegistrar = qs("#wellnessIrRegistrarBtn");
-    if (irRegistrar) irRegistrar.addEventListener("click", () => this._ir("perfil", true));
+    if (irRegistrar) irRegistrar.addEventListener("click", () => this._ir("profile", true));
 
     // Botón "+ Registrar cardio": abre el modal para registrar una sesión.
     const cardioBtn = qs("#cardioRegistrarBtn");
@@ -802,7 +802,7 @@ export class DashboardController {
     );
 
     this.container.querySelectorAll("#goPeriodizacionBtn").forEach((b) =>
-      b.addEventListener("click", () => this._ir("periodizacion", true))
+      b.addEventListener("click", () => this._ir("history", true))
     );
     const sug = qs("#sugerenciaBtn");
     if (sug) sug.addEventListener("click", () => this._iniciarRutinaSugerida());
@@ -850,7 +850,7 @@ export class DashboardController {
 
   /** Continuar rutina de hoy (navega a Entrenar). */
   _iniciarRutina() {
-    this._ir("entrenar", true);
+    this._ir("workout", true);
   }
 
   /** Crea/recarga una rutina rápida del grupo muscular del día y navega a Entrenar. */
@@ -876,7 +876,7 @@ export class DashboardController {
     Store.guardar();
     Store.emit("routine:updated", seleccion);
     Toast.mostrar(`Rutina de ${H.nombreMusculo(grupo).toLowerCase()} cargada`, "success");
-    this._ir("entrenar", true);
+    this._ir("workout", true);
   }
 }
 
