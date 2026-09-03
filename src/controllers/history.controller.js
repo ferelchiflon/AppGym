@@ -8,6 +8,8 @@ import { Store } from "../store.js";
 import { Utils } from "../utils.js";
 import { Toast } from "../toast.js";
 import { Dialog } from "../dialog.js";
+import { seriesHistorialACSV } from "../export/csv.js";
+import { imprimirHistorial } from "../export/pdf.js";
 
 export class HistoryController {
   constructor({ el, rutina, periodizacion, perfil }) {
@@ -30,7 +32,8 @@ export class HistoryController {
 
   _bindEvents() {
     // Exportar y borrar historial
-    this.el.exportHistorialBtn.addEventListener("click", () => this._exportarHistorial());
+    this.el.exportHistorialBtn.addEventListener("click", () => this._exportarHistorialCSV());
+    this.el.exportHistorialPdfBtn.addEventListener("click", () => this._exportarHistorialPDF());
     this.el.clearHistorialBtn.addEventListener("click", () => this._borrarHistorial());
 
     // Periodización
@@ -219,10 +222,31 @@ export class HistoryController {
     Toast.mostrar("Salto CMJ registrado (" + altura + "cm)", "success");
   }
 
-  _exportarHistorial() {
-    const data = JSON.stringify(this.rutina.historial, null, 2);
-    Utils.descargarArchivo("gympro_historial.json", data);
-    Toast.mostrar("Historial exportado", "info");
+  _exportarHistorialCSV() {
+    const historial = this.rutina.historial || [];
+    if (historial.length === 0) {
+      Toast.mostrar("No hay sesiones para exportar", "warning");
+      return;
+    }
+    const csv = seriesHistorialACSV(historial);
+    Utils.descargarArchivo("gympro_series.csv", csv, "text/csv");
+    Toast.mostrar("Historial exportado en CSV", "success");
+  }
+
+  _exportarHistorialPDF() {
+    const historial = this.rutina.historial || [];
+    const haySeries = historial.some((sesion) =>
+      (sesion.ejercicios || []).some((e) => (e.series || []).length > 0)
+    );
+    if (!haySeries) {
+      Toast.mostrar("No hay series para imprimir", "warning");
+      return;
+    }
+    const abierta = imprimirHistorial(historial, "Historial de series");
+    Toast.mostrar(
+      abierta ? "Vista imprimible abierta: guarda como PDF" : "El navegador bloqueó la ventana de impresión",
+      abierta ? "info" : "warning"
+    );
   }
 
   async _borrarHistorial() {

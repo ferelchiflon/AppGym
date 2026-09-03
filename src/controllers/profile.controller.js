@@ -8,6 +8,8 @@ import { Store } from "../store.js";
 import { Utils } from "../utils.js";
 import { Toast } from "../toast.js";
 import { Dialog } from "../dialog.js";
+import { seriesHistorialACSV } from "../export/csv.js";
+import { imprimirHistorial } from "../export/pdf.js";
 
 export class ProfileController {
   constructor({ app, el, perfil, rutina }) {
@@ -41,6 +43,10 @@ export class ProfileController {
     // Backup
     this.el.exportTodoBtn.addEventListener("click", () => this._exportarBackup());
     this.el.importTodoInput.addEventListener("change", (e) => this._importarBackup(e));
+
+    // Exportar historial de series (CSV / PDF)
+    this.el.exportarSeriesBtn.addEventListener("click", () => this._exportarSeriesCSV());
+    this.el.printSeriesBtn.addEventListener("click", () => this._exportarSeriesPDF());
   }
 
   render() {
@@ -155,6 +161,34 @@ export class ProfileController {
     const json = Store.exportarTodo();
     Utils.descargarArchivo("gympro_backup_completo.json", json);
     Toast.mostrar("Backup descargado con éxito", "success");
+  }
+
+  _exportarSeriesCSV() {
+    const historial = this.rutina.historial || [];
+    if (historial.length === 0) {
+      Toast.mostrar("No hay series para exportar", "warning");
+      return;
+    }
+    const csv = seriesHistorialACSV(historial);
+    Utils.descargarArchivo("gympro_series.csv", csv, "text/csv");
+    Toast.mostrar("Historial de series exportado en CSV", "success");
+  }
+
+  _exportarSeriesPDF() {
+    const historial = this.rutina.historial || [];
+    const haySeries = historial.some((sesion) =>
+      (sesion.ejercicios || []).some((e) => (e.series || []).length > 0)
+    );
+    if (!haySeries) {
+      Toast.mostrar("No hay series para imprimir", "warning");
+      return;
+    }
+    const nombre = (this.perfil && this.perfil.data && this.perfil.data.nombre) || "Atleta";
+    const abierta = imprimirHistorial(historial, "Historial de series — " + nombre);
+    Toast.mostrar(
+      abierta ? "Vista imprimible abierta: guarda como PDF" : "El navegador bloqueó la ventana de impresión",
+      abierta ? "info" : "warning"
+    );
   }
 
   async _importarBackup(e) {

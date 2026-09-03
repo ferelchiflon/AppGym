@@ -330,7 +330,8 @@ button{font:inherit}
             <div class="card" id="historialCard">
                 <h2>Historial de sesiones</h2>
                 <div class="row-buttons">
-                    <button id="exportHistorialBtn" class="secondary" type="button">Exportar historial</button>
+                    <button id="exportHistorialBtn" class="secondary" type="button">Exportar CSV</button>
+                    <button id="exportHistorialPdfBtn" class="secondary" type="button">Imprimir PDF</button>
                     <button id="clearHistorialBtn" class="danger" type="button">Borrar historial</button>
                 </div>
                 <div class="badge-list mt-1" id="historialContainer"></div>
@@ -511,6 +512,16 @@ button{font:inherit}
                     <button id="exportTodoBtn" type="button">Descargar backup</button>
                     <label for="importTodoInput" class="btn-file-label secondary">Restaurar backup</label>
                     <input type="file" id="importTodoInput" accept="application/json" class="hidden">
+                </div>
+            </div>
+
+            <!-- EXPORTAR HISTORIAL DE SERIES -->
+            <div class="card" id="exportarSeriesCard">
+                <h2>Exportar historial de series</h2>
+                <p class="small-note-inline">Descarga el historial de series de este atleta en CSV (fecha, ejercicio, peso, reps, RPE/RIR, esPR) o imprímelo como PDF.</p>
+                <div class="row-buttons">
+                    <button id="exportarSeriesBtn" type="button">Exportar CSV</button>
+                    <button id="printSeriesBtn" class="secondary" type="button">Imprimir PDF</button>
                 </div>
             </div>
         </div>
