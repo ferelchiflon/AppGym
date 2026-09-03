@@ -17,6 +17,7 @@ import { PLANTILLAS_PREDEFINIDAS } from "../data/plantillas-predefinidas.js";
 import { GestorTimer } from "../gestor-timer.js";
 import { ExerciseGuide } from "../components/exercise-guide.js";
 import { hacerReordenable } from "../dnd.js";
+import { t } from "../i18n.js";
 
 export class WorkoutController {
   constructor({ app, el, rutina, timer }) {
@@ -192,6 +193,20 @@ export class WorkoutController {
     this.el.seriePeso?.addEventListener("input", actualizarRPE1RMRealTime);
     this.el.serieReps?.addEventListener("input", actualizarRPE1RMRealTime);
 
+    // Atajo de teclado: Enter en los campos numéricos de la serie agrega la serie rápido.
+    // No se vincula a textareas/selects para no interferir con la edición de texto.
+    ["seriePeso", "serieReps", "serieRPE", "serieRIR"].forEach((id) => {
+      const inp = document.getElementById(id);
+      if (inp) {
+        inp.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            this._agregarSerie();
+          }
+        });
+      }
+    });
+
     // Warm-up calculator
     this.el.calcularWarmUpBtn.addEventListener("click", () => this._calcularWarmUp());
 
@@ -349,7 +364,7 @@ export class WorkoutController {
     if (this.el.ejercicioCountNote) {
       const filtrosActivos = this._grupoFiltroActual !== "todos" || this._patronFiltroActual !== "todos" || !!this._busquedaActual;
       this.el.ejercicioCountNote.textContent = filtrosActivos
-        ? filtrados.length + (filtrados.length === 1 ? " resultado" : " resultados")
+        ? t("workout.resultado", { n: filtrados.length })
         : "";
     }
 
@@ -367,7 +382,7 @@ export class WorkoutController {
     if (rutina.length === 0) {
       const empty = document.createElement("div");
       empty.className = "empty-message";
-      empty.textContent = "No hay ejercicios en la rutina de hoy. Agrega uno arriba.";
+      empty.textContent = t("workout.emptyRutina");
       container.appendChild(empty);
       return;
     }
@@ -398,7 +413,7 @@ export class WorkoutController {
 
       const seriesTag = document.createElement("span");
       seriesTag.className = "count-tag";
-      seriesTag.textContent = seriesCount + " series";
+      seriesTag.textContent = t("workout.seriesTag", { n: seriesCount });
 
       const guideBtn = document.createElement("button");
       guideBtn.type = "button";

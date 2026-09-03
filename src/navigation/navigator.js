@@ -9,14 +9,16 @@
  * - Soporte de anclado: un ítem puede navegar a una sección y hacer scroll
  *   hasta una card concreta (data-scroll="idDelCard").
  */
+import { t } from "../i18n.js";
+
 export class AppNavigator {
   constructor() {
     this._titles = {
-      dashboard: "Inicio",
-      workout: "Entrenamiento",
-      history: "Historial",
-      progress: "Progreso",
-      profile: "Perfil",
+      dashboard: "nav.header.dashboard",
+      workout: "nav.header.workout",
+      history: "nav.header.history",
+      progress: "nav.header.progress",
+      profile: "nav.header.profile",
     };
 
     this._hamburger = null;
@@ -106,7 +108,8 @@ export class AppNavigator {
     });
 
     // 3) Título de la sección actual en el header
-    this.setTitle(this._titles[tab] || tab);
+    this._tabActual = tab;
+    this.setTitle(t(this._titles[tab] || tab));
 
     // 4) Hook opcional (p.ej. renderizar analytics al entrar a progreso)
     if (this._onTabEnter) this._onTabEnter(tab);
@@ -133,6 +136,12 @@ export class AppNavigator {
     if (this._headerTitle && text) this._headerTitle.textContent = text;
   }
 
+  /** Re-traduce el título de la pestaña activa (se llama al cambiar de idioma). */
+  refreshTitle() {
+    const tab = this._tabActual || "dashboard";
+    this.setTitle(t(this._titles[tab] || tab));
+  }
+
   _offsetTop(el) {
     let top = 0;
     let node = el;
@@ -148,7 +157,7 @@ export class AppNavigator {
     const activePane = document.querySelector(".tab-pane.active");
     if (activePane) {
       const tab = activePane.id.replace("tab-", "");
-      this.setTitle(this._titles[tab] || tab);
+      this.setTitle(t(this._titles[tab] || tab));
     }
   }
 }

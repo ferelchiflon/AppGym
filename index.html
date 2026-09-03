@@ -102,46 +102,55 @@ button{font:inherit}
 
         <nav class="drawer-nav">
             <div class="drawer-group">
-                <div class="drawer-group-title">🏠 Inicio</div>
-                <button type="button" class="drawer-item" data-nav-target="dashboard">Dashboard</button>
+                <div class="drawer-group-title" data-i18n="drawer.group.inicio">🏠 Inicio</div>
+                <button type="button" class="drawer-item" data-nav-target="dashboard" data-i18n="drawer.item.dashboard">Dashboard</button>
             </div>
 
             <div class="drawer-group">
-                <div class="drawer-group-title">🏋️ Entrenamiento</div>
-                <button type="button" class="drawer-item" data-nav-target="workout">Rutina y series</button>
-                <button type="button" class="drawer-item" data-nav-target="workout" data-scroll="timerCard">Timer de descanso</button>
-                <button type="button" class="drawer-item" data-nav-target="workout" data-scroll="metricasSesionCard">Métricas de sesión</button>
+                <div class="drawer-group-title" data-i18n="drawer.group.entrenamiento">🏋️ Entrenamiento</div>
+                <button type="button" class="drawer-item" data-nav-target="workout" data-i18n="drawer.item.rutina">Rutina y series</button>
+                <button type="button" class="drawer-item" data-nav-target="workout" data-scroll="timerCard" data-i18n="drawer.item.timer">Timer de descanso</button>
+                <button type="button" class="drawer-item" data-nav-target="workout" data-scroll="metricasSesionCard" data-i18n="drawer.item.metricas">Métricas de sesión</button>
             </div>
 
             <div class="drawer-group">
-                <div class="drawer-group-title">📊 Progreso</div>
-                <button type="button" class="drawer-item" data-nav-target="progress">Gráficos y evolución</button>
-                <button type="button" class="drawer-item" data-nav-target="history" data-scroll="historialCard">Historial de sesiones</button>
-                <button type="button" class="drawer-item" data-nav-target="progress" data-scroll="progresoAcumuladoCard">Progreso acumulado</button>
+                <div class="drawer-group-title" data-i18n="drawer.group.progreso">📊 Progreso</div>
+                <button type="button" class="drawer-item" data-nav-target="progress" data-i18n="drawer.item.progreso">Gráficos y evolución</button>
+                <button type="button" class="drawer-item" data-nav-target="history" data-scroll="historialCard" data-i18n="drawer.item.historial">Historial de sesiones</button>
+                <button type="button" class="drawer-item" data-nav-target="progress" data-scroll="progresoAcumuladoCard" data-i18n="drawer.item.acumulado">Progreso acumulado</button>
             </div>
 
             <div class="drawer-group">
-                <div class="drawer-group-title">👤 Perfil y configuración</div>
-                <button type="button" class="drawer-item" data-nav-target="profile" data-scroll="perfilCard">Perfil del atleta</button>
-                <button type="button" class="drawer-item" data-nav-target="profile" data-scroll="medidasCard">Medidas corporales</button>
-                <button type="button" class="drawer-item" data-nav-target="history" data-scroll="wellnessCard">Wellness diario</button>
-                <button type="button" class="drawer-item" data-nav-target="history" data-scroll="saltoCard">Test de salto (CMJ)</button>
-                <button type="button" class="drawer-item" data-nav-target="history" data-scroll="periodizacionCard">Periodización</button>
+                <div class="drawer-group-title" data-i18n="drawer.group.perfil">👤 Perfil y configuración</div>
+                <button type="button" class="drawer-item" data-nav-target="profile" data-scroll="perfilCard" data-i18n="drawer.item.perfil">Perfil del atleta</button>
+                <button type="button" class="drawer-item" data-nav-target="profile" data-scroll="medidasCard" data-i18n="drawer.item.medidas">Medidas corporales</button>
+                <button type="button" class="drawer-item" data-nav-target="history" data-scroll="wellnessCard" data-i18n="drawer.item.wellness">Wellness diario</button>
+                <button type="button" class="drawer-item" data-nav-target="history" data-scroll="saltoCard" data-i18n="drawer.item.salto">Test de salto (CMJ)</button>
+                <button type="button" class="drawer-item" data-nav-target="history" data-scroll="periodizacionCard" data-i18n="drawer.item.periodizacion">Periodización</button>
             </div>
 
             <div class="drawer-group">
-                <div class="drawer-group-title">🎨 Apariencia</div>
+                <div class="drawer-group-title" data-i18n="drawer.group.apariencia">🎨 Apariencia</div>
                 <button type="button" class="drawer-item theme-toggle" id="themeToggleBtn" aria-pressed="false" aria-label="Cambiar entre modo claro y modo oscuro">
                     <span class="theme-toggle-icon" aria-hidden="true">🌙</span>
                     <span class="theme-toggle-label">Modo oscuro</span>
                 </button>
+                <button type="button" class="drawer-item theme-toggle" id="gymModeDrawerBtn" aria-pressed="false" aria-label="Modo Gimnasio">
+                    <span class="theme-toggle-icon" aria-hidden="true">🏋️</span>
+                    <span class="theme-toggle-label" data-i18n="gym.etiqueta">Modo Gimnasio</span>
+                </button>
+                <label class="drawer-settings-label" for="langSelect" data-i18n="idioma.label">🌐 Idioma</label>
+                <select id="langSelect" class="drawer-select" aria-label="Idioma / Language">
+                    <option value="es">Español</option>
+                    <option value="en">English</option>
+                </select>
             </div>
 
             <div class="drawer-group">
-                <div class="drawer-group-title">⚙️ Herramientas extra</div>
-                <button type="button" class="drawer-item" data-nav-target="workout" data-scroll="discosCard">Calculadora de discos</button>
-                <button type="button" class="drawer-item" data-nav-target="profile" data-scroll="backupCard">Backup completo</button>
-                <button type="button" class="drawer-item" data-nav-target="workout" data-scroll="seriesCard">Warm-up calculator</button>
+                <div class="drawer-group-title" data-i18n="drawer.group.herramientas">⚙️ Herramientas extra</div>
+                <button type="button" class="drawer-item" data-nav-target="workout" data-scroll="discosCard" data-i18n="drawer.item.discos">Calculadora de discos</button>
+                <button type="button" class="drawer-item" data-nav-target="profile" data-scroll="backupCard" data-i18n="drawer.item.backup">Backup completo</button>
+                <button type="button" class="drawer-item" data-nav-target="workout" data-scroll="seriesCard" data-i18n="drawer.item.warmup">Warm-up calculator</button>
             </div>
         </nav>
     </aside>
@@ -155,13 +164,16 @@ button{font:inherit}
             <svg class="brand-logo" viewBox="0 0 24 24"><path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12"/></svg>
             <span class="brand-name">GYM PRO <span class="version-tag">v6.0</span></span>
         </span>
-        <span id="headerTitle" class="header-title" role="status">Entrenamiento</span>
+        <span id="headerTitle" class="header-title" role="status" data-i18n="nav.header.dashboard">Entrenamiento</span>
         <button type="button" id="syncStatusBtn" class="sync-status" data-estado="online" aria-label="Estado de sincronización" title="Sincronización activa">
             <span id="syncStatusDot" class="sync-status-dot" aria-hidden="true"></span>
             <span id="syncStatusLabel" class="sync-status-label">En línea</span>
         </button>
         <button type="button" id="themeHeaderBtn" class="icon-btn theme-header-btn" aria-label="Cambiar el tema de la app" aria-pressed="false" title="Modo oscuro activo">
             <span class="theme-header-icon" aria-hidden="true">🌙</span>
+        </button>
+        <button type="button" id="gymModeBtn" class="icon-btn theme-header-btn" aria-label="Activar Modo Gimnasio" aria-pressed="false" title="Activar Modo Gimnasio">
+            <span class="theme-header-icon" aria-hidden="true">🏋️</span>
         </button>
         <button type="button" id="miniTimerBtn" class="mini-timer" aria-label="Abrir timer de descanso">
             <svg class="mini-timer-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>
@@ -179,7 +191,7 @@ button{font:inherit}
         <div class="grid-2">
             <!-- RUTINA -->
             <div class="card" id="rutinaCard">
-                <h2>Rutina de hoy <span class="count-tag" id="ejerciciosCount">0</span></h2>
+                <h2><span data-i18n="workout.titulo.rutina">Rutina de hoy</span> <span class="count-tag" id="ejerciciosCount">0</span></h2>
 
                 <div class="flex-wrap">
                     <div>
@@ -219,7 +231,7 @@ button{font:inherit}
 
             <!-- REGISTRO DE SERIES -->
             <div class="card" id="seriesCard">
-                <h2>Registro de series</h2>
+                <h2 data-i18n="workout.titulo.series">Registro de series</h2>
 
                 <div id="serieForm" class="hidden">
                     <div class="flex-wrap">
@@ -299,7 +311,7 @@ button{font:inherit}
 
             <!-- TIMER DE DESCANSO -->
             <div class="card" id="timerCard">
-                <h2>Timer de descanso</h2>
+                <h2 data-i18n="workout.titulo.timer">Timer de descanso</h2>
                 <div class="timer-display" id="timerDisplay">02:30</div>
                 <div class="flex-wrap">
                     <div>
@@ -565,34 +577,34 @@ button{font:inherit}
             <svg viewBox="0 0 24 24">
                 <path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>
             </svg>
-            <span>Inicio</span>
+            <span data-i18n="nav.tab.dashboard">Inicio</span>
         </button>
         <button type="button" class="nav-tab" data-tab="workout" id="nav-tab-workout">
             <svg viewBox="0 0 24 24">
                 <path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12"/>
             </svg>
-            <span>Entrenar</span>
+            <span data-i18n="nav.tab.workout">Entrenar</span>
         </button>
         <button type="button" class="nav-tab" data-tab="history" id="nav-tab-history">
             <svg viewBox="0 0 24 24">
                 <path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/>
                 <path d="M16 2v4M8 2v4M3 10h18"/>
             </svg>
-            <span>Historial</span>
+            <span data-i18n="nav.tab.history">Historial</span>
         </button>
         <button type="button" class="nav-tab" data-tab="progress" id="nav-tab-progress">
             <svg viewBox="0 0 24 24">
                 <path d="M3 3v18h18"/>
                 <path d="m19 9-5 5-4-4-3 3"/>
             </svg>
-            <span>Progreso</span>
+            <span data-i18n="nav.tab.progress">Progreso</span>
         </button>
         <button type="button" class="nav-tab" data-tab="profile" id="nav-tab-profile">
             <svg viewBox="0 0 24 24">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
             </svg>
-            <span>Atleta</span>
+            <span data-i18n="nav.tab.profile">Atleta</span>
         </button>
     </div>
 </nav>

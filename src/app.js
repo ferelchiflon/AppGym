@@ -24,6 +24,7 @@ import { ProfileController } from "./controllers/profile.controller.js";
 import { DashboardController } from "./controllers/dashboard.controller.js";
 import { AppNavigator } from "./navigation/navigator.js";
 import { SyncManager } from "./sync.js";
+import { t, aplicarIdioma, detectarIdioma, aplicarTraduccionesEstaticas, idiomaActual } from "./i18n.js";
 
 export class AppGymPro {
   constructor() {
@@ -38,6 +39,9 @@ export class AppGymPro {
     this._bindDOM();
     Toast.init();
     this._initTheme();
+    this._iniciarIdioma();
+    this._iniciarGymMode();
+    this._iniciarAtajos();
 
     // Inicializar controladores especializados de cada vista
     this.workoutCtrl = new WorkoutController({
@@ -301,7 +305,7 @@ export class AppGymPro {
         const icono = menuBtn.querySelector(".theme-toggle-icon");
         const etiqueta = menuBtn.querySelector(".theme-toggle-label");
         if (icono) icono.textContent = oscuro ? "🌙" : "☀️";
-        if (etiqueta) etiqueta.textContent = oscuro ? "Modo oscuro" : "Modo claro";
+        if (etiqueta) etiqueta.textContent = oscuro ? t("theme.oscuro") : t("theme.claro");
       }
 
       // Atajo del header (solo icono + tooltip accesible)
@@ -309,15 +313,11 @@ export class AppGymPro {
       if (headerBtn) {
         const icono = headerBtn.querySelector(".theme-header-icon");
         if (icono) icono.textContent = oscuro ? "🌙" : "☀️";
-        headerBtn.setAttribute(
-          "aria-label",
-          oscuro ? "Pulsando cambiarás al modo claro" : "Pulsando cambiarás al modo oscuro"
-        );
-        headerBtn.title = oscuro
-          ? "Modo oscuro activo (pulsa para cambiar al modo claro)"
-          : "Modo claro activo (pulsa para cambiar al modo oscuro)";
+        headerBtn.setAttribute("aria-label", oscuro ? t("theme.aClaro") : t("theme.aOscuro"));
+        headerBtn.title = oscuro ? t("theme.tClaro") : t("theme.tOscuro");
       }
     };
+    this._aplicarTema = aplicar;
 
     // Preferencia guardada por el usuario; si no existe, la del sistema.
     let guardado = null;
@@ -334,9 +334,123 @@ export class AppGymPro {
         const actual = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
         const nuevo = actual === "dark" ? "light" : "dark";
         aplicar(nuevo, true);
-        Toast.mostrar(nuevo === "dark" ? "🌙 Modo oscuro activado" : "☀️ Modo claro activado", "info");
+        Toast.mostrar(nuevo === "dark" ? t("theme.on") : t("theme.off"), "info");
       })
     );
+  }
+
+  /** Re-etiqueta tema actual (se usa al cambiar de idioma). */
+  _aplicarEstadoTema() {
+    if (this._aplicarTema) {
+      this._aplicarTema(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+    }
+  }
+
+  /**
+   * Internacionalización (es/en): aplica el idioma guardado, enlaza el selector
+   * del drawer y re-traduce estáticos + estado de tema/gimnasio en cada cambio.
+   */
+  _iniciarIdioma() {
+    aplicarIdioma(detectarIdioma());
+
+    const sel = this.el.langSelect;
+    if (sel) {
+      sel.value = idiomaActual();
+      sel.addEventListener("change", () => {
+        if (sel.value) aplicarIdioma(sel.value);
+      });
+    }
+
+    document.addEventListener("app:langchange", () => {
+      aplicarTraduccionesEstaticas(document);
+      if (this.navigator) this.navigator.refreshTitle();
+      if (this.workoutCtrl) {
+        this.workoutCtrl.render();
+        this.workoutCtrl._syncGuiaBtn();
+      }
+      this._aplicarEstadoTema();
+      this._aplicarEstadoGym();
+      if (sel) sel.value = idiomaActual();
+    });
+  }
+
+  /**
+   * Modo Gimnasio: alto contraste + objetivos grandes (styles/gym-mode.css).
+   * Se activa desde el header o desde el drawer; persiste en gympro:gymMode.
+   */
+  _iniciarGymMode() {
+    const KEY = "gympro:gymMode";
+    const bots = [this.el.gymModeBtn, this.el.gymModeDrawerBtn];
+
+    this._aplicarGym = (activo) => {
+      document.body.classList.toggle("gym-mode", activo);
+      document.body.setAttribute("data-gym", activo ? "on" : "off");
+      bots.forEach((b) => {
+        if (!b) return;
+        b.setAttribute("aria-pressed", String(!!activo));
+        const etiqueta = b.querySelector(".theme-toggle-label");
+        if (etiqueta) etiqueta.textContent = t("gym.etiqueta");
+      });
+      const headerBtn = this.el.gymModeBtn;
+      if (headerBtn) {
+        headerBtn.setAttribute("aria-label", t(activo ? "gym.headerActivo" : "gym.headerInactivo"));
+        headerBtn.title = t(activo ? "gym.headerActivo" : "gym.headerInactivo");
+      }
+    };
+
+    let guardado = false;
+    try {
+      guardado = localStorage.getItem(KEY) === "on";
+    } catch {
+      /* almacenamiento no disponible */
+    }
+    this._aplicarGym(guardado);
+
+    bots.forEach((b) =>
+      b?.addEventListener("click", () => {
+        const activo = !document.body.classList.contains("gym-mode");
+        this._aplicarGym(activo);
+        try {
+          localStorage.setItem(KEY, activo ? "on" : "off");
+        } catch {
+          /* almacenamiento no disponible */
+        }
+        Toast.mostrar(activo ? t("gym.on") : t("gym.off"), activo ? "success" : "info");
+      })
+    );
+  }
+
+  /** Re-aplica el estado del modo gimnasio (se usa al cambiar de idioma). */
+  _aplicarEstadoGym() {
+    if (this._aplicarGym) {
+      this._aplicarGym(document.body.classList.contains("gym-mode"));
+    }
+  }
+
+  /**
+   * Atajos de teclado globales (Modo Gimnasio / flujo de entrenamiento):
+   *   - r / R : reinicia el timer de descanso.
+   * No disparan si se está escribiendo en inputs, textareas, selects o con
+   * atajos del sistema (Cmd/Ctrl/Alt). La tecla Enter para agregar serie se
+   * gestiona dentro de los campos del formulario en WorkoutController.
+   */
+  _iniciarAtajos() {
+    document.addEventListener("keydown", (e) => {
+      const destino = e.target;
+      const esCampo =
+        destino &&
+        (destino.tagName === "INPUT" ||
+          destino.tagName === "TEXTAREA" ||
+          destino.tagName === "SELECT" ||
+          destino.isContentEditable);
+      if (e.metaKey || e.ctrlKey || e.altKey || esCampo) return;
+
+      const tecla = e.key;
+      if ((tecla === "r" || tecla === "R") && this.timer) {
+        this.timer.reset();
+        Toast.mostrar(t("shortcuts.timerReset"), "info");
+      }
+    });
   }
 
   _bindDOM() {
@@ -430,6 +544,9 @@ export class AppGymPro {
       syncStatusLabel: this.$("syncStatusLabel"),
       themeToggleBtn: this.$("themeToggleBtn"),
       themeHeaderBtn: this.$("themeHeaderBtn"),
+      gymModeBtn: this.$("gymModeBtn"),
+      gymModeDrawerBtn: this.$("gymModeDrawerBtn"),
+      langSelect: this.$("langSelect"),
       floatingTimerDisplay: this.$("floatingTimerDisplay"),
       floatPlayBtn: this.$("floatPlayBtn"),
       floatResetBtn: this.$("floatResetBtn"),

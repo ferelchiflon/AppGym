@@ -1,0 +1,91 @@
+/* ================================================================
+   GYM PRO — Modo Gimnasio (body.gym-mode)
+   Alto contraste + objetivos táctiles grandes para uso durante la
+   rutina activa (dedos sudorosos o en movimiento).
+   Se activa desde el header (🏋️) o el menú (🎨 Apariencia) con la
+   clase .gym-mode en <body>. Hereda la paleta claro/oscuro activa.
+   ================================================================ */
+
+/* --- Contraste reforzado --------------------------------------- */
+body.gym-mode .card,
+body.gym-mode .panel-card,
+body.gym-mode .floating-timer {
+  border: 2px solid var(--border-strong, var(--accent));
+}
+body.gym-mode .card h2,
+body.gym-mode .card h3,
+body.gym-mode .drawer-group-title {
+  font-weight: 800;
+}
+body.gym-mode .label,
+body.gym-mode .small-note,
+body.gym-mode .small-note-inline,
+body.gym-mode .empty-message,
+body.gym-mode .stat-box .label {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* --- Botones principales grandes y táctiles ---------------------- */
+body.gym-mode .card button:not(.stepper-chip):not(.nav-tab):not(.icon-btn):not(.float-btn):not(.badge-delete):not(.badge-guide):not(.drawer-item):not(.sync-status):not(.mini-timer):not(.guide-trigger) {
+  min-height: 58px;
+  font-size: 1.08rem;
+  font-weight: 700;
+  border-width: 2px;
+}
+body.gym-mode #addSerieBtn,
+body.gym-mode #guardarSesionBtn,
+body.gym-mode #startTimerBtn {
+  min-height: 64px;
+  font-size: 1.18rem;
+}
+/* Botón "completar serie": siempre accesible pegando abajo */
+body.gym-mode #guardarSesionBtn {
+  position: sticky;
+  bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px) + 8px);
+  z-index: 40;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+/* --- Entradas clave (peso / reps / RPE / RIR) más grandes -------- */
+body.gym-mode #seriePeso,
+body.gym-mode #serieReps,
+body.gym-mode #serieRPE,
+body.gym-mode #serieRIR {
+  min-height: 58px;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+body.gym-mode .stepper-chip {
+  min-height: 48px;
+  font-size: 1rem;
+}
+
+/* --- Temporizador protagonista ------------------------------------ */
+body.gym-mode #timerDisplay {
+  font-size: clamp(4.25rem, 20vw, 7.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+}
+body.gym-mode .floating-timer-display {
+  font-size: 2.8rem;
+  font-weight: 800;
+}
+body.gym-mode .mini-timer-display {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+body.gym-mode .floating-timer {
+  border-color: var(--accent);
+}
+
+/* --- Feedback visual del conmutador de Modo Gimnasio ------------- */
+body.gym-mode #gymModeBtn,
+body.gym-mode #gymModeDrawerBtn {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+body.gym-mode #gymModeBtn[aria-pressed="true"],
+body.gym-mode #gymModeDrawerBtn[aria-pressed="true"] {
+  background: var(--accent-soft);
+}
