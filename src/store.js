@@ -85,6 +85,7 @@ export const Store = {
             },
             wellness: [],
             saltos: [],
+            sesionesCardio: [],
             rutina: [],
             seriesPorEjercicio: {},
             superseries: {},
@@ -138,6 +139,7 @@ export const Store = {
                     if (!data.activeProfileId || !data.profiles[data.activeProfileId]) {
                         data.activeProfileId = Object.keys(data.profiles)[0];
                     }
+                    Store._asegurarColeccionesNuevas(data);
                     Store._cache = data;
                     // Si ya pasa el umbral, marcamos modo IDB para futuras escrituras.
                     if (raw.length >= UMBRAL_MIGRACION_IDB) {
@@ -153,6 +155,7 @@ export const Store = {
         // Si no hay nada en localStorage, podría estar en IDB (migración previa).
         // Hacemos una carga síncrona inicial con cache vacía y disparamos IDB async.
         const migrado = Store._migrarDesdeV4();
+        Store._asegurarColeccionesNuevas(migrado);
         Store._cache = migrado;
         Store.guardar();
         return migrado;
@@ -235,6 +238,20 @@ export const Store = {
             console.warn('No se pudo migrar datos v4', e);
         }
         return base;
+    },
+
+    /**
+     * Backfill de colecciones añadidas en versiones posteriores (p. ej.
+     * `sesionesCardio` en Fase 2). Se ejecuta al cargar cualquier perfil para
+     * que los datos legacy convivan con las colecciones nuevas sin migrar bytes.
+     */
+    _asegurarColeccionesNuevas(data) {
+        if (!data || !data.profiles || typeof data.profiles !== 'object') return;
+        Object.values(data.profiles).forEach(perfil => {
+            if (perfil && !Array.isArray(perfil.sesionesCardio)) {
+                perfil.sesionesCardio = [];
+            }
+        });
     },
 
     /**

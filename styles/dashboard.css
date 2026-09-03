@@ -545,6 +545,60 @@
     font-variant-numeric: tabular-nums;
 }
 
+/* ---------- Cardio ---------- */
+.cardio-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin: 0.5rem 0 0.75rem;
+}
+
+.cardio-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.55rem 0.6rem;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+}
+
+.cardio-stat strong {
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.cardio-stat span {
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.cardio-extra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.cardio-extra .label strong {
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.cardio-tag {
+    color: var(--danger-text, #ff8a8a);
+    border-color: var(--danger-border, #ff7a7a55);
+    background: var(--danger-bg, #ff7a7a14);
+}
+
+.cardio-last {
+    margin-bottom: 0;
+}
+
 .pr-best {
     margin-top: 0.75rem;
     padding: 0.6rem 0.8rem;

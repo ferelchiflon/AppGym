@@ -33,19 +33,21 @@ export class DashboardController {
    * @param {Object|null} [opts.perfil]
    * @param {Object|null} [opts.el]
    */
-  constructor({ app = null, rutina = null, periodizacion = null, perfil = null, el = null } = {}) {
+  constructor({ app = null, rutina = null, periodizacion = null, perfil = null, cardio = null, el = null } = {}) {
     this.app = app;
     this.rutina = rutina;
     this.periodizacion = periodizacion;
     this.perfil = perfil;
+    this.cardio = cardio;
     this.container = (el && el.container) || document.getElementById("dashboardContainer");
   }
 
   /** Actualiza referencias tras cambiar de perfil y re-renderiza. */
-  actualizarInstancias({ rutina = null, periodizacion = null, perfil = null } = {}) {
+  actualizarInstancias({ rutina = null, periodizacion = null, perfil = null, cardio = null } = {}) {
     if (rutina) this.rutina = rutina;
     if (periodizacion) this.periodizacion = periodizacion;
     if (perfil) this.perfil = perfil;
+    if (cardio) this.cardio = cardio;
     this.render();
   }
 
@@ -333,6 +335,74 @@ export class DashboardController {
           </div>
         </div>
         <button class="btn-scale" id="goPeriodizacionBtn">Ver plan completo</button>
+      </div>`;
+  }
+
+  /** Acceso seguro a las sesiones de cardio (gestor propio o readonly fallback). */
+  _sesionesCardio() {
+    if (this.cardio && typeof this.cardio.getSesiones === "function") return this.cardio.getSesiones();
+    if (this.perfil && this.perfil.data && Array.isArray(this.perfil.data.sesionesCardio)) {
+      return this.perfil.data.sesionesCardio;
+    }
+    return [];
+  }
+
+  /** Tarjeta cardio: resumen de la última semana sin romper el layout. */
+  _cardioCard() {
+    const sesiones = this._sesionesCardio();
+    const gestor = this.cardio && typeof this.cardio.getResumen === "function" ? this.cardio : null;
+    const resumen = gestor ? gestor.getResumen(7) : null;
+
+    if (!resumen || resumen.sesiones === 0) {
+      return `
+        <div class="panel-card">
+          <div class="panel-card-head">
+            <div>
+              <div class="eyebrow">CARDIO</div>
+              <h3>Semana sin cardio</h3>
+            </div>
+          </div>
+          <p class="muted">Registrá sesiones de correr, bici, remo u otro para ver tu volumen semanal aquí.</p>
+          <div class="cardio-stats">
+            <div class="cardio-stat"><strong>0</strong><span>sesiones</span></div>
+            <div class="cardio-stat"><strong>0</strong><span>min</span></div>
+            <div class="cardio-stat"><strong>0</strong><span>km</span></div>
+          </div>
+        </div>`;
+    }
+
+    const ultima = sesiones[0];
+    const tipoLabel = {
+      correr: "Correr",
+      bici: "Bici",
+      remo: "Remo",
+      otro: "Otro",
+    };
+    const nombreTipo = tipoLabel[ultima?.tipo] || (ultima?.tipo ? String(ultima.tipo) : "Cardio");
+    const detalleUltima =
+      `${this._esc(nombreTipo)} · ${formatNum(ultima?.duracion)} min` +
+      `${ultima?.distancia ? " · " + formatNum(ultima.distancia) + " km" : ""}` +
+      `${ultima?.fc ? " · FC " + formatNum(ultima.fc) + " ppm" : ""}`;
+
+    return `
+      <div class="panel-card">
+        <div class="panel-card-head">
+          <div>
+            <div class="eyebrow">CARDIO</div>
+            <h3>Resumen semanal</h3>
+          </div>
+          <span class="tag cardio-tag">7 días</span>
+        </div>
+        <div class="cardio-stats">
+          <div class="cardio-stat"><strong>${formatNum(resumen.sesiones)}</strong><span>sesiones</span></div>
+          <div class="cardio-stat"><strong>${formatNum(resumen.minutos)}</strong><span>min</span></div>
+          <div class="cardio-stat"><strong>${formatNum(resumen.distancia)}</strong><span>km</span></div>
+        </div>
+        <div class="cardio-extra">
+          ${resumen.fcPromedio ? `<span class="label">FC media <strong>${formatNum(resumen.fcPromedio)}</strong> ppm</span>` : ""}
+          ${resumen.rpePromedio ? `<span class="label">RPE medio <strong>${formatNum(resumen.rpePromedio)}</strong>/10</span>` : ""}
+        </div>
+        <p class="muted cardio-last">Última: ${detalleUltima}</p>
       </div>`;
   }
 
@@ -644,6 +714,7 @@ export class DashboardController {
           ${this._quickStatsRow(vol, se, stre, best, acwr)}
           ${this._calendario(days)}
           ${this._acwrCard(acwr)}
+          ${this._cardioCard()}
           ${this._periodizacionCard()}
           ${this._sugerenciaCard(grupo, ultimo)}
         </div>

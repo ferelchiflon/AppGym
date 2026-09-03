@@ -78,6 +78,24 @@ export interface SesionEntrenamiento {
   rpePromedio?: number;
 }
 
+export type TipoCardio = "correr" | "bici" | "remo" | "otro";
+
+export interface SesionCardio {
+  id: string;
+  tipo: TipoCardio;
+  /** Duración en minutos. */
+  duracion: number;
+  /** Distancia en kilómetros (opcional). */
+  distancia?: number | null;
+  /** Frecuencia cardíaca promedio en ppm (opcional, carga manual). */
+  fc?: number | null;
+  /** Percepción subjetiva del esfuerzo (1-10). */
+  rpe: number;
+  notas?: string;
+  fecha: string;
+  timestamp?: string;
+}
+
 export interface PerfilAtletaData {
   id: string;
   nombre: string;
@@ -92,6 +110,7 @@ export interface PerfilAtletaData {
   };
   wellness: WellnessRegistro[];
   saltos: SaltoCMJ[];
+  sesionesCardio: SesionCardio[];
   rutina: string[];
   seriesPorEjercicio: Record<string, Serie[]>;
   superseries: Record<string, string[]>;

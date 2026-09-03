@@ -13,6 +13,7 @@ import { Toast } from "./toast.js";
 import { Dialog } from "./dialog.js";
 import { PerfilAtleta } from "./perfil-atleta.js";
 import { GestorRutina } from "./gestor-rutina.js";
+import { GestorCardio } from "./gestor-cardio.js";
 import { GestorPeriodizacion } from "./gestor-periodizacion.js";
 import { GestorTimer } from "./gestor-timer.js";
 
@@ -29,6 +30,7 @@ export class AppGymPro {
 
     this.perfil = new PerfilAtleta(perfilActivo);
     this.rutina = new GestorRutina(perfilActivo);
+    this.cardio = new GestorCardio(perfilActivo);
     this.periodizacion = new GestorPeriodizacion(perfilActivo.bloques);
     this.timer = new GestorTimer();
 
@@ -68,6 +70,7 @@ export class AppGymPro {
       rutina: this.rutina,
       periodizacion: this.periodizacion,
       perfil: this.perfil,
+      cardio: this.cardio,
       el: { container: this.el.dashboardContainer },
     });
 
@@ -152,6 +155,7 @@ export class AppGymPro {
     const perfilActivo = Store.getPerfilActivo();
     this.perfil = new PerfilAtleta(perfilActivo);
     this.rutina = new GestorRutina(perfilActivo);
+    this.cardio = new GestorCardio(perfilActivo);
     this.periodizacion = new GestorPeriodizacion(perfilActivo.bloques);
 
     this.workoutCtrl.actualizarInstancias({ rutina: this.rutina, timer: this.timer });
@@ -172,6 +176,7 @@ export class AppGymPro {
       rutina: this.rutina,
       periodizacion: this.periodizacion,
       perfil: this.perfil,
+      cardio: this.cardio,
     });
 
     this._renderPerfilesSelector();
