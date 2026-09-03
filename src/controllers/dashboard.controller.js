@@ -99,9 +99,13 @@ export class DashboardController {
 
     let botonTexto;
     let botonInfo;
+    // Modo del botón rápido: "continuar" = la rutina ya está armada (solo navega);
+    // "armar" = hay que crear la rutina sugerida antes de navegar a Entrenar.
+    this._quickStartModo = "armar";
     if (this._tieneRutinaHoy()) {
       botonTexto = "Continuar rutina de hoy";
       botonInfo = "Tu entrenamiento de hoy está cargado y listo para empezar.";
+      this._quickStartModo = "continuar";
     } else if (yaEntreno && hist.length) {
       botonTexto = "Iniciar rutina sugerida";
       botonInfo = "Enfocate en el grupo muscular con menor work-volume semanal.";
@@ -119,7 +123,7 @@ export class DashboardController {
           <p class="quick-info">${botonInfo}</p>
         </div>
         <div class="quick-actions">
-          <button class="btn-scale cta-block" id="quickStartBtn">${botonTexto}</button>
+          <button class="btn-scale cta-block" id="quickStartBtn" data-modo="${this._quickStartModo}">${botonTexto}</button>
         </div>
       </div>`;
   }
@@ -675,7 +679,15 @@ export class DashboardController {
     const qs = (id) => this.container.querySelector(id);
 
     const quick = qs("#quickStartBtn");
-    if (quick) quick.addEventListener("click", () => this._iniciarRutina());
+    if (quick) {
+      quick.addEventListener("click", () => {
+        // "Continuar rutina de hoy" ya está armada → solo navega.
+        // Cualquier otro estado ("Iniciar mi primer entrenamiento" / "Iniciar
+        // rutina sugerida") debe armar la rutina antes de navegar a Entrenar.
+        if (this._quickStartModo === "continuar") this._iniciarRutina();
+        else this._iniciarRutinaSugerida();
+      });
+    }
 
     const guardar = qs("#wellnessGuardarBtn");
     if (guardar) {
