@@ -17,8 +17,10 @@ export { EJERCICIOS_CATALOGO, GRUPOS_MUSCULARES, PATRONES_MOVIMIENTO };
  *
  * Claves = id del ejercicio en EJERCICIOS_CATALOGO. El "press militar" usa el
  * id interno `press_hombro` (aliases como "press-militar" se resuelven en
- * ExerciseGuide). La carpeta `carpeta` apunta al directorio de imágenes en
- * assets/guides/{carpeta}/fase{1..3}.jpg (rutas relativas).
+ * ExerciseGuide). `imagen` apunta a la infografía completa de la guía con una
+ * ruta relativa desde assets/guides/ (ej: assets/guides/press-militar.jpg).
+ * `fases` describe las fases técnicas (título + descripción) que se muestran
+ * debajo de la imagen principal; no llevan imagen individual.
  */
 const _nombreDe = (id) => {
   const ej = EJERCICIOS_CATALOGO.find((e) => e.id === id);
@@ -30,7 +32,7 @@ export const EXERCISE_GUIDES = {
   press_hombro: {
     id: "press_hombro",
     nombre: _nombreDe("press_hombro"),
-    carpeta: "press-militar",
+    imagen: "assets/guides/press-militar.jpg",
     fases: [
       {
         titulo: "Inicio",
@@ -59,7 +61,7 @@ export const EXERCISE_GUIDES = {
   sentadilla: {
     id: "sentadilla",
     nombre: _nombreDe("sentadilla"),
-    carpeta: "sentadilla",
+    imagen: "assets/guides/sentadilla.jpg",
     fases: [
       {
         titulo: "Inicio",

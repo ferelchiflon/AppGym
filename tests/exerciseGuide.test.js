@@ -13,15 +13,22 @@ describe("Datos de guías (EXERCISE_GUIDES)", () => {
     expect(EXERCISE_GUIDES).toHaveProperty("sentadilla");
   });
 
-  it("cada guía tiene 3 fases y entrega rutas relativas de imágenes", () => {
+  it("cada guía tiene 3 fases, imagen principal y músculos", () => {
     ["press_hombro", "sentadilla"].forEach((id) => {
       const guia = EXERCISE_GUIDES[id];
       expect(guia.fases).toHaveLength(3);
       expect(guia.musculos.length).toBeGreaterThan(0);
-      // La carpeta se usa para assets/guides/{carpeta}/fase{n}.jpg
-      expect(typeof guia.carpeta).toBe("string");
+      // La infografía única se carga desde assets/guides/ (ruta relativa).
+      expect(typeof guia.imagen).toBe("string");
+      expect(guia.imagen.startsWith("assets/guides/")).toBe(true);
+      // Las fases solo llevan texto: sin imagen individual por fase.
+      guia.fases.forEach((f) => {
+        expect(typeof f.titulo).toBe("string");
+        expect(typeof f.desc).toBe("string");
+      });
     });
-    expect(EXERCISE_GUIDES.press_hombro.carpeta).toBe("press-militar");
+    expect(EXERCISE_GUIDES.press_hombro.imagen).toBe("assets/guides/press-militar.jpg");
+    expect(EXERCISE_GUIDES.sentadilla.imagen).toBe("assets/guides/sentadilla.jpg");
   });
 
   it("respeta las fases pedidas para cada ejercicio", () => {
@@ -82,6 +89,40 @@ describe("Modal ExerciseGuide (DOM)", () => {
 
     const muscles = overlay.querySelectorAll(".guide-muscle");
     expect(muscles.length).toBe(6);
+  });
+
+  it("muestra 1 imagen principal y 3 fases de texto (sin imagen por fase)", () => {
+    const ok = ExerciseGuide.abrirPorEjercicio("press-militar");
+    expect(ok).toBe(true);
+
+    const overlay = document.querySelector(".guide-overlay");
+    const box = overlay.querySelector(".guide-box");
+
+    // Orden del modal: header → imagen principal → fases → músculos.
+    const children = [...box.children];
+    expect(children[0].classList.contains("guide-head")).toBe(true);
+    expect(children[1].classList.contains("guide-main-image")).toBe(true);
+    expect(children[2].classList.contains("guide-phases")).toBe(true);
+    expect(children[3].classList.contains("guide-muscles-section")).toBe(true);
+
+    // Una sola imagen principal, con la ruta de la infografía completa.
+    const principal = box.querySelector(".guide-main-image");
+    const imgPrincipal = principal.querySelector("img");
+    expect(imgPrincipal).not.toBeNull();
+    expect(imgPrincipal.src.endsWith("assets/guides/press-militar.jpg")).toBe(true);
+
+    // 3 fases son bloques de texto: número + título + desc, sin <img>.
+    const phases = box.querySelectorAll(".guide-phase");
+    expect(phases.length).toBe(3);
+    phases.forEach((p) => {
+      expect(p.querySelector("img")).toBeNull();
+      expect(p.querySelector(".guide-phase-num")).not.toBeNull();
+      expect(p.querySelector(".guide-phase-title")).not.toBeNull();
+      expect(p.querySelector(".guide-phase-desc")).not.toBeNull();
+    });
+
+    // En todo el modal hay exactamente una imagen.
+    expect(overlay.querySelectorAll("img").length).toBe(1);
   });
 
   it("no abre si el ejercicio no tiene guía", () => {

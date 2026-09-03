@@ -5,9 +5,9 @@
  *
  * Sin dependencias externas. Los datos de las guías viven en
  * EXERCISE_GUIDES (src/config.js). El modal es un singleton: cada apertura
- * cierra cualquier instancia previa. Los `onerror` de las imágenes muestran
- * un placeholder con el nombre de la fase (las imágenes fase1/2/3.jpg se
- * cargan con rutas relativas desde assets/guides/{carpeta}/).
+ * cierra cualquier instancia previa. El `onerror` de la imagen principal
+ * muestra un placeholder con el nombre de la guía (la infografía se carga con
+ * una ruta relativa desde assets/guides/).
  */
 import { EXERCISE_GUIDES } from "../config.js";
 
@@ -65,12 +65,27 @@ export class ExerciseGuide {
       .replace(/"/g, "&quot;");
   }
 
-  /** Ruta relativa de la foto de una fase (fase1.jpg, fase2.jpg, fase3.jpg). */
-  _imagenFase(i) {
-    const guia = this.guia;
-    if (guia.imagenes && guia.imagenes[i]) return guia.imagenes[i];
-    const carpeta = guia.carpeta || guia.id;
-    return `assets/guides/${carpeta}/fase${i + 1}.jpg`;
+  /** Imagen principal única de la guía (infografía completa), con fallback. */
+  _buildImagenPrincipal() {
+    const wrap = document.createElement("div");
+    wrap.className = "guide-main-image";
+    const nombre = this.guia.nombre || "Guía de ejecución";
+    wrap.dataset.guia = nombre;
+
+    const img = document.createElement("img");
+    img.alt = nombre;
+    img.loading = "lazy";
+    img.addEventListener(
+      "error",
+      () => {
+        wrap.classList.add("guide-main-image-fallback");
+        img.remove();
+      },
+      { once: true }
+    );
+    img.src = this.guia.imagen || "";
+    wrap.appendChild(img);
+    return wrap;
   }
 
   abrir() {
@@ -93,7 +108,12 @@ export class ExerciseGuide {
     const box = document.createElement("div");
     box.className = "guide-box";
 
-    box.append(this._buildHeader(), this._buildFases(), this._buildMusculos());
+    box.append(
+      this._buildHeader(),
+      this._buildImagenPrincipal(),
+      this._buildFases(),
+      this._buildMusculos()
+    );
     overlay.appendChild(box);
     document.body.appendChild(overlay);
 
@@ -152,24 +172,6 @@ export class ExerciseGuide {
       num.className = "guide-phase-num";
       num.textContent = String(i + 1).padStart(2, "0");
 
-      const imgWrap = document.createElement("div");
-      imgWrap.className = "guide-phase-img-wrap";
-      imgWrap.dataset.fase = fase.titulo || "Fase " + (i + 1);
-
-      const img = document.createElement("img");
-      img.alt = "Fase " + (i + 1) + ": " + (fase.titulo || "");
-      img.loading = "lazy";
-      img.addEventListener(
-        "error",
-        () => {
-          imgWrap.classList.add("guide-phase-img-fallback");
-          img.remove();
-        },
-        { once: true }
-      );
-      img.src = this._imagenFase(i);
-      imgWrap.appendChild(img);
-
       const titulo = document.createElement("h4");
       titulo.className = "guide-phase-title";
       titulo.textContent = this._esc(fase.titulo || "");
@@ -178,7 +180,7 @@ export class ExerciseGuide {
       desc.className = "guide-phase-desc";
       desc.textContent = this._esc(fase.desc || "");
 
-      card.append(num, imgWrap, titulo, desc);
+      card.append(num, titulo, desc);
       phases.appendChild(card);
     });
 
