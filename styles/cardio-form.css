@@ -1,0 +1,80 @@
+/* ========== CARDIO FORM (modal de registro de sesión) ==========
+   Reutiliza el esqueleto modal (.dialog-overlay/.dialog-box/.dialog-acciones),
+   los botones (.btn-scale, .secondary), el cierre (.guide-close) y el selector
+   de esfuerzo (.wstar) ya definidos. Aquí solo vive el layout del formulario. */
+
+.cardio-form-dialog {
+    max-width: 480px;
+}
+
+.cardio-form-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.cardio-form-title {
+    font-size: clamp(1.15rem, 1rem + 0.7vw, 1.4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin: 0;
+}
+
+/* Reemplaza el rojo del eyebrow de las guías por el acento info (tema cardio). */
+.cardio-eyebrow {
+    color: var(--info-text);
+}
+
+.cardio-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 0.75rem;
+}
+
+.cardio-form-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.cardio-form-field textarea {
+    resize: vertical;
+    min-height: 58px;
+}
+
+/* Ocultar distancia cuando el tipo es "otro" (no aplica). */
+.cardio-form-hidden {
+    display: none !important;
+}
+
+/* Selector RPE 1-10: mismo lenguaje visual que el wellness (.wstar). */
+.cardio-rpe {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.4rem;
+}
+
+.cardio-rpe .wstar {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    margin-top: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+/* Mensaje de error de validación del formulario. */
+.cardio-form-error {
+    margin-top: 0.75rem;
+    padding: 0.6rem 0.8rem;
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    border-radius: var(--radius-control);
+    color: var(--danger-text);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}

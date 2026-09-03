@@ -9,6 +9,7 @@ import { Store } from "../store.js";
 import { Toast } from "../toast.js";
 import { EJERCICIOS_DISPONIBLES } from "../config.js";
 import { ExerciseGuide } from "../components/exercise-guide.js";
+import { CardioForm } from "../components/cardio-form.js";
 import * as H from "../utils/dashboard-helpers.js";
 
 const WELLNESS_LABELS = ["Sueño", "Motivación", "Estrés", "DOMS"];
@@ -368,6 +369,9 @@ export class DashboardController {
             <div class="cardio-stat"><strong>0</strong><span>min</span></div>
             <div class="cardio-stat"><strong>0</strong><span>km</span></div>
           </div>
+          <div class="cardio-acciones">
+            <button class="btn-scale" id="cardioRegistrarBtn" type="button">+ Registrar cardio</button>
+          </div>
         </div>`;
     }
 
@@ -403,6 +407,9 @@ export class DashboardController {
           ${resumen.rpePromedio ? `<span class="label">RPE medio <strong>${formatNum(resumen.rpePromedio)}</strong>/10</span>` : ""}
         </div>
         <p class="muted cardio-last">Última: ${detalleUltima}</p>
+        <div class="cardio-acciones">
+          <button class="btn-scale" id="cardioRegistrarBtn" type="button">+ Registrar cardio</button>
+        </div>
       </div>`;
   }
 
@@ -780,6 +787,15 @@ export class DashboardController {
     // Botón del estado vacío: navega al formulario de wellness (tab perfil).
     const irRegistrar = qs("#wellnessIrRegistrarBtn");
     if (irRegistrar) irRegistrar.addEventListener("click", () => this._ir("perfil", true));
+
+    // Botón "+ Registrar cardio": abre el modal para registrar una sesión.
+    const cardioBtn = qs("#cardioRegistrarBtn");
+    if (cardioBtn) {
+      cardioBtn.addEventListener("click", () => {
+        if (!this.cardio) return;
+        CardioForm.abrir(this.cardio, { onGuardado: () => this.render() });
+      });
+    }
 
     this.container.querySelectorAll(".wstar").forEach((star) =>
       star.addEventListener("click", () => this._marcarStar(star))
