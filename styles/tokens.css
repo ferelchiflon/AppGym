@@ -4,6 +4,28 @@
    All numeric/metric text uses tabular-figures so values don't dance.
 */
 :root {
+    /* ---------- Spacing scale (4px base → 64px) ---------- */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-7: 32px;
+    --space-8: 40px;
+    --space-9: 48px;
+    --space-10: 64px;
+
+    /* ---------- Elevación (sombras) ---------- */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+    --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    /* Transparencias de navegación (adaptables a tema) */
+    --surface-glass: rgba(19, 24, 34, 0.86);
+    --bottom-nav-bg: rgba(19, 24, 34, 0.94);
+
     /* Surfaces — deep athletic charcoal, not pure black (warmer, less harsh) */
     --canvas: #0B0E14;
     --surface: #131822;
@@ -50,8 +72,240 @@
     --radius-control: clamp(8px, 1vw, 10px);
     --radius-tag: 9999px;
 
+    /* Derivados que también cambian por tema (gradientes, shimmer, hovers) */
+    --hero-accent: rgba(198, 255, 61, 0.1);
+    --skeleton-shimmer: rgba(255, 255, 255, 0.08);
+    --hover-fill: rgba(255, 255, 255, 0.05);
+    --select-chevron: #9AA4BD;
+
     /* Z-index scale (managed per ui-ux-pro-max guidance) */
     --z-base: 10;
     --z-sticky: 20;
     --z-overlay: 50;
+}
+
+/* ================================================================
+   LIGHT MODE — prefers-color-scheme
+   Cambia los valores de los custom properties; todo el layout se
+   adapta en cascada sin tocar componentes.
+   ================================================================ */
+@media (prefers-color-scheme: light) {
+    :root {
+        --canvas: #F3F5F9;
+        --surface: #FFFFFF;
+        --surface-alt: #EFF2F7;
+        --surface-raised: #E7EBF2;
+
+        --surface-glass: rgba(255, 255, 255, 0.86);
+        --bottom-nav-bg: rgba(255, 255, 255, 0.92);
+
+        --text-primary: #0B0E14;
+        --text-secondary: #3D4557;
+        --text-tertiary: #6B7488;
+
+        --border: rgba(11, 14, 20, 0.09);
+        --border-strong: rgba(11, 14, 20, 0.17);
+
+        --accent: #8AB514;
+        --accent-hover: #9CC61C;
+        --accent-contrast: #0B0E14;
+        --accent-soft: rgba(138, 181, 20, 0.14);
+
+        --info-bg: rgba(38, 100, 171, 0.1);
+        --info-text: #1E5EA8;
+        --success-bg: rgba(30, 139, 78, 0.1);
+        --success-text: #18813F;
+        --danger-bg: rgba(200, 46, 46, 0.1);
+        --danger-text: #B52E2E;
+        --warning-bg: rgba(190, 122, 0, 0.12);
+        --warning-text: #A25F00;
+
+        --shadow-sm: 0 1px 2px rgba(11, 14, 20, 0.08);
+        --shadow-md: 0 8px 24px rgba(11, 14, 20, 0.1);
+        --shadow-lg: 0 18px 46px rgba(11, 14, 20, 0.16), 0 2px 8px rgba(11, 14, 20, 0.08);
+        --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+        --hero-accent: rgba(138, 181, 20, 0.09);
+        --skeleton-shimmer: rgba(11, 14, 20, 0.06);
+        --hover-fill: rgba(11, 14, 20, 0.06);
+        --select-chevron: #6B7488;
+    }
+}
+
+/* ================================================================
+   ALTO CONTRASTE — prefers-contrast: more
+   ================================================================ */
+@media (prefers-contrast: more) {
+    :root {
+        --border: rgba(255, 255, 255, 0.22);
+        --border-strong: rgba(255, 255, 255, 0.4);
+        --text-secondary: #C2CBDE;
+        --text-tertiary: #AAB4CA;
+        --accent: #D8FF6B;
+    }
+
+    button,
+    input,
+    select,
+    textarea,
+    .card,
+    .panel-card,
+    .stat-box,
+    .badge {
+        border-width: 2px;
+    }
+
+    .nav-tab.active {
+        box-shadow: 0 0 0 2px var(--accent);
+    }
+}
+
+/* ================================================================
+   FORCED COLORS — Windows High Contrast
+   ================================================================ */
+@media (forced-colors: active) {
+    :root,
+    html[data-theme="light"],
+    html[data-theme="dark"] {
+        --canvas: Canvas;
+        --surface: Canvas;
+        --surface-alt: Canvas;
+        --surface-raised: Canvas;
+        --surface-glass: Canvas;
+        --bottom-nav-bg: Canvas;
+
+        --text-primary: CanvasText;
+        --text-secondary: CanvasText;
+        --text-tertiary: GrayText;
+
+        --border: ButtonBorder;
+        --border-strong: ButtonBorder;
+
+        --accent: Highlight;
+        --accent-hover: Highlight;
+        --accent-contrast: HighlightText;
+        --accent-soft: Canvas;
+
+        --info-bg: Canvas;
+        --info-text: LinkText;
+        --success-bg: Canvas;
+        --success-text: CanvasText;
+        --danger-bg: Canvas;
+        --danger-text: CanvasText;
+        --warning-bg: Canvas;
+        --warning-text: CanvasText;
+
+        --shadow-sm: none;
+        --shadow-md: none;
+        --shadow-lg: none;
+        --shadow-inset: none;
+    }
+
+    *,
+    *::before,
+    *::after {
+        forced-color-adjust: auto;
+    }
+
+    button,
+    .btn-scale,
+    .nav-tab,
+    .icon-btn,
+    .drawer-item,
+    .stepper-chip,
+    input,
+    select,
+    textarea {
+        border: 1px solid ButtonBorder;
+        background: ButtonFace;
+        color: ButtonText;
+    }
+}
+
+/* ================================================================
+   TEMA MANUAL — data-theme (botón del usuario)
+   El usuario puede forzar claro/oscuro independientemente de la
+   preferencia del SO. Estos selectores tienen más especificidad que
+   :root y por eso ganan a @media (prefers-color-scheme).
+   ================================================================ */
+html[data-theme="light"] {
+    --canvas: #F3F5F9;
+    --surface: #FFFFFF;
+    --surface-alt: #EFF2F7;
+    --surface-raised: #E7EBF2;
+
+    --surface-glass: rgba(255, 255, 255, 0.86);
+    --bottom-nav-bg: rgba(255, 255, 255, 0.92);
+
+    --text-primary: #0B0E14;
+    --text-secondary: #3D4557;
+    --text-tertiary: #6B7488;
+
+    --border: rgba(11, 14, 20, 0.09);
+    --border-strong: rgba(11, 14, 20, 0.17);
+
+    --accent: #8AB514;
+    --accent-hover: #9CC61C;
+    --accent-contrast: #0B0E14;
+    --accent-soft: rgba(138, 181, 20, 0.14);
+
+    --info-bg: rgba(38, 100, 171, 0.1);
+    --info-text: #1E5EA8;
+    --success-bg: rgba(30, 139, 78, 0.1);
+    --success-text: #18813F;
+    --danger-bg: rgba(200, 46, 46, 0.1);
+    --danger-text: #B52E2E;
+    --warning-bg: rgba(190, 122, 0, 0.12);
+    --warning-text: #A25F00;
+
+    --shadow-sm: 0 1px 2px rgba(11, 14, 20, 0.08);
+    --shadow-md: 0 8px 24px rgba(11, 14, 20, 0.1);
+    --shadow-lg: 0 18px 46px rgba(11, 14, 20, 0.16), 0 2px 8px rgba(11, 14, 20, 0.08);
+    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+    --hero-accent: rgba(138, 181, 20, 0.09);
+    --skeleton-shimmer: rgba(11, 14, 20, 0.06);
+    --hover-fill: rgba(11, 14, 20, 0.06);
+    --select-chevron: #6B7488;
+}
+
+html[data-theme="dark"] {
+    --canvas: #0B0E14;
+    --surface: #131822;
+    --surface-alt: #1A2030;
+    --surface-raised: #20283B;
+
+    --surface-glass: rgba(19, 24, 34, 0.86);
+    --bottom-nav-bg: rgba(19, 24, 34, 0.94);
+
+    --text-primary: #F4F6FB;
+    --text-secondary: #9AA4BD;
+    --text-tertiary: #77829C;
+
+    --border: rgba(255, 255, 255, 0.07);
+    --border-strong: rgba(255, 255, 255, 0.14);
+
+    --accent: #C6FF3D;
+    --accent-hover: #D7FF66;
+    --accent-contrast: #0B0E14;
+    --accent-soft: rgba(198, 255, 61, 0.14);
+
+    --info-bg: rgba(86, 156, 255, 0.16);
+    --info-text: #7DB7FF;
+    --success-bg: rgba(72, 209, 122, 0.16);
+    --success-text: #54E08A;
+    --danger-bg: rgba(255, 95, 95, 0.16);
+    --danger-text: #FF7A7A;
+    --warning-bg: rgba(255, 196, 0, 0.16);
+    --warning-text: #FFCB52;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+    --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    --hero-accent: rgba(198, 255, 61, 0.1);
+    --skeleton-shimmer: rgba(255, 255, 255, 0.08);
+    --hover-fill: rgba(255, 255, 255, 0.05);
+    --select-chevron: #9AA4BD;
 }

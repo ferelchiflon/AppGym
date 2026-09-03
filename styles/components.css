@@ -6,7 +6,7 @@ label {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--text-secondary);
-    margin-top: 1rem;
+    margin-top: var(--space-4);
     margin-bottom: 0.35rem;
 }
 
@@ -155,7 +155,7 @@ button.success:hover {
 
 /* ========== LISTS & BADGES ========== */
 .badge-list {
-    margin-top: 1rem;
+    margin-top: var(--space-4);
     max-height: 220px;
     max-height: 32vh; /* viewport-relative so long lists don't dominate short screens */
     overflow-y: auto;
@@ -281,7 +281,7 @@ button.success:hover {
 .empty-message {
     color: var(--text-tertiary);
     text-align: center;
-    padding: 1.25rem 0;
+    padding: var(--space-5) 0;
     font-style: italic;
     font-size: clamp(0.78rem, 0.72rem + 0.2vw, 0.88rem);
 }
@@ -748,4 +748,125 @@ button.success:hover {
     color: var(--text-primary);
     box-shadow: none;
 }
+/* ========== BÚSQUEDA DE EJERCICIOS (Selector) ========== */
+#ejercicioBusqueda {
+    width: 100%;
+    margin: 0 0 0.5rem;
+}
+.small-note {
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    margin: 0.2rem 0 0;
+    min-height: 1rem;
+}
 
+/* ========== DRAG & DROP REORDEN DE RUTINA ========== */
+.routine-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+.routine-badge .drag-handle {
+    flex: none;
+    cursor: grab;
+    -webkit-user-select: none;
+    user-select: none;
+    color: var(--text-tertiary);
+    padding: 2px 4px;
+    font-size: 1rem;
+    opacity: 0.7;
+    transition: color 0.16s ease, opacity 0.16s ease;
+    touch-action: none;
+}
+.routine-badge .drag-handle:hover,
+.routine-badge .drag-handle:focus-visible {
+    color: var(--accent);
+    opacity: 1;
+}
+.routine-badge .drag-handle:active { cursor: grabbing; }
+.routine-badge > span:not(.drag-handle),
+.routine-badge > .count-tag { pointer-events: none; }
+
+/* Estados durante el arrastre activo */
+.dnd-active .routine-badge { cursor: grab; }
+.routine-badge.dnd-dragging {
+    opacity: 0.55;
+    border-style: dashed;
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    transform: scale(1.015);
+    transition: transform 0.12s ease, opacity 0.12s ease;
+}
+.routine-badge.dnd-over {
+    border-top: 2px solid var(--accent);
+    background: var(--accent-soft);
+}
+
+/* ========== PLANTILLAS PREDEFINIDAS ========== */
+.plantillas-predefinidas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1rem;
+}
+.predef-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-control);
+    padding: 0.7rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+.predef-card:hover {
+    border-color: var(--border-strong);
+    border-left-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md, 0 6px 18px rgba(0, 0, 0, 0.08));
+}
+.predef-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+.predef-head h4 {
+    margin: 0;
+    font-size: clamp(0.82rem, 0.76rem + 0.3vw, 0.92rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+.predef-tags {
+    color: var(--text-tertiary);
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+.predef-desc {
+    margin: 0;
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+.predef-ejercicios {
+    margin: 0;
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    line-height: 1.4;
+}
+.predef-acciones {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.15rem;
+}
+.predef-acciones button {
+    flex: 0 1 auto;
+    min-width: 0;
+    margin-top: 0;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.78rem;
+}

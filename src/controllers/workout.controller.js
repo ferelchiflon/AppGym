@@ -13,8 +13,10 @@ import { FormulasRM, PlateCalculator } from "../formulas.js";
 import { Autoregulacion } from "../autorregulacion.js";
 import { GRUPOS_MUSCULARES, PATRONES_MOVIMIENTO } from "../data/exercises.js";
 import { EJERCICIOS_DISPONIBLES } from "../config.js";
+import { PLANTILLAS_PREDEFINIDAS } from "../data/plantillas-predefinidas.js";
 import { GestorTimer } from "../gestor-timer.js";
 import { ExerciseGuide } from "../components/exercise-guide.js";
+import { hacerReordenable } from "../dnd.js";
 
 export class WorkoutController {
   constructor({ app, el, rutina, timer }) {
@@ -25,6 +27,7 @@ export class WorkoutController {
     this._rirTocadoPorUsuario = false;
     this._grupoFiltroActual = "todos";
     this._patronFiltroActual = "todos";
+    this._busquedaActual = "";
 
     this._bindEvents();
     this._bindSteppers();
@@ -206,6 +209,31 @@ export class WorkoutController {
     this.el.startTimerBtn.addEventListener("click", () => this.timer.iniciar());
     this.el.pauseTimerBtn.addEventListener("click", () => this.timer.pausar());
     this.el.resetTimerBtn.addEventListener("click", () => this.timer.reset());
+  // Búsqueda por texto dentro del selector de ejercicios (Feature: Búsqueda + Filtros)
+    if (this.el.ejercicioBusqueda) {
+      this.el.ejercicioBusqueda.addEventListener(
+        "input",
+        Utils.debounce((e) => {
+          this._busquedaActual = (e.target.value || "").trim().toLowerCase();
+          this._renderSelectorEjercicios();
+        }, 180)
+      );
+    }
+
+    // Drag & Drop para reordenar ejercicios (escritorio + táctil vía Pointer Events)
+    if (this.el.rutinaContainer) {
+      hacerReordenable(this.el.rutinaContainer, {
+        selector: ".badge.routine-badge",
+        handleSel: ".drag-handle",
+        onReorder: (fromIdx, toIdx) => {
+          if (this.rutina.reordenarEjercicio(fromIdx, toIdx)) {
+            Store.emit("routine:updated", this.rutina.data.rutina);
+            GestorTimer.vibrarCorto();
+          }
+        },
+      });
+    }
+
   }
 
   _subscribeStore() {
@@ -233,6 +261,7 @@ export class WorkoutController {
     this._renderSelectorEjercicios();
     this._renderRutina();
     this._renderPlantillas();
+    this._renderPlantillasPredefinidas();
     this._renderSeries();
     this._syncGuiaBtn();
   }
@@ -286,6 +315,17 @@ export class WorkoutController {
       filtrados = filtrados.filter((e) => e.patron === this._patronFiltroActual);
     }
 
+    // Búsqueda por texto: nombre del ejercicio y grupos musculares (principal y secundarios).
+    if (this._busquedaActual) {
+      const q = this._busquedaActual;
+      filtrados = filtrados.filter(
+        (e) =>
+          (e.nombre || "").toLowerCase().includes(q) ||
+          String(e.musculo || "").toLowerCase().includes(q) ||
+          (e.musculosSecundarios || []).some((m) => String(m).toLowerCase().includes(q))
+      );
+    }
+
     const frag = document.createDocumentFragment();
     filtrados.forEach((ej) => {
       const opt = document.createElement("option");
@@ -296,7 +336,23 @@ export class WorkoutController {
       frag.appendChild(opt);
     });
 
+    if (filtrados.length === 0) {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "Sin resultados para tu búsqueda / filtros";
+      frag.appendChild(opt);
+    }
+
     this.el.selectEjercicio.replaceChildren(frag);
+
+    // Nota de conteo de resultados según búsqueda/filtros activos.
+    if (this.el.ejercicioCountNote) {
+      const filtrosActivos = this._grupoFiltroActual !== "todos" || this._patronFiltroActual !== "todos" || !!this._busquedaActual;
+      this.el.ejercicioCountNote.textContent = filtrosActivos
+        ? filtrados.length + (filtrados.length === 1 ? " resultado" : " resultados")
+        : "";
+    }
+
     this._syncGuiaBtn();
   }
 
@@ -325,9 +381,17 @@ export class WorkoutController {
       const seriesCount = (this.rutina.seriesPorEjercicio[id] || []).length;
 
       const badge = document.createElement("div");
-      badge.className = "badge" + (actual === id ? " active" : "");
+      badge.className = "badge routine-badge" + (actual === id ? " active" : "");
       badge.setAttribute("role", "button");
       badge.setAttribute("tabindex", "0");
+
+      // Manejador de arrastre (handle). Sin él no se inicia el drag, para no
+      // interferir con el click de selección ni con los botones ⓘ / ×.
+      const dragHandle = document.createElement("span");
+      dragHandle.className = "drag-handle";
+      dragHandle.setAttribute("aria-label", "Arrastrar " + ej.nombre + " para reordenar");
+      dragHandle.title = "Arrastrar para reordenar";
+      dragHandle.textContent = "≡";
 
       const nombreSpan = document.createElement("span");
       nombreSpan.textContent = ej.nombre;
@@ -368,7 +432,7 @@ export class WorkoutController {
         this._renderSeries();
       });
 
-      badge.append(nombreSpan, seriesTag, guideBtn, deleteBtn);
+      badge.append(dragHandle, nombreSpan, seriesTag, guideBtn, deleteBtn);
       frag.appendChild(badge);
     });
 
@@ -497,6 +561,96 @@ export class WorkoutController {
     if (Store.eliminarPlantilla(id)) {
       Toast.mostrar("Plantilla eliminada", "info");
       this._renderPlantillas();
+    }
+  }
+
+  _renderPlantillasPredefinidas() {
+    const container = this.el.plantillasPredefinidasContainer;
+    if (!container) return;
+    container.replaceChildren();
+
+    const frag = document.createDocumentFragment();
+
+    PLANTILLAS_PREDEFINIDAS.forEach((tpl) => {
+      const card = document.createElement("article");
+      card.className = "predef-card";
+
+      const head = document.createElement("div");
+      head.className = "predef-head";
+
+      const titulo = document.createElement("h4");
+      titulo.textContent = tpl.nombre;
+
+      const badges = document.createElement("span");
+      badges.className = "predef-tags";
+      badges.textContent = (tpl.etiquetas || []).join(" · ");
+
+      head.append(titulo, badges);
+
+      const desc = document.createElement("p");
+      desc.className = "predef-desc";
+      desc.textContent = tpl.descripcion || "";
+
+      const ejList = document.createElement("p");
+      ejList.className = "predef-ejercicios";
+      ejList.textContent = (tpl.ejercicios || [])
+        .map((id) => {
+          const ej = EJERCICIOS_DISPONIBLES.find((e) => e.id === id);
+          return ej ? ej.nombre : id;
+        })
+        .join(" · ");
+
+      const acciones = document.createElement("div");
+      acciones.className = "predef-acciones";
+
+      const importarBtn = document.createElement("button");
+      importarBtn.type = "button";
+      importarBtn.className = "primary";
+      importarBtn.textContent = "Importar y usar";
+      importarBtn.addEventListener("click", () => this._importarPlantillaPredefinida(tpl));
+
+      acciones.appendChild(importarBtn);
+
+      card.append(head, desc, ejList, acciones);
+      frag.appendChild(card);
+    });
+
+    container.appendChild(frag);
+  }
+
+  /** Importa una plantilla predefinida: la guarda en "Plantillas guardadas" y la carga. */
+  async _importarPlantillaPredefinida(tpl) {
+    if (!tpl || !Array.isArray(tpl.ejercicios) || tpl.ejercicios.length === 0) {
+      Toast.mostrar("Esta plantilla no tiene ejercicios definidos", "warning");
+      return;
+    }
+
+    // La copia queda persistida en el perfil activo para que el usuario pueda
+    // editarla y reutilizarla después ("Importar y usar").
+    const plantilla = Store.crearPlantilla(tpl.nombre, [...tpl.ejercicios]);
+    if (!plantilla) return;
+
+    // Si la rutina actual tiene series, confirmar antes de pisarlas (igual que `_cargarPlantilla`).
+    const tieneSeries = this.rutina.rutina.some((ejId) => {
+      return (this.rutina.seriesPorEjercicio[ejId] || []).length > 0;
+    });
+
+    if (tieneSeries) {
+      const ok = await Dialog.confirm(
+        "Importar esta plantilla reemplazará la rutina actual y sus series. ¿Continuar?",
+        { textoConfirmar: "Importar", peligroso: true }
+      );
+      if (!ok) {
+        // No se carga, pero la copia ya quedó en "Plantillas guardadas".
+        Toast.mostrar("Plantilla importada a 'Plantillas guardadas'", "info");
+        return;
+      }
+    }
+
+    const id = plantilla.id;
+    if (this.rutina.cargarPlantilla(id)) {
+      Store.emit("routine:updated", this.rutina.data.rutina);
+      Toast.mostrar('Plantilla "' + tpl.nombre + '" importada y cargada', "success");
     }
   }
 

@@ -11,6 +11,7 @@ import { FormulasRM } from './formulas.js';
 import { Autoregulacion } from './autorregulacion.js';
 import { Store } from './store.js';
 import { EJERCICIOS_DISPONIBLES } from './config.js';
+import { reordenarArrayEjercicios } from './dnd.js';
 
 export class GestorRutina {
     constructor(rutinaData) {
@@ -51,6 +52,49 @@ export class GestorRutina {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Reordena la rutina moviendo el ejercicio en `fromIdx` hacia `toIdx`.
+     * Remapea las superseries (indexadas por posición) para que los pares que
+     * ya estaban enlazados sigan siéndolo si permanecen adyacentes.
+     * Persiste el cambio de inmediato en el Store.
+     * Devuelve true si el movimiento se aplicó, false si los índices son inválidos.
+     */
+    reordenarEjercicio(fromIdx, toIdx) {
+        const rutina = this.data.rutina;
+        if (
+            !Array.isArray(rutina) ||
+            rutina.length < 2 ||
+            fromIdx < 0 ||
+            fromIdx >= rutina.length ||
+            toIdx < 0 ||
+            toIdx >= rutina.length ||
+            fromIdx === toIdx
+        ) {
+            return false;
+        }
+
+        const { rutina: nuevaRutina, superseries: nuevasSuper } = reordenarArrayEjercicios(
+            rutina,
+            this.data.superseries,
+            fromIdx,
+            toIdx
+        );
+
+        this.data.rutina = nuevaRutina;
+        this.data.superseries = nuevasSuper;
+
+        // Mantener el ejercicio seleccionado apuntando al mismo id (ya no a la posición).
+        const seleccionado = this.ejercicioSeleccionado;
+        if (seleccionado !== null && this.data.rutina.includes(seleccionado)) {
+            this.ejercicioSeleccionado = seleccionado;
+        } else if (this.data.rutina.length > 0) {
+            this.ejercicioSeleccionado = this.data.rutina[0];
+        }
+
+        Store.guardar();
+        return true;
     }
 
     getEjercicioActual() {

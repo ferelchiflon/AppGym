@@ -23,6 +23,7 @@ import { AnalyticsController } from "./controllers/analytics.controller.js";
 import { ProfileController } from "./controllers/profile.controller.js";
 import { DashboardController } from "./controllers/dashboard.controller.js";
 import { AppNavigator } from "./navigation/navigator.js";
+import { SyncManager } from "./sync.js";
 
 export class AppGymPro {
   constructor() {
@@ -36,6 +37,7 @@ export class AppGymPro {
 
     this._bindDOM();
     Toast.init();
+    this._initTheme();
 
     // Inicializar controladores especializados de cada vista
     this.workoutCtrl = new WorkoutController({
@@ -76,6 +78,7 @@ export class AppGymPro {
 
     this._wakeLock = null;
     this._initWebAPIs();
+    this._initSync();
     this._bindGlobalEvents();
     this._setupNavigation();
     this._renderPerfilesSelector();
@@ -117,6 +120,63 @@ export class AppGymPro {
         }
       });
     }
+  }
+
+  /**
+   * Arranca la sincronización offline-first: cola persistente en IndexedDB,
+   * listeners online/offline e indicador visual en la cabecera.
+   */
+  _initSync() {
+    if (!this.el.syncStatusBtn) return;
+
+    const pintar = (estado) => {
+      const btn = this.el.syncStatusBtn;
+      const dot = this.el.syncStatusDot;
+      const label = this.el.syncStatusLabel;
+      if (!btn) return;
+      btn.dataset.estado = estado.online ? "online" : "offline";
+      if (dot) {
+        dot.className = "sync-status-dot " + (estado.online ? "on" : "off");
+      }
+      if (label) {
+        label.textContent = estado.online
+          ? estado.pendientes > 0
+            ? "Sincronizando…"
+            : "En línea"
+          : "Sin conexión";
+      }
+      btn.title = estado.online
+        ? estado.pendientes > 0
+          ? estado.pendientes + " cambio(s) pendientes de sincronizar"
+          : "Sincronización activa"
+        : "Sin conexión. Tus cambios quedan en la cola local.";
+    };
+
+    this.sync = new SyncManager({
+      intervaloColaMs: 8000,
+      endpointUrl: null, // sin back-end; la cola es el respaldo offline-first local
+      onEstadoCambio: pintar,
+    });
+
+    this.sync.iniciar().then(() => {
+      this.sync.suscribirseAlStore(Store);
+      this.sync.estado().then(pintar);
+    });
+
+    // Click en el indicador: intenta drenar la cola; si está offline, informa.
+    this.el.syncStatusBtn.addEventListener("click", async () => {
+      if (!this.sync.online) {
+        Toast.mostrar("Sin conexión. Conéctate y pulsa de nuevo para sincronizar.", "info");
+        return;
+      }
+      const n = await this.sync.procesarCola();
+      if (n > 0) {
+        Toast.mostrar("Sincronizado: " + n + " cambio(s)", "success");
+      } else {
+        Toast.mostrar("Todo sincronizado.", "info");
+      }
+      this.sync.estado().then(pintar);
+    });
   }
 
   async _solicitarWakeLock() {
@@ -207,6 +267,78 @@ export class AppGymPro {
     }
   }
 
+  _initTheme() {
+    // Botón de tema (menú + atajo del header): fuerza claro/oscuro de forma manual,
+    // independiente de la preferencia del SO. Aprovecha los bloques
+    // html[data-theme="light"/"dark"] ya definidos en tokens.css.
+    const btns = [this.el.themeToggleBtn, this.el.themeHeaderBtn];
+    const KEY = "gympro:tema";
+
+    const temaDesdeSO = () =>
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+
+    const aplicar = (tema, persistir = false) => {
+      const raiz = document.documentElement;
+      raiz.dataset.theme = tema;
+      raiz.style.colorScheme = tema; // scrollbars/inputs nativos acordes al tema
+      if (persistir) {
+        try {
+          localStorage.setItem(KEY, tema);
+        } catch {
+          /* almacenamiento no disponible */
+        }
+      }
+      const oscuro = tema === "dark";
+      btns.forEach((b) => b?.setAttribute("aria-pressed", String(oscuro)));
+
+      // Botón del menú (icono + etiqueta textual)
+      const menuBtn = this.el.themeToggleBtn;
+      if (menuBtn) {
+        const icono = menuBtn.querySelector(".theme-toggle-icon");
+        const etiqueta = menuBtn.querySelector(".theme-toggle-label");
+        if (icono) icono.textContent = oscuro ? "🌙" : "☀️";
+        if (etiqueta) etiqueta.textContent = oscuro ? "Modo oscuro" : "Modo claro";
+      }
+
+      // Atajo del header (solo icono + tooltip accesible)
+      const headerBtn = this.el.themeHeaderBtn;
+      if (headerBtn) {
+        const icono = headerBtn.querySelector(".theme-header-icon");
+        if (icono) icono.textContent = oscuro ? "🌙" : "☀️";
+        headerBtn.setAttribute(
+          "aria-label",
+          oscuro ? "Pulsando cambiarás al modo claro" : "Pulsando cambiarás al modo oscuro"
+        );
+        headerBtn.title = oscuro
+          ? "Modo oscuro activo (pulsa para cambiar al modo claro)"
+          : "Modo claro activo (pulsa para cambiar al modo oscuro)";
+      }
+    };
+
+    // Preferencia guardada por el usuario; si no existe, la del sistema.
+    let guardado = null;
+    try {
+      guardado = localStorage.getItem(KEY);
+    } catch {
+      /* sin acceso a storage */
+    }
+    const inicial = guardado === "light" || guardado === "dark" ? guardado : temaDesdeSO();
+    aplicar(inicial);
+
+    btns.forEach((btn) =>
+      btn?.addEventListener("click", () => {
+        const actual = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+        const nuevo = actual === "dark" ? "light" : "dark";
+        aplicar(nuevo, true);
+        Toast.mostrar(nuevo === "dark" ? "🌙 Modo oscuro activado" : "☀️ Modo claro activado", "info");
+      })
+    );
+  }
+
   _bindDOM() {
     this.$ = (id) => document.getElementById(id);
     this.el = {
@@ -216,6 +348,8 @@ export class AppGymPro {
       eliminarPerfilBtn: this.$("eliminarPerfilBtn"),
       filtroMusculoSelect: this.$("filtroMusculoSelect"),
       filtroPatronSelect: this.$("filtroPatronSelect"),
+      ejercicioBusqueda: this.$("ejercicioBusqueda"),
+      ejercicioCountNote: this.$("ejercicioCountNote"),
       selectEjercicio: this.$("ejercicioSelect"),
       crearEjercicioBtn: this.$("crearEjercicioBtn"),
       rutinaContainer: this.$("rutinaContainer"),
@@ -224,6 +358,7 @@ export class AppGymPro {
       resetRutinaBtn: this.$("resetRutinaBtn"),
       guardarPlantillaBtn: this.$("guardarPlantillaBtn"),
       plantillasContainer: this.$("plantillasContainer"),
+      plantillasPredefinidasContainer: this.$("plantillasPredefinidasContainer"),
       pesoKg: this.$("pesoKg"),
       tiempoMin: this.$("tiempoMin"),
       calcularBtn: this.$("calcularMetricasBtn"),
@@ -290,6 +425,11 @@ export class AppGymPro {
       resetTimerBtn: this.$("resetTimerBtn"),
       miniTimerDisplay: this.$("miniTimerDisplay"),
       miniTimerBtn: this.$("miniTimerBtn"),
+      syncStatusBtn: this.$("syncStatusBtn"),
+      syncStatusDot: this.$("syncStatusDot"),
+      syncStatusLabel: this.$("syncStatusLabel"),
+      themeToggleBtn: this.$("themeToggleBtn"),
+      themeHeaderBtn: this.$("themeHeaderBtn"),
       floatingTimerDisplay: this.$("floatingTimerDisplay"),
       floatPlayBtn: this.$("floatPlayBtn"),
       floatResetBtn: this.$("floatResetBtn"),

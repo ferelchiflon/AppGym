@@ -130,6 +130,14 @@ button{font:inherit}
             </div>
 
             <div class="drawer-group">
+                <div class="drawer-group-title">🎨 Apariencia</div>
+                <button type="button" class="drawer-item theme-toggle" id="themeToggleBtn" aria-pressed="false" aria-label="Cambiar entre modo claro y modo oscuro">
+                    <span class="theme-toggle-icon" aria-hidden="true">🌙</span>
+                    <span class="theme-toggle-label">Modo oscuro</span>
+                </button>
+            </div>
+
+            <div class="drawer-group">
                 <div class="drawer-group-title">⚙️ Herramientas extra</div>
                 <button type="button" class="drawer-item" data-nav-target="workout" data-scroll="discosCard">Calculadora de discos</button>
                 <button type="button" class="drawer-item" data-nav-target="profile" data-scroll="backupCard">Backup completo</button>
@@ -148,6 +156,13 @@ button{font:inherit}
             <span class="brand-name">GYM PRO <span class="version-tag">v6.0</span></span>
         </span>
         <span id="headerTitle" class="header-title" role="status">Entrenamiento</span>
+        <button type="button" id="syncStatusBtn" class="sync-status" data-estado="online" aria-label="Estado de sincronización" title="Sincronización activa">
+            <span id="syncStatusDot" class="sync-status-dot" aria-hidden="true"></span>
+            <span id="syncStatusLabel" class="sync-status-label">En línea</span>
+        </button>
+        <button type="button" id="themeHeaderBtn" class="icon-btn theme-header-btn" aria-label="Cambiar el tema de la app" aria-pressed="false" title="Modo oscuro activo">
+            <span class="theme-header-icon" aria-hidden="true">🌙</span>
+        </button>
         <button type="button" id="miniTimerBtn" class="mini-timer" aria-label="Abrir timer de descanso">
             <svg class="mini-timer-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>
             <span id="miniTimerDisplay" class="mini-timer-display">02:30</span>
@@ -177,10 +192,12 @@ button{font:inherit}
                     </div>
                     <div style="grid-column: 1 / -1; width: 100%;">
                         <label for="ejercicioSelect">Ejercicio (+90 disponibles)</label>
+                        <input type="search" id="ejercicioBusqueda" placeholder="🔎 Buscar por nombre o músculo (ej. press, pecho, espalda…)" autocomplete="off" aria-label="Buscar ejercicio por nombre o músculo">
                         <div class="exercise-picker-row">
                             <select id="ejercicioSelect" aria-label="Seleccionar ejercicio"></select>
                             <button id="guiaBtn" class="secondary guide-trigger" type="button" aria-label="Ver guía del ejercicio seleccionado">Guía</button>
                         </div>
+                        <p class="small-note" id="ejercicioCountNote"></p>
                     </div>
                 </div>
 
@@ -195,6 +212,9 @@ button{font:inherit}
 
                 <h3 class="plantillas-titulo">Plantillas guardadas</h3>
                 <div class="badge-list mt-1" id="plantillasContainer"></div>
+
+                <h3 class="plantillas-titulo">Plantillas predefinidas</h3>
+                <div class="plantillas-predefinidas mt-1" id="plantillasPredefinidasContainer"></div>
             </div>
 
             <!-- REGISTRO DE SERIES -->

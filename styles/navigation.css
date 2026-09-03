@@ -12,7 +12,7 @@
     gap: 12px;
     padding: 10px 4px;
     margin: -8px -8px 14px;
-    background: linear-gradient(180deg, var(--surface) 62%, rgba(19, 24, 34, .86));
+    background: linear-gradient(180deg, var(--surface) 62%, var(--surface-glass));
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
@@ -52,11 +52,22 @@
     color: var(--text-primary); box-shadow: none; cursor: pointer;
     transition: background 0.16s ease, border-color 0.16s ease;
 }
-.icon-btn:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--border-strong); }
+.icon-btn:hover { background: var(--hover-fill); border-color: var(--border-strong); }
 .icon-btn svg {
     width: 20px; height: 20px; stroke: currentColor; stroke-width: 2;
     fill: none; stroke-linecap: round; stroke-linejoin: round;
 }
+
+/* Atajo de tema en el header (claro/oscuro) */
+.theme-header-btn {
+    width: 38px; height: 38px; min-width: 38px;
+    border-radius: 9999px; font-size: 1.05rem; line-height: 1;
+}
+.theme-header-btn[aria-pressed="true"] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+.theme-header-icon { display: inline-flex; }
 
 /* ---------- Mini timer en header ---------- */
 .mini-timer {
@@ -142,10 +153,16 @@
 .drawer-nav { display: flex; flex-direction: column; gap: 14px; }
 .drawer-group { display: flex; flex-direction: column; gap: 6px; }
 .drawer-group-title {
+    display: flex; align-items: center; gap: var(--space-2);
     font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.08em; color: var(--text-secondary);
     padding: 2px 6px 4px;
     border-bottom: 1px solid var(--border); margin-bottom: 2px;
+}
+.drawer-group-title svg {
+    width: 14px; height: 14px; flex: 0 0 auto;
+    stroke: var(--accent); stroke-width: 2; fill: none;
+    stroke-linecap: round; stroke-linejoin: round;
 }
 .drawer-item {
     display: block; width: 100%; text-align: left;
@@ -159,6 +176,23 @@
 .drawer-item:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--border-strong); }
 .drawer-item:active { transform: scale(0.99); }
 
+/* Toggle de tema (modo claro / oscuro) en el menú */
+.drawer-item.theme-toggle {
+    display: flex; align-items: center; gap: 10px;
+}
+.theme-toggle-icon {
+    width: 20px; text-align: center; flex: none;
+    font-size: 1.05rem; line-height: 1;
+}
+.drawer-item.theme-toggle[aria-pressed="true"] {
+    border-color: var(--border-strong);
+    background: var(--accent-soft);
+}
+.drawer-item.theme-toggle[aria-pressed="true"] .theme-toggle-label {
+    color: var(--accent);
+    font-weight: 700;
+}
+
 /* ---------- Timer flotante ---------- */
 .floating-timer {
     position: fixed;
@@ -170,7 +204,7 @@
     background: var(--surface);
     border: 1px solid var(--border-strong);
     border-radius: 9999px;
-    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+    box-shadow: var(--shadow-lg);
 }
 .floating-timer-display {
     font-variant-numeric: tabular-nums; font-weight: 800;
@@ -218,4 +252,35 @@
 @media (min-width: 1024px) {
     .drawer-overlay { backdrop-filter: blur(4px); }
     .floating-timer { right: 20px; bottom: 5.5rem; }
+}
+/* ---------- Indicador de sincronización (offline-first) en header ---------- */
+.sync-status {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 6px 12px; margin: 0; border-radius: 9999px;
+    background: var(--surface-alt); border: 1px solid var(--border);
+    color: var(--text-primary); cursor: pointer;
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.01em;
+    transition: border-color 0.16s ease, background 0.16s ease;
+    white-space: nowrap;
+}
+.sync-status:hover { border-color: var(--accent); background: var(--accent-soft); }
+.sync-status-dot {
+    width: 8px; height: 8px; border-radius: 9999px; flex: none;
+    background: var(--text-tertiary);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.sync-status-dot.on {
+    background: var(--success-text);
+    box-shadow: 0 0 0 3px var(--success-bg);
+    animation: sync-pulse 2.4s ease-in-out infinite;
+}
+.sync-status-dot.off { background: var(--danger-text); }
+.sync-status[data-estado="offline"] .sync-status-label { color: var(--danger-text); }
+@keyframes sync-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+}
+@media (max-width: 480px) {
+    .sync-status-label { display: none; }
+    .sync-status { padding: 6px 10px; }
 }
