@@ -33,5 +33,10 @@ jobs:
       - name: Tests unitarios (Vitest)
         run: npm test
 
+      - name: Cobertura de código (umbrales Vitest)
+        # Genera el reporte y valida los umbrales configurados en vitest.config.js
+        # (lines/statements/functions/branches). Falla el job si se violan.
+        run: npm run test:coverage
+
       - name: Verificación de compilación (Build)
         run: npm run build
