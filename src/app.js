@@ -635,6 +635,11 @@ export class AppGymPro {
       this.navigator.goTo("workout", "timerCard");
     });
 
+    // Deep-link (shortcuts del manifest / ?tab= / #<tab>). Se re-sincroniza
+    // aquí para que el hook `_onTabEnter` (ya configurado) renderice la vista
+    // objetivo si apunta a `dashboard` o `progress` (p.ej. ?tab=progress).
+    this.navigator.syncFromDeepLink();
+
     // Controles flotantes del timer (Play/Pausa + Reset), disponibles en todas las secciones.
     this.el.floatPlayBtn?.addEventListener("click", () => {
       if (this.timer.corriendo) this.timer.pausar();

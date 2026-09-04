@@ -1,0 +1,110 @@
+{
+  "name": "GYM PRO — Registro de Entrenamiento",
+  "short_name": "GYM PRO",
+  "id": "./",
+  "description": "Registro de entrenamiento profesional, periodización y cálculo de 1RM",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0B0E14",
+  "theme_color": "#0B0E14",
+  "categories": ["fitness", "health", "sports"],
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./icons/screenshot-dashboard.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard de inicio con métricas de entrenamiento"
+    },
+    {
+      "src": "./icons/screenshot-workout.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Entrenamiento activo: rutina y series"
+    },
+    {
+      "src": "./icons/screenshot-history.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Historial de sesiones de entrenamiento"
+    },
+    {
+      "src": "./icons/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Vista de escritorio de GYM PRO"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Iniciar entrenamiento",
+      "short_name": "Entrenar",
+      "description": "Abre la vista de rutina y series para empezar a entrenar",
+      "url": "./index.html?tab=workout",
+      "icons": [
+        {
+          "src": "./icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Ver historial",
+      "short_name": "Historial",
+      "description": "Consulta el historial de sesiones de entrenamiento",
+      "url": "./index.html?tab=history",
+      "icons": [
+        {
+          "src": "./icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
+

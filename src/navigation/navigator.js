@@ -37,6 +37,12 @@ export class AppNavigator {
     this._headerTitle = document.getElementById("headerTitle");
     this._body = document.body;
 
+    // Deep-linking para shortcuts del manifest (p.ej. ?tab=workout o #workout).
+    // Permite que Chrome/Android abran una vista concreta al lanzar la app
+    // desde un acceso directo, sin recarga completa (SPA de una sola página).
+    this.syncFromDeepLink();
+    window.addEventListener("hashchange", () => this.syncFromDeepLink());
+
     this._hamburger?.addEventListener("click", () => this.toggle());
     this._closeBtn?.addEventListener("click", () => this.close());
     this._overlay?.addEventListener("click", () => this.close());
@@ -159,5 +165,42 @@ export class AppNavigator {
       const tab = activePane.id.replace("tab-", "");
       this.setTitle(t(this._titles[tab] || tab));
     }
+  }
+
+  /**
+   * Lee la URL (query `?tab=` o hash `#<tab>`) y navega a la vista indicada.
+   * Soportado: ?tab=dashboard|workout|history|progress|profile
+   *            #workout, #history, etc.
+   * Opcionalmente acepta un ancla secundaria (<tab>/<scrollTarget> vía hash).
+   * Las entradas inválidas se ignoran de forma silenciosa (arranque normal).
+   */
+  _syncFromDeepLink() {
+    const TABS = new Set(Object.keys(this._titles));
+    let tab = null;
+    let scrollTarget = null;
+
+    // 1) Query param: ./index.html?tab=workout
+    const params = new URLSearchParams(location.search);
+    const qTab = params.get("tab");
+    if (qTab && TABS.has(qTab)) tab = qTab;
+
+    // 2) Hash: ./index.html#workout o #workout/rutinaCard
+    const hash = (location.hash || "").replace(/^#/, "");
+    if (hash) {
+      const [hTab, hTarget] = hash.split("/");
+      if (TABS.has(hTab)) {
+        tab = hTab;
+        if (hTarget) scrollTarget = hTarget;
+      }
+    }
+
+    if (!tab) return;
+    this._tabActual = tab;
+    this.goTo(tab, scrollTarget);
+  }
+
+  /** Alias público para re-sincronizar el deep-link desde fuera (p.ej. app.js). */
+  syncFromDeepLink() {
+    this._syncFromDeepLink();
   }
 }

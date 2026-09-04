@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#131822"/>
+      <stop offset="100%" stop-color="#0B0E14"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D4FF5E"/>
+      <stop offset="100%" stop-color="#C6FF3D"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <!-- Fondo embebido (full-bleed, sin esquinas recortadas) para el modo
+       maskable: el fondo ocupa TODO el lienzo para que las máscaras
+       irregulares de Android (círculo, cuadrado redondeado, etc.) nunca
+       dejen transparentes en los bordes. -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- Contenido en la ZONA SEGURA: centrado dentro del círculo interior del
+       80% (~205px) para evitar recortes de la máscara del launcher. -->
+  <g transform="translate(256,258) scale(0.85) translate(-256,-258)">
+    <g transform="translate(64,64) scale(0.75)" fill="none" stroke="url(#accent)" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="70" y="160" width="36" height="192" rx="18" fill="url(#accent)" stroke="none" filter="url(#glow)"/>
+      <rect x="120" y="196" width="28" height="120" rx="14" fill="#F4F6FB" stroke="none"/>
+      <rect x="148" y="240" width="216" height="32" rx="10" fill="#9AA4BD" stroke="none"/>
+      <line x1="230" y1="240" x2="230" y2="272" stroke="#131822" stroke-width="4"/>
+      <line x1="256" y1="240" x2="256" y2="272" stroke="#131822" stroke-width="4"/>
+      <line x1="282" y1="240" x2="282" y2="272" stroke="#131822" stroke-width="4"/>
+      <rect x="364" y="196" width="28" height="120" rx="14" fill="#F4F6FB" stroke="none"/>
+      <rect x="406" y="160" width="36" height="192" rx="18" fill="url(#accent)" stroke="none" filter="url(#glow)"/>
+    </g>
+    <g transform="translate(256,420)">
+      <rect x="-100" y="-22" width="200" height="44" rx="22" fill="rgba(198,255,61,0.12)" stroke="rgba(198,255,61,0.3)" stroke-width="1.5"/>
+      <text text-anchor="middle" y="7" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-weight="900" font-size="22" letter-spacing="4" fill="#C6FF3D">GYM PRO</text>
+    </g>
+  </g>
+</svg>
