@@ -5,7 +5,7 @@
 //     por lo que Chrome SIEMPRE recibe la última versión del diseño y re-cachea.
 //   - Solo interceptamos GET same-origin; lo cross-origin va directo a la red.
 
-const CACHE_VERSION = 'gympro-v7.0-pwa';
+const CACHE_VERSION = 'gympro-v8.0-pwa';
 const CACHE_RUNTIME = `${CACHE_VERSION}-runtime`;
 const CACHE_FUENTES = `${CACHE_VERSION}-fuentes`;
 
