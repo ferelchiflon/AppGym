@@ -130,4 +130,21 @@ describe("Manejo global de errores (ErrorHandler)", () => {
       expect.any(Error)
     );
   });
+
+  it("captura un error sin message ni filename", () => {
+    montarToast();
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const e = new Event("error");
+    Object.defineProperty(e, "stack", { value: "fallback stack" });
+    window.dispatchEvent(e);
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining("[error-handler] Error de runtime"),
+      "Error de runtime desconocido",
+      expect.objectContaining({
+        stack: "fallback stack",
+        location: undefined,
+      })
+    );
+  });
 });

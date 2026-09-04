@@ -888,7 +888,8 @@ export class WorkoutController {
     res.porLado.forEach((d) => {
       const span = document.createElement("span");
       span.className = "badge";
-      span.textContent = d.peso + "kg × " + d.cantidad + " (por lado)";
+      const valorDisco = d.disco ?? d.peso;
+      span.textContent = valorDisco + "kg × " + d.cantidad + " (por lado)";
       div.appendChild(span);
     });
     container.appendChild(div);

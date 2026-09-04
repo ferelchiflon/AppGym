@@ -89,4 +89,15 @@ describe("AppNavigator", () => {
     const drawer = document.getElementById("drawer");
     expect(drawer.classList.contains("open")).toBe(false);
   });
+
+  it("syncFromDeepLink navega según el hash o query param", () => {
+    window.location.hash = "#history/card-historial";
+    navigator.syncFromDeepLink();
+
+    const tabHistory = document.getElementById("tab-history");
+    expect(tabHistory.classList.contains("active")).toBe(true);
+    expect(document.getElementById("headerTitle").textContent).toBe("Historial");
+
+    window.location.hash = "";
+  });
 });
