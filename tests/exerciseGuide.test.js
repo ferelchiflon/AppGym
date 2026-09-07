@@ -18,17 +18,17 @@ describe("Datos de guías (EXERCISE_GUIDES)", () => {
       const guia = EXERCISE_GUIDES[id];
       expect(guia.fases).toHaveLength(3);
       expect(guia.musculos.length).toBeGreaterThan(0);
-      // La infografía única se carga desde assets/guides/ (ruta relativa).
+      // La infografía única se carga desde public/guides/ (ruta absoluta).
       expect(typeof guia.imagen).toBe("string");
-      expect(guia.imagen.startsWith("assets/guides/")).toBe(true);
+      expect(guia.imagen.startsWith("/guides/")).toBe(true);
       // Las fases solo llevan texto: sin imagen individual por fase.
       guia.fases.forEach((f) => {
         expect(typeof f.titulo).toBe("string");
         expect(typeof f.desc).toBe("string");
       });
     });
-    expect(EXERCISE_GUIDES.press_hombro.imagen).toBe("assets/guides/press-militar.jpg");
-    expect(EXERCISE_GUIDES.sentadilla.imagen).toBe("assets/guides/sentadilla.jpg");
+    expect(EXERCISE_GUIDES.press_hombro.imagen).toBe("/guides/press-militar.jpg");
+    expect(EXERCISE_GUIDES.sentadilla.imagen).toBe("/guides/sentadilla.jpg");
   });
 
   it("respeta las fases pedidas para cada ejercicio", () => {
@@ -60,7 +60,7 @@ describe("Resolución de ids", () => {
   });
 
   it("devuelve null para ejercicios sin guía", () => {
-    expect(ExerciseGuide.porId("press_banca")).toBeNull();
+    expect(ExerciseGuide.porId("flexiones")).toBeNull();
     expect(ExerciseGuide.porId("")).toBeNull();
     expect(ExerciseGuide.porId(null)).toBeNull();
   });
@@ -109,7 +109,7 @@ describe("Modal ExerciseGuide (DOM)", () => {
     const principal = box.querySelector(".guide-main-image");
     const imgPrincipal = principal.querySelector("img");
     expect(imgPrincipal).not.toBeNull();
-    expect(imgPrincipal.src.endsWith("assets/guides/press-militar.jpg")).toBe(true);
+    expect(imgPrincipal.src.endsWith("/guides/press-militar.jpg")).toBe(true);
 
     // 3 fases son bloques de texto: número + título + desc, sin <img>.
     const phases = box.querySelectorAll(".guide-phase");
@@ -126,7 +126,7 @@ describe("Modal ExerciseGuide (DOM)", () => {
   });
 
   it("no abre si el ejercicio no tiene guía", () => {
-    const ok = ExerciseGuide.abrirPorEjercicio("press_banca");
+    const ok = ExerciseGuide.abrirPorEjercicio("flexiones");
     expect(ok).toBe(false);
     expect(document.querySelector(".guide-overlay")).toBeNull();
   });
