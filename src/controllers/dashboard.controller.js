@@ -7,10 +7,10 @@
 
 import { Store } from "../store.js";
 import { Toast } from "../toast.js";
-import { EJERCICIOS_DISPONIBLES } from "../config.js";
+import { EJERCICIOS_DISPONIBLES } from "../config.ts";
 import { ExerciseGuide } from "../components/exercise-guide.js";
 import { CardioForm } from "../components/cardio-form.js";
-import * as H from "../utils/dashboard-helpers.js";
+import * as H from "../utils/dashboard-helpers.ts";
 
 const WELLNESS_LABELS = ["Sueño", "Motivación", "Estrés", "DOMS"];
 const WELLNESS_KEYS = ["sueno", "motivacion", "estres", "doms"];
@@ -580,7 +580,7 @@ export class DashboardController {
             .map((l) => {
               const max = Math.max(25, l.mrv || l.mav || 1);
               const width = Math.min(100, Math.round(((l.efectivas || 0) / max) * 100));
-              const zona = zonaVolumen(l, width);
+              const zona = zonaVolumen(l);
               return `
             <div class="lmk-item">
               <div class="lmk-row">
@@ -905,7 +905,7 @@ function zonaAcwr(r) {
   return "Carga baja. Podés sumar volumen.";
 }
 
-function zonaVolumen(l, _width) {
+function zonaVolumen(l) {
   const map = {
     sobre_mrv: { color: "#FF7A7A", label: "Riesgo de sobrecarga" },
     en_mav: { color: "#54E08A", label: "Zona óptima" },

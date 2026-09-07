@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { GestorCardio, TIPOS_CARDIO } from "../src/gestor-cardio.js";
 import { Store } from "../src/store.js";
-import { CONFIG } from "../src/config.js";
+import { CONFIG } from "../src/config.ts";
 
 function perfilBase() {
   return {

@@ -3,7 +3,7 @@ import { HistoryController } from "../src/controllers/history.controller.js";
 import { Store } from "../src/store.js";
 import { Toast } from "../src/toast.js";
 import { Dialog } from "../src/dialog.js";
-import { Utils } from "../src/utils.js";
+import { Utils } from "../src/utils.ts";
 import * as csvExport from "../src/export/csv.js";
 import * as pdfExport from "../src/export/pdf.js";
 import historyViewHtml from "../src/views/history.js";

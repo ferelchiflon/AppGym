@@ -4,7 +4,7 @@
  * ExerciseGuide en jsdom.
  */
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { EXERCISE_GUIDES, EJERCICIOS_CATALOGO } from "../src/config.js";
+import { EXERCISE_GUIDES, EJERCICIOS_CATALOGO } from "../src/config.ts";
 import { ExerciseGuide } from "../src/components/exercise-guide.js";
 
 describe("Datos de guías (EXERCISE_GUIDES)", () => {

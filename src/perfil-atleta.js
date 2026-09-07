@@ -1,10 +1,10 @@
 /**
  * src/perfil-atleta.js
  * Datos del atleta + wellness + readiness + saltos CMJ.
- * Depende de: ./utils.js (Utils), ./store.js (Store)
+ * Depende de: ./utils.ts (Utils), ./store.js (Store)
  */
 
-import { Utils } from './utils.js';
+import { Utils } from './utils.ts';
 import { Store } from './store.js';
 
 export class PerfilAtleta {

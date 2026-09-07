@@ -1,10 +1,10 @@
 /**
  * src/wellness-correlation.js
  * Cruza sesiones con wellness del mismo día para ver el impacto en volumen.
- * Depende de: ./utils.js (Utils)
+ * Depende de: ./utils.ts (Utils)
  */
 
-import { Utils } from './utils.js';
+import { Utils } from './utils.ts';
 
 export const WellnessCorrelation = {
     analizar(historial, wellness) {

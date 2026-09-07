@@ -77,7 +77,7 @@ export const VolumeLandmarks = {
       let estado = "sub_mev";
       let etiqueta = "Bajo estímulo (< MEV)";
       let color = "warning";
-      let progresoPct = Math.min(100, Math.round((efectivas / lm.mavMax) * 100));
+      const progresoPct = Math.min(100, Math.round((efectivas / lm.mavMax) * 100));
 
       if (efectivas >= lm.mrv) {
         estado = "sobre_mrv";

@@ -4,12 +4,12 @@
  * con su rol biomecánico.
  *
  * Sin dependencias externas. Los datos de las guías viven en
- * EXERCISE_GUIDES (src/config.js). El modal es un singleton: cada apertura
+ * EXERCISE_GUIDES (src/config.ts). El modal es un singleton: cada apertura
  * cierra cualquier instancia previa. El `onerror` de la imagen principal
  * muestra un placeholder con el nombre de la guía (la infografía se carga con
  * una ruta relativa desde assets/guides/).
  */
-import { EXERCISE_GUIDES } from "../config.js";
+import { EXERCISE_GUIDES } from "../config.ts";
 
 /**
  * Normalización de nombres/ids alternativos hacia los ids reales del

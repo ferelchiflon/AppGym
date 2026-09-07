@@ -1,11 +1,11 @@
 /**
  * src/formulas.js
  * Fórmulas de estimación de 1RM y calculadora de discos.
- * Depende de: ../src/config.js (CONFIG)
+ * Depende de: ../src/config.ts (CONFIG)
  */
 
-import { CONFIG } from './config.js';
-import { Utils } from './utils.js';
+import { CONFIG } from './config.ts';
+import { Utils } from './utils.ts';
 
 /**
  * Tabla de conversión RPE a %1RM (Mike Tuchscherer / Reactive Training Systems).

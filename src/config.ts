@@ -1,6 +1,37 @@
 import { EJERCICIOS_CATALOGO, GRUPOS_MUSCULARES, PATRONES_MOVIMIENTO } from './data/exercises.js';
 
-export const CONFIG = {
+/** Configuración general de la aplicación (constantes). */
+export interface AppConfig {
+  VERSION: string;
+  STORAGE_KEY: string;
+  DEFAULT_ALTURA: number;
+  DEFAULT_PESO: number;
+  DISCOS_KG: number[];
+  BARRA_KG_DEFAULT: number;
+}
+
+/** Una fase técnica de una guía de ejercicio. */
+export interface GuiaFase {
+  titulo: string;
+  desc: string;
+}
+
+/** Músculo participante con su rol. */
+export interface GuiaMusculo {
+  nombre: string;
+  rol: string;
+}
+
+/** Guía de ejecución estructurada para un ejercicio del catálogo. */
+export interface EjercicioGuia {
+  id: string;
+  nombre: string;
+  imagen: string;
+  fases: GuiaFase[];
+  musculos: GuiaMusculo[];
+}
+
+export const CONFIG: AppConfig = {
     VERSION: '6.0',
     STORAGE_KEY: 'gympro_data',
     DEFAULT_ALTURA: 175,
@@ -23,12 +54,12 @@ export { EJERCICIOS_CATALOGO, GRUPOS_MUSCULARES, PATRONES_MOVIMIENTO };
  * `fases` describe las fases técnicas (título + descripción) que se muestran
  * debajo de la imagen principal; no llevan imagen individual.
  */
-const _nombreDe = (id) => {
+const _nombreDe = (id: string): string => {
   const ej = EJERCICIOS_CATALOGO.find((e) => e.id === id);
   return ej ? ej.nombre : id;
 };
 
-export const EXERCISE_GUIDES = {
+export const EXERCISE_GUIDES: Record<string, EjercicioGuia> = {
   /** Press militar con barra (id del catálogo. Alias: "press-militar"). */
   press_hombro: {
     id: "press_hombro",

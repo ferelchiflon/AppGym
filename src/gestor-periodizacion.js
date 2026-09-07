@@ -2,10 +2,10 @@
  * src/gestor-periodizacion.js
  * Periodización contemporánea (ATR, DUP, Lineal) con microciclos progresivos,
  * cálculo dinámico de semanas transcurridas y prescripción de carga por sesión.
- * Depende de: ./utils.js (Utils), ./store.js (Store)
+ * Depende de: ./utils.ts (Utils), ./store.js (Store)
  */
 
-import { Utils } from './utils.js';
+import { Utils } from './utils.ts';
 import { Store } from './store.js';
 
 export const MODELOS_PERIODIZACION = {

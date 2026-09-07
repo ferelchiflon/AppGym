@@ -6,13 +6,13 @@
  */
 
 import { Store } from "../store.js";
-import { Utils } from "../utils.js";
+import { Utils } from "../utils.ts";
 import { Toast } from "../toast.js";
 import { Dialog } from "../dialog.js";
 import { FormulasRM, PlateCalculator } from "../formulas.js";
 import { Autoregulacion } from "../autorregulacion.js";
 import { GRUPOS_MUSCULARES, PATRONES_MOVIMIENTO } from "../data/exercises.js";
-import { EJERCICIOS_DISPONIBLES } from "../config.js";
+import { EJERCICIOS_DISPONIBLES } from "../config.ts";
 import { PLANTILLAS_PREDEFINIDAS } from "../data/plantillas-predefinidas.js";
 import { GestorTimer } from "../gestor-timer.js";
 import { ExerciseGuide } from "../components/exercise-guide.js";

@@ -5,7 +5,7 @@
  */
 
 import { Store } from "../store.js";
-import { Utils } from "../utils.js";
+import { Utils } from "../utils.ts";
 import { Toast } from "../toast.js";
 import { Dialog } from "../dialog.js";
 import { seriesHistorialACSV } from "../export/csv.js";

@@ -1,10 +1,10 @@
 /**
  * src/autorregulacion.js
  * Sugerencia de peso para próxima serie según RPE reportado vs objetivo.
- * Depende de: ./utils.js
+ * Depende de: ./utils.ts
  */
 
-import { Utils } from './utils.js';
+import { Utils } from './utils.ts';
 
 export const Autoregulacion = {
     // Sugiere el peso de la próxima serie según el RPE reportado vs el RPE objetivo.

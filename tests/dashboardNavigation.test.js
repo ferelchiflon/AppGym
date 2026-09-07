@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { DashboardController } from "../src/controllers/dashboard.controller.js";
 import controllerSrc from "../src/controllers/dashboard.controller.js?raw";
 import { Store } from "../src/store.js";
-import * as H from "../src/utils/dashboard-helpers.js";
+import * as H from "../src/utils/dashboard-helpers.ts";
 
 /**
  * Regresión de navegación del DashboardController + cobertura de

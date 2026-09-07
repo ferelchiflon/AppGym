@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { DashboardController } from "../src/controllers/dashboard.controller.js";
-import { COLORS_SPARKLINE } from "../src/utils/dashboard-helpers.js";
+import { COLORS_SPARKLINE } from "../src/utils/dashboard-helpers.ts";
 
 /**
  * Tests unitarios del sparkline de wellness (SVG puro suavizado) y del

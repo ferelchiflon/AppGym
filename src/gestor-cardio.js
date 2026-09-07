@@ -4,10 +4,10 @@
  * semanales/mensuales. Persiste en Store bajo `perfil.sesionesCardio` (colección
  * propia, separada del historial de fuerza gestionado por GestorRutina).
  *
- * Depende de: ./utils.js (Utils), ./store.js (Store)
+ * Depende de: ./utils.ts (Utils), ./store.js (Store)
  */
 
-import { Utils } from './utils.js';
+import { Utils } from './utils.ts';
 import { Store } from './store.js';
 
 /** Tipos de cardio soportados (ids estables para Store). */

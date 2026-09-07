@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { Utils } from '../src/utils.js';
+import { Utils } from '../src/utils.ts';
 
 describe('Utils.clamp', () => {
   it('should return the value itself if it is within the range', () => {

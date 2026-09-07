@@ -1,7 +1,7 @@
 /**
  * src/store.js
  * Persistencia unificada con versionado y migración desde v4.
- * Depende de: ./config.js (CONFIG), ./utils.js (Utils), ./toast.js (Toast)
+ * Depende de: ./config.ts (CONFIG), ./utils.ts (Utils), ./toast.js (Toast)
  *
  * Estrategia de almacenamiento:
  *  - Por defecto usa localStorage (sincrono, simple, <5MB).
@@ -15,8 +15,8 @@
  * si el contenedor no existe.
  */
 
-import { CONFIG, EJERCICIOS_DISPONIBLES } from './config.js';
-import { Utils } from './utils.js';
+import { CONFIG, EJERCICIOS_DISPONIBLES } from './config.ts';
+import { Utils } from './utils.ts';
 import { Toast } from './toast.js';
 
 // Umbral: si el JSON serializado pasa este tamaño, migramos a IndexedDB.

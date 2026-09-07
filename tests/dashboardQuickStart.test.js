@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { DashboardController } from "../src/controllers/dashboard.controller.js";
-import { Utils } from "../src/utils.js";
+import { Utils } from "../src/utils.ts";
 
 /**
  * Tests del botón de arranque rápido del Dashboard (#quickStartBtn).

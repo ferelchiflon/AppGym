@@ -1,16 +1,16 @@
 /**
  * src/gestor-rutina.js
  * Rutina, series, PRs, superseries, historial, métricas de progreso.
- * Depende de: ./utils.js (Utils), ./formulas.js (FormulasRM),
+ * Depende de: ./utils.ts (Utils), ./formulas.js (FormulasRM),
  *              ./autorregulacion.js (Autoregulacion), ./store.js (Store),
- *              ./config.js (EJERCICIOS_DISPONIBLES)
+ *              ./config.ts (EJERCICIOS_DISPONIBLES)
  */
 
-import { Utils } from './utils.js';
+import { Utils } from './utils.ts';
 import { FormulasRM } from './formulas.js';
 import { Autoregulacion } from './autorregulacion.js';
 import { Store } from './store.js';
-import { EJERCICIOS_DISPONIBLES } from './config.js';
+import { EJERCICIOS_DISPONIBLES } from './config.ts';
 import { reordenarArrayEjercicios } from './dnd.js';
 
 export class GestorRutina {
