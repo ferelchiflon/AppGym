@@ -18,11 +18,14 @@ export default defineConfig({
         // Recalibrado el 2026-07-09 tras añadir tests/history.controller.test.js
         // (history.controller.js: lines 50.94% → 98.11%, functions 53.33% → 100%, branches 34.78% → 75.32%):
         //   lines 78.39% · statements 78.39% · functions 73.84% · branches 68.52%
+        // Recalibrado el 2026-07-09 tras ampliar tests/workout.test.js
+        // (workout.controller.js: lines 74.50% → 99.33%, functions 75.00% → 100%, branches 65.94% → 80.56%):
+        //   lines 81.22% · statements 81.22% · functions 77.29% · branches 70.64%
         // Margen de seguridad: ~1-2 puntos por debajo de lo medido para estabilidad.
-        lines: 76,
-        statements: 76,
-        functions: 71,
-        branches: 66,
+        lines: 79,
+        statements: 79,
+        functions: 74,
+        branches: 68,
       },
       // IMPORTANTE: definir `exclude` REEMPLAZA la lista por defecto de Vitest.
       // La lista anterior omitía tests/*.d.ts/coverage/dist, por lo que se
