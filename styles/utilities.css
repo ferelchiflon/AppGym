@@ -247,6 +247,32 @@
     to { transform: scaleX(0); }
 }
 
+/* Toast accionable (aviso de nueva versión / Service Worker) */
+.toast-accion {
+    align-items: center;
+    cursor: pointer;
+}
+.toast-texto {
+    flex: 1;
+    min-width: 0;
+}
+.toast-action-btn {
+    flex-shrink: 0;
+    border: 1px solid var(--border-strong);
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.7rem;
+    border-radius: var(--radius-control);
+    cursor: pointer;
+    transition: filter 0.15s ease;
+}
+.toast-action-btn:hover,
+.toast-action-btn:focus-visible {
+    filter: brightness(1.1);
+}
+
 /* ========== SKELETON LOADERS ========== */
 .skeleton {
     position: relative;

@@ -660,16 +660,77 @@ export class AppGymPro {
     this.el.floatPlayBtn.classList.toggle("is-running", this.timer.corriendo);
   }
 
-  _registrarServiceWorker() {
+  /**
+   * Registra el Service Worker y avisa al usuario cuando una versión nueva
+   * toma control de la página en segundo plano (sin recargar), para evitar
+   * pantallas en blanco por imports() dinámicos de chunks JS viejos con hash
+   * que el SW nuevo ya purgó del caché.
+   *
+   * @param {Navigator} [nav=navigator] Navegador a usar (inyectable en tests).
+   */
+  _registrarServiceWorker(nav = navigator) {
     if (
-      "serviceWorker" in navigator &&
-      (location.protocol === "https:" ||
-        location.hostname === "localhost" ||
-        location.hostname === "127.0.0.1")
+      !nav ||
+      !("serviceWorker" in nav) ||
+      (typeof location !== "undefined" &&
+        !(
+          location.protocol === "https:" ||
+          location.hostname === "localhost" ||
+          location.hostname === "127.0.0.1"
+        ))
     ) {
-      navigator.serviceWorker.register("sw.js").catch(() => {
-        // Silencioso: PWA progresiva
-      });
+      return;
     }
+
+    const sw = nav.serviceWorker;
+
+    // Importante: capturar si YA había un controller ANTES de que el SW nuevo
+    // tome control. En el primer load de un usuario nuevo `controller` es null
+    // (nadie controlaba la página), y no hay nada que "reemplazar": no se debe
+    // avisar ni recargar. Solo avisamos cuando un controller previo es
+    // reemplazado por uno nuevo.
+    const habiaController = !!sw.controller;
+
+    sw.register("sw.js").catch(() => {
+      // Silencioso: PWA progresiva
+    });
+
+    sw.addEventListener("controllerchange", () => {
+      // El evento se dispara también en la 1ª instalación (null -> controller).
+      // Solo actuamos si antes había un controller y ahora lo reemplazó otro.
+      if (!habiaController || !sw.controller) return;
+
+      if (this._haySesionEnCurso()) {
+        // Entrenamiento en curso o datos sin guardar: no recargar de golpe.
+        Toast.mostrarAccion({
+          mensaje: "Hay una versión nueva disponible. Guardá tu progreso y actualizá.",
+          accionLabel: "Actualizar",
+          tipo: "info",
+          onAccion: () => window.location.reload(),
+        });
+      } else {
+        // Sin nada en curso: recargar automáticamente para adoptar la versión
+        // nueva cuanto antes, pero con un aviso breve para no sobresaltar.
+        Toast.mostrar("Nueva versión instalada. Recargando…", "info");
+        window.location.reload();
+      }
+    });
+  }
+
+  /**
+   * Detecta si hay una sesión de entrenamiento activa o datos sin guardar,
+   * es decir, si una recarga forzosa podría descartar trabajo del usuario.
+   */
+  _haySesionEnCurso() {
+    const rutina = this.rutina;
+    const timer = this.timer;
+
+    const hayEjercicios = !!(rutina && rutina.rutina && rutina.rutina.length > 0);
+    const haySeriesSinGuardar =
+      hayEjercicios &&
+      rutina.rutina.some((id) => (rutina.seriesPorEjercicio[id] || []).length > 0);
+    const timerCorriendo = !!(timer && timer.corriendo);
+
+    return hayEjercicios || haySeriesSinGuardar || timerCorriendo;
   }
 }
