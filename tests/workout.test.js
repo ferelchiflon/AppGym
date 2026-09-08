@@ -27,6 +27,7 @@ function mountWorkoutDOM() {
     seriesContainer: document.getElementById("seriesContainer"),
     serieForm: document.getElementById("serieForm"),
     serieFormEmpty: document.getElementById("serieFormEmpty"),
+    serieUltimaVez: document.getElementById("serieUltimaVez"),
     seriePeso: document.getElementById("seriePeso"),
     serieReps: document.getElementById("serieReps"),
     serieRPE: document.getElementById("serieRPE"),
@@ -71,6 +72,7 @@ function makeRutina() {
     },
     ejercicioSeleccionado: "press_banca",
     getEjercicioActual: vi.fn(() => "press_banca"),
+    getUltimaSesionEjercicio: vi.fn(() => null),
     seleccionarEjercicio: vi.fn(function (id) {
       this.ejercicioSeleccionado = id;
     }),
@@ -290,6 +292,52 @@ describe("WorkoutController", () => {
     });
   });
 
+describe("Recordatorio 'última vez' al cargar series", () => {
+    it("muestra el texto de última vez y precarga peso/reps si hubo historial", () => {
+      const el = mountWorkoutDOM();
+      const rutina = makeRutina();
+      rutina.getUltimaSesionEjercicio.mockReturnValue({
+        peso: 80, reps: 8, rpe: 8, rir: 2, fecha: "2026-08-09", fechaISO: "2026-08-09T10:00:00",
+      });
+
+      new WorkoutController({ app: {}, el, rutina, timer: makeTimer() });
+
+      expect(el.serieUltimaVez.textContent).toContain("Última vez: 80kg × 8 reps");
+      expect(el.serieUltimaVez.textContent).toContain("RPE 8");
+      expect(el.seriePeso.value).toBe("80");
+      expect(el.serieReps.value).toBe("8");
+    });
+
+    it("no muestra el texto ni precarga cuando el ejercicio nunca se hizo", () => {
+      const el = mountWorkoutDOM();
+      const rutina = makeRutina();
+      rutina.getUltimaSesionEjercicio.mockReturnValue(null);
+
+      new WorkoutController({ app: {}, el, rutina, timer: makeTimer() });
+
+      expect(el.serieUltimaVez.textContent).toBe("");
+      expect(el.seriePeso.value).toBe("");
+      expect(el.serieReps.value).toBe("");
+    });
+
+    it("no pisa los valores que el usuario ya escribió", () => {
+      const el = mountWorkoutDOM();
+      const rutina = makeRutina();
+      rutina.getUltimaSesionEjercicio.mockReturnValue({
+        peso: 80, reps: 8, rpe: null, rir: null, fecha: "2026-08-09", fechaISO: "2026-08-09T10:00:00",
+      });
+
+      el.seriePeso.value = "100";
+      el.serieReps.value = "5";
+
+      new WorkoutController({ app: {}, el, rutina, timer: makeTimer() });
+
+      // El prefill respeta lo ya escrito (100 y 5), pero el recordatorio sí se muestra.
+      expect(el.serieUltimaVez.textContent).toContain("Última vez: 80kg × 8 reps");
+      expect(el.seriePeso.value).toBe("100");
+      expect(el.serieReps.value).toBe("5");
+    });
+  });
   describe("Herramientas adicionales: Warmup, Discos y Timer", () => {
     it("calcula warm-up para el peso actual", () => {
       const el = mountWorkoutDOM();

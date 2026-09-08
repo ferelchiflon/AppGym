@@ -50,6 +50,7 @@ export default `    <section id="tab-workout" class="tab-pane" aria-labelledby="
                 <h2 data-i18n="workout.titulo.series">Registro de series</h2>
 
                 <div id="serieForm" class="hidden">
+                    <div id="serieUltimaVez" class="small-note-inline"></div>
                     <div class="flex-wrap">
                         <div class="input-stepper-wrap">
                             <label for="seriePeso">Peso (kg)</label>

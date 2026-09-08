@@ -23,6 +23,15 @@ function nuevaRutinaConEjercicios(ids, superseries = {}) {
   return new GestorRutina(perfil);
 }
 
+function rutinaConHistorial(historial) {
+  const perfil = Store.getPerfilActivo();
+  perfil.rutina = ["press_banca"];
+  perfil.seriesPorEjercicio = { press_banca: [] };
+  perfil.superseries = {};
+  perfil.historial = historial;
+  return new GestorRutina(perfil);
+}
+
 describe("Plantillas predefinidas", () => {
   it("definen id, nombre, descripcion y ejercicios válidos del catálogo", () => {
     expect(PLANTILLAS_PREDEFINIDAS.length).toBeGreaterThanOrEqual(4);
@@ -117,5 +126,41 @@ describe("SyncManager (offline-first)", () => {
     manager._online = true;
     expect(await manager.procesarCola()).toBe(0);
     manager.destruir();
+  });
+});
+
+describe("getUltimaSesionEjercicio (recordatorio 'última vez')", () => {
+  beforeEach(resetStore);
+
+  it("devuelve la última serie del ejercicio en la última sesión del historial", () => {
+    const rutina = rutinaConHistorial([
+      {
+        fecha: "5 ago", fechaISO: "2026-08-05T10:00:00",
+        ejercicios: [{ id: "press_banca", series: [{ peso: 60, reps: 10 }, { peso: 70, reps: 8 }] }],
+      },
+      {
+        fecha: "9 ago", fechaISO: "2026-08-09T10:00:00",
+        ejercicios: [{ id: "press_banca", series: [{ peso: 75, reps: 8 }, { peso: 77.5, reps: 6 }] }],
+      },
+    ]);
+
+    const ultima = rutina.getUltimaSesionEjercicio("press_banca");
+    // La sesión más reciente es la del 9 ago y, dentro de ella, la última serie (77.5×6).
+    expect(ultima).toMatchObject({ peso: 77.5, reps: 6, fechaISO: "2026-08-09T10:00:00" });
+  });
+
+  it("devuelve null si nunca se hizo el ejercicio (sin historial)", () => {
+    const rutina = rutinaConHistorial([]);
+    expect(rutina.getUltimaSesionEjercicio("press_banca")).toBeNull();
+  });
+
+  it("devuelve null si solo hay historial de OTROS ejercicios", () => {
+    const rutina = rutinaConHistorial([
+      {
+        fechaISO: "2026-08-05T10:00:00",
+        ejercicios: [{ id: "sentadilla", series: [{ peso: 100, reps: 5 }] }],
+      },
+    ]);
+    expect(rutina.getUltimaSesionEjercicio("press_banca")).toBeNull();
   });
 });

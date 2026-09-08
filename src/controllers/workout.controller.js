@@ -686,6 +686,36 @@ export class WorkoutController {
     if (serieForm) serieForm.classList.remove("hidden");
     if (emptyMsg) emptyMsg.classList.add("hidden");
 
+    // Recordatorio "última vez": qué hizo el usuario en este ejercicio la última
+    // vez, para reducir la fricción de cargar series. Solo texto de contexto.
+    const ultima = this.rutina.getUltimaSesionEjercicio(ejercicioId);
+    const ultimaVezEl = this.el.serieUltimaVez;
+    if (ultimaVezEl) {
+      if (ultima && (ultima.peso !== null || ultima.reps !== null)) {
+        const rpeTxt = ultima.rpe ? " · RPE " + ultima.rpe : "";
+        ultimaVezEl.textContent =
+          "Última vez: " +
+          (ultima.peso !== null ? ultima.peso : "—") + "kg × " +
+          (ultima.reps !== null ? ultima.reps : "—") + " reps" +
+          rpeTxt +
+          (ultima.fechaISO ? " (" + ultima.fechaISO.slice(0, 10) + ")" : "");
+      } else {
+        ultimaVezEl.textContent = "";
+      }
+    }
+
+    // Prefill opcional: si el usuario todavía no tocó peso/reps de la serie nueva,
+    // precargamos el valor real (editable) de la última vez. Guardamos con valor
+    // vacío para no pisar lo que ya haya escrito (ej. al cambiar de ejercicio).
+    if (ultima) {
+      if (this.el.seriePeso && this.el.seriePeso.value === "" && ultima.peso !== null) {
+        this.el.seriePeso.value = ultima.peso;
+      }
+      if (this.el.serieReps && this.el.serieReps.value === "" && ultima.reps !== null) {
+        this.el.serieReps.value = ultima.reps;
+      }
+    }
+
     const series = this.rutina.seriesPorEjercicio[ejercicioId] || [];
     const container = this.el.seriesContainer;
     container.replaceChildren();

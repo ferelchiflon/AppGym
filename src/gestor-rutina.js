@@ -324,6 +324,34 @@ export class GestorRutina {
         });
     }
 
+    /**
+     * Última serie registrada del ejercicio en una sesión ANTERIOR del historial,
+     * para el recordatorio "última vez" al cargar una serie nueva.
+     * Devuelve la última sesión cronológica que incluye el ejercicio y, dentro de
+     * ella, la última serie (la más representativa del final de ese día).
+     * @param {string} ejercicioId id del ejercicio.
+     * @returns {{peso, reps, rpe, rir, fecha, fechaISO}|null} null si nunca se hizo.
+     */
+    getUltimaSesionEjercicio(ejercicioId) {
+        const historialEjercicio = this.data.historial
+            .flatMap(sesion => sesion.ejercicios.filter(e => e.id === ejercicioId).map(e => ({ ...e, fecha: sesion.fecha, fechaISO: sesion.fechaISO })))
+            .filter(e => e.series.length > 0);
+
+        if (historialEjercicio.length === 0) return null;
+
+        // El historial es cronológico (push en guardarSesion): el último es el más reciente.
+        const ultimo = historialEjercicio[historialEjercicio.length - 1];
+        const serie = ultimo.series[ultimo.series.length - 1];
+        return {
+            peso: serie.peso ?? null,
+            reps: serie.reps ?? null,
+            rpe: serie.rpe ?? null,
+            rir: serie.rir ?? null,
+            fecha: ultimo.fecha,
+            fechaISO: ultimo.fechaISO,
+        };
+    }
+
     getVolumenPorSesion(n = 10) {
         return this.data.historial.slice(-n).map(s => ({
             fecha: s.fecha,

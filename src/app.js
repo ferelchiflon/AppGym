@@ -501,6 +501,7 @@ export class AppGymPro {
       seriesContainer: this.$("seriesContainer"),
       serieForm: this.$("serieForm"),
       serieFormEmpty: this.$("serieFormEmpty"),
+      serieUltimaVez: this.$("serieUltimaVez"),
       seriePeso: this.$("seriePeso"),
       serieReps: this.$("serieReps"),
       serieRPE: this.$("serieRPE"),
