@@ -852,4 +852,79 @@
         grid-template-columns: 1fr auto;
     }
 }
+/* ===== Widgets de seguimiento (dashboard-widgets.js) ===== */
+.dw-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2, 0.5rem);
+}
+.dw-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2, 0.5rem);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+.dw-empty {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+}
+.dw-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2, 0.5rem);
+    flex-wrap: wrap;
+}
+.dw-fecha {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--accent);
+}
+.dw-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+.dw-chip {
+    font-size: 0.72rem;
+    color: var(--text-primary);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-tag);
+    padding: 0.15rem 0.5rem;
+}
+.dw-objetivo {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    line-height: 1.2;
+    color: var(--text-primary);
+}
+.dw-muted {
+    font-size: 0.78rem;
+    color: var(--text-tertiary);
+}
+.dw-achievements {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1, 0.25rem);
+}
+.dw-item {
+    position: relative;
+    padding-left: 1.1rem;
+    font-size: 0.84rem;
+    color: var(--text-primary);
+}
+.dw-item::before {
+    content: "🏅";
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 0.8rem;
+}
 }

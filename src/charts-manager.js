@@ -49,11 +49,14 @@ export const ChartsManager = {
     _Chart: null,
 
     _colores: {
-        // Tema dark + naranja: #FF5E00 como acento principal de gráficos.
-        linea: '#FF5E00',
-        grilla: 'rgba(255, 255, 255, 0.07)',
-        texto: 'rgba(154, 164, 189, 0.92)',
-        barras: ['#FF5E00', '#FF7A29', '#8E8E93', '#FF9500', '#FF3B30', '#5AC8FA'],
+        // Tema dark + lima (DS Performance Athletic): #C6FF3D como acento.
+        linea: '#C6FF3D',
+        grilla: 'rgba(255, 255, 255, 0.05)', // cuadrículas sutiles
+        texto: '#9AA4BD', // --text-secondary
+        barras: ['#C6FF3D', '#D7FF66', '#9AA4BD', '#7DB7FF', '#54E08A', '#FFCB52'],
+        gradienteInicio: 'rgba(198, 255, 61, 0.30)',
+        gradienteFin: 'rgba(198, 255, 61, 0)',
+        fuente: "'Oswald', 'Inter', -apple-system, system-ui, sans-serif",
     },
 
     _destruir(id) {
@@ -70,11 +73,28 @@ export const ChartsManager = {
         try {
             if (!this._Chart) {
                 this._Chart = await _loadChart();
+                if (this._Chart && this._Chart.defaults) {
+                    // Tipografía de marca (Oswald) + color por defecto del DS.
+                    this._Chart.defaults.font.family = this._colores.fuente;
+                    this._Chart.defaults.color = this._colores.texto;
+                }
             }
             return this._Chart;
         } catch (e) {
             console.error('No se pudo cargar Chart.js', e);
             return null;
+        }
+    },
+
+    /** Gradiente de fondo vertical lima→transparente (fallback seguro). */
+    _gradiente(canvasEl, desde, hasta) {
+        try {
+            const g = canvasEl.getContext('2d').createLinearGradient(0, 0, 0, canvasEl.height || 200);
+            g.addColorStop(0, desde);
+            g.addColorStop(1, hasta);
+            return g;
+        } catch {
+            return hasta || 'transparent';
         }
     },
 
@@ -98,7 +118,7 @@ export const ChartsManager = {
                     label: `1RM estimado — ${nombreEjercicio}`,
                     data: datosProgreso.map(d => Math.round(d.rm * 10) / 10),
                     borderColor: this._colores.linea,
-                    backgroundColor: 'rgba(17,17,17,0.06)',
+                    backgroundColor: this._gradiente(ctx, this._colores.gradienteInicio, this._colores.gradienteFin),
                     borderWidth: 2,
                     tension: 0.25,
                     fill: true,

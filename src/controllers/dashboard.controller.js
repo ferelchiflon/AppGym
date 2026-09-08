@@ -10,6 +10,7 @@ import { Toast } from "../toast.js";
 import { EJERCICIOS_DISPONIBLES } from "../config.ts";
 import { ExerciseGuide } from "../components/exercise-guide.js";
 import { CardioForm } from "../components/cardio-form.js";
+import { renderSeguimiento } from "../components/dashboard-widgets.js";
 import * as H from "../utils/dashboard-helpers.ts";
 
 const WELLNESS_LABELS = ["Sueño", "Motivación", "Estrés", "DOMS"];
@@ -732,6 +733,15 @@ export class DashboardController {
           ${this._prsCard(prs)}
           ${this._landmarksCard(lmks)}
         </div>
+
+        ${renderSeguimiento({
+          historial: hist,
+          periodizacion: this.periodizacion,
+          grupo,
+          prs,
+          stre,
+          best,
+        })}
       </div>`;
 
     this.container.innerHTML = html;
