@@ -13,8 +13,8 @@ import { CardioForm } from "../components/cardio-form.js";
 import { renderSeguimiento } from "../components/dashboard-widgets.js";
 import * as H from "../utils/dashboard-helpers.ts";
 
-const WELLNESS_LABELS = ["Sueño", "Motivación", "Estrés", "DOMS"];
-const WELLNESS_KEYS = ["sueno", "motivacion", "estres", "doms"];
+const WELLNESS_LABELS = ["Sueño", "Motivación", "Estrés", "DOMS", "Energía", "Fatiga", "Alimentación", "Hidratación"];
+const WELLNESS_KEYS = ["sueno", "motivacion", "estres", "doms", "energia", "fatiga", "alimentacion", "hidratacion"];
 
 const USUARIOS_ESPECIALES = ["Invitado", "Cargando…"];
 
@@ -188,7 +188,7 @@ export class DashboardController {
         </div>
         <div class="wellness-serie"><div class="eyebrow">ÚLTIMOS 7 DÍAS</div>${this._sparkline(serie)}</div>
         <div class="wellness-note" style="color:${color}">
-          ${readiness ? "Tu readiness se basa en sueño, motivación, estrés y DOMS." : "Registrá tu bienestar para obtener tu score de readiness."}
+          ${readiness ? "Tu readiness se basa en 8 métricas: sueño, energía, fatiga, alimentación, hidratación, motivación, estrés y DOMS." : "Registrá tu bienestar para obtener tu score de readiness."}
         </div>
       </div>`;
   }
@@ -202,9 +202,9 @@ export class DashboardController {
     const padY = 6;
     return wellness.map((w, i) => {
       const raw = w[key] || 1;
-      // estrés y DOMS son "invertidos": mayor = peor, así que se invierten para
-      // que "bienestar alto" siempre quede arriba en todas las líneas.
-      const val = key === "estres" || key === "doms" ? 6 - raw : raw;
+      // estrés, DOMS y fatiga son "invertidos": mayor = peor, así que se invierten
+      // para que "bienestar alto" siempre quede arriba en todas las líneas.
+      const val = key === "estres" || key === "doms" || key === "fatiga" ? 6 - raw : raw;
       const x = n === 1 ? W / 2 : padX + (i * (W - 2 * padX)) / (n - 1);
       const y = Hgt - padY - ((val - 1) / 4) * (Hgt - 2 * padY);
       return [x, y];
@@ -781,7 +781,7 @@ export class DashboardController {
     if (guardar) {
       guardar.addEventListener("click", () => {
         const valores = {};
-        ["sueno", "motivacion", "estres", "doms"].forEach((k) => {
+        WELLNESS_KEYS.forEach((k) => {
           const group = this.container.querySelector(`.wellness-stars[data-var="${k}"]`);
           valores[k] = group ? group.querySelectorAll(".wstar.on").length : 1;
         });
@@ -845,12 +845,10 @@ export class DashboardController {
       Toast.mostrar("No hay un perfil activo para guardar el bienestar", "danger");
       return;
     }
-    const datos = {
-      sueno: Math.max(1, Number(valores.sueno) || 1),
-      motivacion: Math.max(1, Number(valores.motivacion) || 1),
-      estres: Math.max(1, Number(valores.estres) || 1),
-      doms: Math.max(1, Number(valores.doms) || 1),
-    };
+    const datos = {};
+    WELLNESS_KEYS.forEach((k) => {
+      datos[k] = Math.max(1, Number(valores[k]) || 1);
+    });
     perfil.registrarWellness(datos);
     Store.guardar();
     Store.emit("wellness:updated", perfil.data.wellness);

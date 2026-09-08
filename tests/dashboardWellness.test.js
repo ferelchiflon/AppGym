@@ -1,6 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { DashboardController } from "../src/controllers/dashboard.controller.js";
 import { COLORS_SPARKLINE } from "../src/utils/dashboard-helpers.ts";
+import { PerfilAtleta } from "../src/perfil-atleta.js";
+import { Store } from "../src/store.js";
+import { Toast } from "../src/toast.js";
 
 /**
  * Tests unitarios del sparkline de wellness (SVG puro suavizado) y del
@@ -114,4 +117,88 @@ describe("DashboardController · tarjeta wellness estado vacío", () => {
     expect(html).toContain("ÚLTIMOS 7 DÍAS");
     expect(html).not.toContain("wellnessIrRegistrarBtn");
   });
+describe("PerfilAtleta · check-in de 8 métricas (Fase 3)", () => {
+  it("registrarWellness persiste un check-in con los 8 campos", () => {
+    const perfil = new PerfilAtleta({ wellness: [], perfil: {} });
+    vi.spyOn(Store, "guardar").mockImplementation(() => {});
+    const entry = perfil.registrarWellness({
+      sueno: 5, estres: 2, doms: 1, motivacion: 4,
+      energia: 5, fatiga: 1, alimentacion: 4, hidratacion: 5,
+    });
+    expect(entry.sueno).toBe(5);
+    expect(entry.energia).toBe(5);
+    expect(entry.fatiga).toBe(1);
+    expect(entry.alimentacion).toBe(4);
+    expect(entry.hidratacion).toBe(5);
+    const ultimo = perfil.getWellnessUltimo();
+    expect(ultimo).toEqual(entry);
+  });
+
+  it("_guardarWellness propaga los 8 campos al perfil y re-renderiza", () => {
+    const c = makeController();
+    c.render = vi.fn();
+    vi.spyOn(Store, "guardar").mockImplementation(() => {});
+    vi.spyOn(Toast, "mostrar").mockImplementation(() => {});
+    const registrar = vi.fn((d) => d);
+    c.perfil = { data: { wellness: [] }, registrarWellness: registrar };
+    c._guardarWellness({
+      sueno: 5, motivacion: 4, estres: 2, doms: 1,
+      energia: 5, fatiga: 1, alimentacion: 4, hidratacion: 5,
+    });
+    expect(registrar).toHaveBeenCalledWith(expect.objectContaining({
+      sueno: 5, energia: 5, fatiga: 1, alimentacion: 4, hidratacion: 5,
+    }));
+    expect(c.render).toHaveBeenCalled();
+  });
+
+  it("getEstadoGeneral con solo registro viejo (sin campos nuevos) usa neutral y no rompe", () => {
+    const perfil = new PerfilAtleta({
+      wellness: [{ fecha: "2026-01-01", sueno: 3, estres: 3, doms: 3, motivacion: 3 }],
+    });
+    const r = perfil.getEstadoGeneral(5);
+    expect(Number.isNaN(r.score)).toBe(false);
+    expect(r.score).toBe(3);
+    expect(r.estado).toBe("Normal");
+    expect(r.promedios.energia).toBe(3);
+    expect(r.promedios.fatiga).toBe(3);
+    expect(r.promedios.alimentacion).toBe(3);
+    expect(r.promedios.hidratacion).toBe(3);
+  });
+
+  it("getEstadoGeneral mezcla registros viejos y nuevos en la ventana sin NaN y las métricas nuevas pesan", () => {
+    const perfil = new PerfilAtleta({
+      wellness: [
+        { fecha: "2026-01-01", sueno: 3, estres: 3, doms: 3, motivacion: 3 },
+        { fecha: "2026-01-02", sueno: 5, estres: 1, doms: 1, motivacion: 5, energia: 5, fatiga: 1, alimentacion: 5, hidratacion: 5 },
+        { fecha: "2026-01-03", sueno: 4, estres: 2, doms: 2, motivacion: 4, energia: 4, fatiga: 2, alimentacion: 4, hidratacion: 4 },
+        { fecha: "2026-01-04", sueno: 4, estres: 2, doms: 2, motivacion: 4, energia: 4, fatiga: 2, alimentacion: 4, hidratacion: 4 },
+        { fecha: "2026-01-05", sueno: 3, estres: 3, doms: 3, motivacion: 3 },
+      ],
+    });
+    const r = perfil.getEstadoGeneral(5);
+    expect(r.muestras).toBe(5);
+    expect(Number.isNaN(r.score)).toBe(false);
+    expect(r.score).toBeGreaterThan(3);
+    // promedios crudos: registros viejos dejan 3 en las métricas nuevas
+    expect(r.promedios.energia).toBeGreaterThan(3);
+    expect(r.promedios.fatiga).toBeLessThan(3); // invertida: óptimos la bajan
+  });
+});
+
+describe("DashboardController · tarjeta wellness con 8 métricas", () => {
+  it("renderiza las 8 filas de estrellas (1 por métrica) con sus claves y etiquetas", () => {
+    const c = makeController();
+    const html = c._wellnessCard(
+      [{ fecha: "2026-01-01", sueno: 4, estres: 2, doms: 2, motivacion: 4, energia: 4, fatiga: 2, alimentacion: 4, hidratacion: 4 }],
+      { color: "#54E08A" }
+    );
+    expect(html.match(/class="wellness-row"/g)).toHaveLength(8);
+    ["sueno", "motivacion", "estres", "doms", "energia", "fatiga", "alimentacion", "hidratacion"].forEach((k) => {
+      expect(html).toContain(`data-var="${k}"`);
+    });
+    ["Energía", "Fatiga", "Alimentación", "Hidratación"].forEach((lb) => {
+      expect(html).toContain(`>${lb}</span>`);
+    });
+  });
+});
 });

@@ -33,10 +33,18 @@ export const WellnessCorrelation = {
         return {
             suficienteDatos: true,
             cruces: cruces.length,
+            // Fase 3: incluimos también los 4 campos nuevos de wellness. Como bucket()
+            // compara valores bajos (≤2) vs altos (≥4) DENTRO de la misma métrica, la
+            // dirección (directa/invertida) es irrelevante aquí. Registros viejos sin el
+            // campo quedan fuera de ambos buckets (no rompen nada, no generan NaN).
             sueno: bucket('sueno'),
             estres: bucket('estres'),
             doms: bucket('doms'),
             motivacion: bucket('motivacion'),
+            energia: bucket('energia'),
+            fatiga: bucket('fatiga'),
+            alimentacion: bucket('alimentacion'),
+            hidratacion: bucket('hidratacion'),
         };
     },
 };

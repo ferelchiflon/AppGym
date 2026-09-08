@@ -24,13 +24,18 @@ export class PerfilAtleta {
     getObjetivo() { return this.data.perfil.objetivo; }
     getNivel() { return this.data.perfil.nivel; }
 
-    registrarWellness({ sueno, estres, doms, motivacion }) {
+    registrarWellness({ sueno, estres, doms, motivacion, energia, fatiga, alimentacion, hidratacion }) {
         const entry = {
             fecha: Utils.fechaISO(),
             sueno: Utils.clamp(sueno, 1, 5),
             estres: Utils.clamp(estres, 1, 5),
             doms: Utils.clamp(doms, 1, 5),
             motivacion: Utils.clamp(motivacion, 1, 5),
+            // Campos nuevos (Fase 3): valor por defecto neutral (3) si no se proveen.
+            energia: Utils.clamp(energia ?? 3, 1, 5),
+            fatiga: Utils.clamp(fatiga ?? 3, 1, 5),
+            alimentacion: Utils.clamp(alimentacion ?? 3, 1, 5),
+            hidratacion: Utils.clamp(hidratacion ?? 3, 1, 5),
         };
         // Si ya existe un registro de hoy, lo reemplaza en vez de duplicar
         const idxHoy = this.data.wellness.findIndex(w => w.fecha === entry.fecha);
@@ -50,12 +55,32 @@ export class PerfilAtleta {
         const recientes = this.data.wellness.slice(-ventana);
         if (recientes.length === 0) return null;
 
-        const avgSueno = Utils.promedio(recientes.map(w => w.sueno));
-        const avgEstres = Utils.promedio(recientes.map(w => w.estres));
-        const avgDoms = Utils.promedio(recientes.map(w => w.doms));
-        const avgMotivacion = Utils.promedio(recientes.map(w => w.motivacion));
+        // Tabla de dirección de cada métrica wellness (escala 1-5):
+        //  - "directa":   mayor puntaje = mejor  → sueño, motivación, energía, alimentación, hidratación.
+        //  - "invertida": menor puntaje = mejor  → estrés, DOMS, fatiga (se normalizan como 6 - valor).
+        const DIRECCION = {
+            sueno: 'directa', motivacion: 'directa', energia: 'directa',
+            alimentacion: 'directa', hidratacion: 'directa',
+            estres: 'invertida', doms: 'invertida', fatiga: 'invertida',
+        };
+        const KEYS = Object.keys(DIRECCION);
+        // Registros wellness viejos no tienen los campos nuevos: se tratan como
+        // "neutral" (3/5) en tiempo de lectura (sin migrar ni reescribir datos).
+        const NEUTRAL = 3;
 
-        const score = (avgSueno + avgMotivacion + (6 - avgEstres) + (6 - avgDoms)) / 4;
+        // Promedios CRUDOS por métrica (1-5), con NEUTRAL si el campo falta.
+        const promedios = {};
+        KEYS.forEach((k) => {
+            promedios[k] = Utils.promedio(recientes.map((w) => {
+                const v = (typeof w[k] === 'number' && !Number.isNaN(w[k])) ? w[k] : NEUTRAL;
+                return v;
+            }));
+        });
+
+        // Las invertidas se dan vuelta aquí para el score, dejando los promedios crudos.
+        const score = Utils.promedio(KEYS.map((k) => (
+            DIRECCION[k] === 'invertida' ? 6 - promedios[k] : promedios[k]
+        )));
 
         let estado;
         if (score >= 4) estado = 'Óptimo';
@@ -67,7 +92,7 @@ export class PerfilAtleta {
             score: Math.round(score * 10) / 10,
             estado,
             muestras: recientes.length,
-            promedios: { sueno: avgSueno, estres: avgEstres, doms: avgDoms, motivacion: avgMotivacion },
+            promedios,
         };
     }
 
