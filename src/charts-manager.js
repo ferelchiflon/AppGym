@@ -49,10 +49,11 @@ export const ChartsManager = {
     _Chart: null,
 
     _colores: {
-        linea: '#C6FF3D',
+        // Tema dark + naranja: #FF5E00 como acento principal de gráficos.
+        linea: '#FF5E00',
         grilla: 'rgba(255, 255, 255, 0.07)',
         texto: 'rgba(154, 164, 189, 0.92)',
-        barras: ['#C6FF3D', '#7DB7FF', '#54E08A', '#FFCB52', '#FF7A7A', '#3b8ea5'],
+        barras: ['#FF5E00', '#FF7A29', '#8E8E93', '#FF9500', '#FF3B30', '#5AC8FA'],
     },
 
     _destruir(id) {
@@ -157,8 +158,8 @@ export const ChartsManager = {
                 datasets: [{
                     label: 'Volumen semanal (kg)',
                     data: sesiones.map(s => Math.round(s.volumen)),
-                    backgroundColor: 'rgba(125, 183, 255, 0.45)',
-                    borderColor: '#7DB7FF',
+                    backgroundColor: 'rgba(255, 94, 0, 0.45)',
+                    borderColor: '#FF5E00',
                     borderRadius: 4,
                     maxBarThickness: 32,
                 }],

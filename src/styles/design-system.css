@@ -1,0 +1,278 @@
+/* ================================================================
+   GYM PRO — DESIGN SYSTEM
+   "Dark Minimalist" + acento naranja de alto impacto.
+   ================================================================
+   Capa de diseño de alto nivel. Se importa globalmente desde el
+   punto de entrada (src/main.js); Vite la bundlea junto al resto.
+
+   Bloques de este archivo:
+     1. Paleta Dark + Naranja y Tokens (fuente única de verdad).
+     2. Puente hacia los tokens legacy que usan styles/*.css
+        (--accent, --surface, --canvas, --text-*, --border, ...)
+        para que el tema se propague a TODA la app sin tocar lógica.
+     3. Capa base: tipografía, foco visible naranja, selección,
+        scrollbar e interacciones.
+
+   Cascade: los bloques html[data-theme="dark"/"light"] tienen la
+   MISMA especificidad que los de tokens.css pero este archivo se
+   carga después, por lo que GANAN por orden y aplican el tema naranja
+   en claro y oscuro de forma consistente.
+   ================================================================ */
+
+/* ================================================================
+   1. Paleta de colores Dark + Naranja y Tokens
+   ================================================================ */
+:root {
+    /* ---------- Fondos ---------- */
+    --bg-primary: #0D0D0E;
+    --bg-secondary: #111112;
+    --bg-surface: #161618;
+    --bg-surface-hover: #222225;
+    --bg-surface-active: #2A2A2E;
+
+    /* ---------- Naranja (Acento Principal) ---------- */
+    --accent-orange: #FF5E00;
+    --accent-orange-hover: #FF7A29;
+    --accent-orange-active: #E65400;
+    --accent-orange-glow: rgba(255, 94, 0, 0.25);
+    --accent-orange-subtle: rgba(255, 94, 0, 0.1);
+
+    /* ---------- Texto ---------- */
+    --text-primary: #F2F2F3;
+    --text-secondary: #8E8E93;
+    --text-tertiary: #5E5E64;
+    --text-inverse: #0D0D0E;
+
+    /* ---------- Bordes ---------- */
+    --border-subtle: #26262A;
+    --border-medium: #3A3A3E;
+    --border-active: #FF5E00;
+
+    /* ---------- Estados ---------- */
+    --success: #34C759;
+    --warning: #FF9500;
+    --danger: #FF3B30;
+    --info: #5AC8FA;
+
+    /* ---------- Sombras y Radios ---------- */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+    --shadow-glow: 0 0 30px var(--accent-orange-glow);
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+
+    /* ---------- Tipografía ---------- */
+    --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* ---------- Espaciado ---------- */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+
+    /* ---------- Transiciones ---------- */
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* ================================================================
+   2. Puente a los tokens legacy usados por styles/*.css
+   ================================================================ */
+:root,
+html[data-theme="dark"] {
+    /* Surfaces — deep warm charcoal (dark minimal) */
+    --canvas: var(--bg-primary);
+    --surface: var(--bg-secondary);
+    --surface-alt: var(--bg-surface);
+    --surface-raised: var(--bg-surface-active);
+    --surface-hover: var(--bg-surface-hover);
+
+    --surface-glass: rgba(17, 17, 18, 0.84);
+    --bottom-nav-bg: rgba(13, 13, 14, 0.94);
+
+    /* Texto */
+    --text-primary: #F2F2F3;
+    --text-secondary: #8E8E93;
+    --text-tertiary: #5E5E64;
+
+    /* Bordes */
+    --border: rgba(255, 255, 255, 0.07);
+    --border-strong: var(--border-medium);
+
+    /* Acento naranja (reemplaza el lima) */
+    --accent: var(--accent-orange);
+    --accent-hover: var(--accent-orange-hover);
+    --accent-contrast: var(--text-inverse);
+    --accent-soft: var(--accent-orange-subtle);
+
+    /* Estados semánticos */
+    --info-bg: rgba(90, 200, 250, 0.16);
+    --info-text: #7DB7FF;
+    --success-bg: rgba(52, 199, 89, 0.16);
+    --success-text: #54E08A;
+    --danger-bg: rgba(255, 59, 48, 0.16);
+    --danger-text: #FF7A7A;
+    --warning-bg: rgba(255, 149, 0, 0.16);
+    --warning-text: #FFCB52;
+
+    /* Aliases legacy */
+    --pastel-blue-bg: var(--info-bg);
+    --pastel-blue-text: var(--info-text);
+    --pastel-green-bg: var(--success-bg);
+    --pastel-green-text: var(--success-text);
+    --pastel-red-bg: var(--danger-bg);
+    --pastel-red-text: var(--danger-text);
+    --pastel-yellow-bg: var(--warning-bg);
+    --pastel-yellow-text: var(--warning-text);
+
+    /* Sombras / radios */
+    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --radius-card: var(--radius-md);
+    --radius-control: var(--radius-sm);
+    --radius-tag: var(--radius-full);
+
+    /* Derivados */
+    --hero-accent: rgba(255, 94, 0, 0.1);
+    --skeleton-shimmer: rgba(255, 255, 255, 0.08);
+    --hover-fill: rgba(255, 255, 255, 0.05);
+    --select-chevron: #8E8E93;
+
+    /* Escala espaciado (legacy --space-1..10) */
+    --space-1: var(--spacing-xs);
+    --space-2: var(--spacing-xs);
+    --space-3: 12px;
+    --space-4: var(--spacing-md);
+    --space-5: 20px;
+    --space-6: var(--spacing-lg);
+    --space-7: var(--spacing-xl);
+    --space-8: 40px;
+    --space-9: 48px;
+    --space-10: 64px;
+}
+
+/* ---------- Variante clara (modo claro, mantiene el acento naranja) ---------- */
+html[data-theme="light"] {
+    --canvas: #F4F1EC;
+    --surface: #FFFFFF;
+    --surface-alt: #F0EDE7;
+    --surface-raised: #E7E2DA;
+
+    --surface-glass: rgba(255, 255, 255, 0.86);
+    --bottom-nav-bg: rgba(255, 255, 255, 0.92);
+
+    --text-primary: #17170F;
+    --text-secondary: #4A4A40;
+    --text-tertiary: #75756B;
+
+    --border: rgba(13, 13, 14, 0.09);
+    --border-strong: rgba(13, 13, 14, 0.17);
+
+    --accent: #E65400;
+    --accent-hover: #FF5E00;
+    --accent-contrast: #FFFFFF;
+    --accent-soft: rgba(230, 84, 0, 0.12);
+
+    --info-bg: rgba(38, 100, 171, 0.1);
+    --info-text: #1E5EA8;
+    --success-bg: rgba(30, 139, 78, 0.1);
+    --success-text: #18813F;
+    --danger-bg: rgba(200, 46, 46, 0.1);
+    --danger-text: #B52E2E;
+    --warning-bg: rgba(190, 122, 0, 0.12);
+    --warning-text: #A25F00;
+
+    --pastel-blue-bg: var(--info-bg);
+    --pastel-blue-text: var(--info-text);
+    --pastel-green-bg: var(--success-bg);
+    --pastel-green-text: var(--success-text);
+    --pastel-red-bg: var(--danger-bg);
+    --pastel-red-text: var(--danger-text);
+    --pastel-yellow-bg: var(--warning-bg);
+    --pastel-yellow-text: var(--warning-text);
+
+    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    --radius-card: var(--radius-md);
+    --radius-control: var(--radius-sm);
+    --radius-tag: var(--radius-full);
+
+    --hero-accent: rgba(255, 94, 0, 0.08);
+    --skeleton-shimmer: rgba(13, 13, 14, 0.06);
+    --hover-fill: rgba(13, 13, 14, 0.06);
+    --select-chevron: #4A4A40;
+
+    --space-1: var(--spacing-xs);
+    --space-2: var(--spacing-xs);
+    --space-3: 12px;
+    --space-4: var(--spacing-md);
+    --space-5: 20px;
+    --space-6: var(--spacing-lg);
+    --space-7: var(--spacing-xl);
+    --space-8: 40px;
+    --space-9: 48px;
+/* ================================================================
+   3. Capa base de aplicación
+   ================================================================ */
+
+/* Tipografía del sistema por defecto en todo el documento */
+:root {
+    font-family: var(--font-family);
+}
+
+body {
+    background-color: var(--bg-primary);
+    background-image: none; /* asegura lienzo oscuro plano */
+    color: var(--text-primary);
+}
+
+/* Foco visible de alto contraste (naranja) — accesibilidad AA */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--accent-orange);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Selección de texto con acento naranja */
+::selection {
+    background: var(--accent-orange);
+    color: #fff;
+}
+
+/* Scrollbar acorde al tema oscuro */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-medium) transparent;
+}
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+    border-radius: var(--radius-full);
+}
+*::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-orange);
+}
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Glow de acento para superficies destacadas (CTA naranjas) */
+.glow-accent {
+    box-shadow: var(--shadow-glow);
+}
+
+/* Microinteracción de hover para superficies interactivas */
+@media (hover: hover) {
+    .card:hover,
+    .panel-card:hover {
+        background-color: var(--bg-surface-hover);
+    }
+}
+    --space-10: 64px;
+}
