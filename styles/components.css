@@ -65,6 +65,7 @@ textarea:focus {
 /* ========== BUTTONS ========== */
 button {
     /* Acid-lime primary: dark text on lime = striking, professional, on-brand for performance/energy. */
+    font-family: var(--font-display);
     background: var(--accent);
     border: 1px solid var(--accent);
     font-weight: 700;
@@ -235,12 +236,12 @@ button.success:hover {
     text-align: center;
 }
 .stat-box .number {
-    font-family: 'SF Mono', 'Geist Mono', monospace;
-    font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem);
-    font-weight: 600;
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 1.15rem + 1vw, 1.85rem);
+    font-weight: 700;
     color: var(--accent);
     font-variant-numeric: tabular-nums;
-    line-height: 1.2;
+    line-height: 1.05;
 }
 .stat-box .label {
     font-family: 'SF Mono', 'Geist Mono', monospace;

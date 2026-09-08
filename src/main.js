@@ -10,14 +10,6 @@ import { Toast } from './toast.js';
 import { AppGymPro } from './app.js';
 import appLayout from './views/index.js';
 
-// Sistema de diseño global (tema oscuro minimalista + acento naranja).
-// Se importa aquí para que Vite lo bundlee e inyecte junto a la app.
-import './styles/design-system.css';
-// Capa de componentes reutilizables (Button/Card/Modal) y mejoras de
-// layout (sidebar de escritorio, stats, progreso). Se carga DESPUÉS del
-// design-system para ganar en la cascada.
-import './styles/components.css';
-
 document.addEventListener('DOMContentLoaded', () => {
     // 0) Registrar la captura global de errores lo antes posible: antes de
     //    montar vistas, para que cualquier fallo de arranque también se loguee

@@ -82,6 +82,15 @@
     --z-base: 10;
     --z-sticky: 20;
     --z-overlay: 50;
+
+    /* ---------- Tipografía ----------
+       --font-display: display/fuente de marca — condensada grotesca con
+       energía atlética (Oswald, autohosteada en styles/fonts/ para la PWA
+       offline-first). Se usa en títulos, labels de sección, números clave
+       (RM/PR/racha) y elementos de marca.
+       --font-body: sans-serif legible para texto corrido. */
+    --font-display: 'Oswald', 'Arial Narrow', 'Inter', 'Helvetica Neue', sans-serif;
+    --font-body: 'Inter', 'Helvetica Neue', -apple-system, system-ui, sans-serif;
 }
 
 /* ================================================================
