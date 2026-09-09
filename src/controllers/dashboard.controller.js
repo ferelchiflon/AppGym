@@ -12,6 +12,7 @@ import { ExerciseGuide } from "../components/exercise-guide.js";
 import { CardioForm } from "../components/cardio-form.js";
 import { renderSeguimiento } from "../components/dashboard-widgets.js";
 import * as H from "../utils/dashboard-helpers.ts";
+import { WellnessCorrelation } from "../wellness-correlation.js";
 
 const WELLNESS_LABELS = ["Sueño", "Motivación", "Estrés", "DOMS", "Energía", "Fatiga", "Alimentación", "Hidratación"];
 const WELLNESS_KEYS = ["sueno", "motivacion", "estres", "doms", "energia", "fatiga", "alimentacion", "hidratacion"];
@@ -798,6 +799,8 @@ export class DashboardController {
       ? `<div class="estado-alertas">${senales.map((s) => `<p>⚠️ ${this._esc(s)}</p>`).join("")}</div>`
       : "";
 
+    const insight = this._correlacionWellnessBanner();
+
     return `
       <div class="panel-card estado-banner" style="border-left:4px solid ${color};border-color:${color}66;background:linear-gradient(135deg,${color}1f,${color}08)">
         <div class="estado-head">
@@ -809,6 +812,62 @@ export class DashboardController {
         <p class="estado-sugerencia">${this._sugerenciaReadiness(hoy.score)}</p>
         <div class="estado-desglose">${desglose}</div>
         ${alertas}
+        ${insight}
+      </div>`;
+  }
+
+  /**
+   * Asociación observada (bajo volumen) entre las métricas wellness y el volumen de
+   * las sesiones del mismo día. Reusa WellnessCorrelation y el MISMO criterio de
+   * datos suficientes que analytics.controller.js (≥2 cruces). Si no hay data
+   * suficiente devuelve cadena vacía (el banner no muestra nada, a diferencia de
+   * analytics que sí muestra una nota). Por ahora cruza SOLO contra volumenTotal
+   * (como analizar()); no lo extendemos a fuerza/salto en este paso.
+   * Sección chica debajo del desglose: señal/asociación, nunca causalidad.
+   */
+  _correlacionWellnessBanner() {
+    const hist = this.rutina ? this.rutina.historial || [] : [];
+    const perfil = this.perfil;
+    const wellness = (perfil && perfil.data && perfil.data.wellness) || [];
+
+    const analisis = WellnessCorrelation.analizar(hist, wellness);
+    if (!analisis || !analisis.suficienteDatos) return "";
+
+    const etiquetas = {
+      sueno: "sueño",
+      estres: "estrés",
+      doms: "DOMS",
+      motivacion: "motivación",
+      energia: "energía",
+      fatiga: "fatiga",
+      alimentacion: "alimentación",
+      hidratacion: "hidratación",
+    };
+    const orden = Object.keys(etiquetas);
+
+    const lineas = [];
+    orden.forEach((m) => {
+      const d = analisis[m];
+      if (!d || d.diffPct === null || d.nBajos === 0 || d.nAltos === 0) return;
+      const signo = d.diffPct >= 0 ? "+" : "";
+      lineas.push({
+        fuerza: Math.abs(d.diffPct),
+        html: `📊 Con ${etiquetas[m]} alto vs bajo: <strong>${signo}${d.diffPct}%</strong> de volumen promedio.`,
+      });
+    });
+
+    if (!lineas.length) return "";
+    // Solo las 2 asociaciones más fuertes (mayor |%| primero) para no saturar el banner.
+    lineas.sort((a, b) => b.fuerza - a.fuerza);
+    const top = lineas
+      .slice(0, 2)
+      .map((l) => `<p>${l.html}</p>`)
+      .join("");
+
+    return `
+      <div class="estado-insight">
+        ${top}
+        <p class="insight-note">Asociación observada con tu volumen, no causalidad.</p>
       </div>`;
   }
 

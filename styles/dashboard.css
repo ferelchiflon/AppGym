@@ -963,5 +963,9 @@
 .estado-alertas { border-top: 1px solid var(--surface-alt); padding-top: .55rem; }
 .estado-alertas p { margin-bottom: .35rem; color: var(--text-primary); }
 .estado-alertas p:last-child { margin-bottom: 0; }
+.estado-insight { border-top: 1px solid var(--surface-alt); margin-top: .7rem; padding-top: .6rem; font-size: .86rem; color: var(--text-secondary); }
+.estado-insight p { margin: .15rem 0; }
+.estado-insight strong { color: var(--text-primary); }
+.estado-insight .insight-note { font-size: .72rem; color: var(--text-tertiary); font-style: italic; margin-top: .35rem; }
 }
 }

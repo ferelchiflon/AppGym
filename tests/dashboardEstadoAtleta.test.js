@@ -107,28 +107,60 @@ describe("tendenciaReadiness · flechas por componente (±5 = estable)", () => {
   });
 });
 
-describe("ventanaAnteriorReadiness · recorta últimos 4 días", () => {
+describe("correlacionWellnessBanner · asociación observada con el volumen", () => {
   const dias = (n) => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
 
-  it("saca los últimos 4 del wellness/saltos y las sesiones recientes del historial", () => {
-    const v = ventanaAnteriorReadiness({
-      wellness: [1, 2, 3, 4, 5],
-      saltos: [9, 8, 7, 6, 5],
+  /** 4 cruces: 2 días de sueño alto (volumen alto) y 2 de sueño bajo (volumen bajo). */
+  function controllerCorrelacion() {
+    const c = makeController();
+    c.perfil = {
+      data: {
+        wellness: [
+          { fecha: dias(0), sueno: 5, estres: 3, doms: 3, motivacion: 3 },
+          { fecha: dias(1), sueno: 5, estres: 3, doms: 3, motivacion: 3 },
+          { fecha: dias(2), sueno: 1, estres: 3, doms: 3, motivacion: 3 },
+          { fecha: dias(3), sueno: 1, estres: 3, doms: 3, motivacion: 3 },
+        ],
+        saltos: [],
+      },
+    };
+    c.rutina = {
       historial: [
-        { fechaISO: dias(0), ejercicios: [] },
-        { fechaISO: dias(6), ejercicios: [] },
+        { fechaISO: dias(0), volumenTotal: 300, ejercicios: [] },
+        { fechaISO: dias(1), volumenTotal: 320, ejercicios: [] },
+        { fechaISO: dias(2), volumenTotal: 100, ejercicios: [] },
+        { fechaISO: dias(3), volumenTotal: 120, ejercicios: [] },
       ],
-    });
+    };
+    return c;
+  }
 
-    expect(v.wellness).toHaveLength(1); // 5 - 4
-    expect(v.saltos).toHaveLength(1);
-    expect(v.historial).toHaveLength(1);
-    expect(v.historial[0].fechaISO).toBe(dias(6)); // la de hoy (dias(0)) queda fuera
+  it("muestra la sección de insight con tono de 'asociación, no causalidad'", () => {
+    const html = controllerCorrelacion()._correlacionWellnessBanner();
+    // avgAltos=310, avgBajos=110 → diffPct=((310-110)/110)*100 = 181.8%
+    expect(html).toContain("estado-insight");
+    expect(html).toContain("Con sueño alto vs bajo");
+    expect(html).toContain("+181.8%");
+    expect(html).toContain("no causalidad");
   });
 
-  it("no muta los arrays originales", () => {
-    const wellness = [1, 2, 3, 4, 5];
-    ventanaAnteriorReadiness({ wellness, saltos: [], historial: [] });
-    expect(wellness).toHaveLength(5);
+  it("integra el insight debajo del desglose dentro del banner", () => {
+    const html = controllerCorrelacion()._estadoAtletaBanner();
+    expect(html).toContain("estado-desglose");
+    expect(html).toContain("estado-insight");
+    // El insight queda después del desglose (no lo corta).
+    expect(html.indexOf("estado-insight")).toBeGreaterThan(html.indexOf("estado-desglose"));
+  });
+
+  it("no muestra nada cuando no hay datos de wellness ni sesiones", () => {
+    const c = controllerCon([NEUTRAL]); // sin historial → analizar() devuelve null
+    expect(c._correlacionWellnessBanner()).toBe("");
+  });
+
+  it("no muestra nada cuando hay menos de 2 cruces (mismo criterio que analytics)", () => {
+    const c = makeController();
+    c.perfil = { data: { wellness: [{ fecha: dias(0), sueno: 5, estres: 3, doms: 3, motivacion: 3 }], saltos: [] } };
+    c.rutina = { historial: [{ fechaISO: dias(0), volumenTotal: 100, ejercicios: [] }] };
+    expect(c._correlacionWellnessBanner()).toBe("");
   });
 });
