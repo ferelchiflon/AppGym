@@ -174,7 +174,7 @@ describe("HistoryController", () => {
       };
       const periodizacion = makePeriodizacion(bloque, prescripcion);
       const perfil = makePerfil({
-        wellness: [{ sueno: 5, estres: 2, doms: 1, motivacion: 5, fecha: "2026-09-04" }],
+        wellness: [{ sueno: 5, estres: 2, doms: 1, motivacion: 5, energia: 5, fatiga: 1, alimentacion: 5, hidratacion: 5, fecha: "2026-09-04" }],
         saltos: [{ altura: 42.5, fecha: "2026-09-04" }],
       });
 
@@ -456,6 +456,46 @@ describe("HistoryController", () => {
       expect(controller.rutina).toBe(rutina);
       expect(controller.perfil).toBe(perfil);
       expect(controller.el).toBe(el);
+    });
+  });
+
+  describe("_renderWellness · badge de estado con 8 métricas (wellnessScore)", () => {
+    it("todo bien en las 8 métricas → 'Óptimo para entrenar pesado'", () => {
+      const el = mountHistoryDOM();
+      const perfil = makePerfil({
+        wellness: [{ fecha: "2026-09-04", sueno: 5, motivacion: 5, estres: 1, doms: 1, energia: 5, fatiga: 1, alimentacion: 5, hidratacion: 5 }],
+      });
+      const controller = crearController({ el, perfil });
+      controller._renderWellness();
+      expect(el.wellnessEstado.textContent).toContain("Óptimo para entrenar pesado");
+    });
+
+    it("todo mal en las 8 métricas → 'Fatiga alta'", () => {
+      const el = mountHistoryDOM();
+      const perfil = makePerfil({
+        wellness: [{ fecha: "2026-09-04", sueno: 1, motivacion: 1, estres: 5, doms: 5, energia: 1, fatiga: 5, alimentacion: 1, hidratacion: 1 }],
+      });
+      const controller = crearController({ el, perfil });
+      controller._renderWellness();
+      expect(el.wellnessEstado.textContent).toContain("Fatiga alta (considerar deload/descanso)");
+    });
+
+    it("mixto: bien en las viejas, mal en las nuevas → 'Moderado' en vez del falso 'Óptimo'", () => {
+      const el = mountHistoryDOM();
+      const perfil = makePerfil({
+        wellness: [{ fecha: "2026-09-04", sueno: 5, motivacion: 5, estres: 1, doms: 1, energia: 1, fatiga: 5, alimentacion: 1, hidratacion: 1 }],
+      });
+      const controller = crearController({ el, perfil });
+      controller._renderWellness();
+      expect(el.wellnessEstado.textContent).toContain("Moderado (ajustar RPE)");
+    });
+
+    it("registro viejo sin campos nuevos (NEUTRAL=3) no rompe ni da NaN", () => {
+      const el = mountHistoryDOM();
+      const perfil = makePerfil({ wellness: [{ fecha: "2026-09-04", sueno: 3, estres: 3, doms: 3, motivacion: 3 }] });
+      const controller = crearController({ el, perfil });
+      expect(() => controller._renderWellness()).not.toThrow();
+      expect(el.wellnessEstado.textContent).toContain("Moderado (ajustar RPE)"); // 3.0 → total 12
     });
   });
 });

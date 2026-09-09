@@ -5,7 +5,7 @@
  */
 
 import { Store } from "../store.js";
-import { Utils } from "../utils.ts";
+import { Utils, wellnessScore } from "../utils.ts";
 import { Toast } from "../toast.js";
 import { Dialog } from "../dialog.js";
 import { seriesHistorialACSV } from "../export/csv.js";
@@ -160,7 +160,11 @@ export class HistoryController {
     }
 
     const ultimo = registros[registros.length - 1];
-    const total = (ultimo.sueno || 3) + (6 - (ultimo.estres || 3)) + (6 - (ultimo.doms || 3)) + (ultimo.motivacion || 3);
+    // Misma fuente de verdad que getEstadoGeneral()/calcularReadiness(): score 1-5
+    // (promedio plano de las 8 métricas) vía wellnessScore(). Escalamos *4 para
+    // conservar los mismos umbrales 0-20 (>=16 Óptimo / >=11 Moderado / <11 fatiga).
+    const { score } = wellnessScore([ultimo]);
+    const total = Math.round(score * 4 * 10) / 10;
     const estado = total >= 16 ? "Óptimo para entrenar pesado" : total >= 11 ? "Moderado (ajustar RPE)" : "Fatiga alta (considerar deload/descanso)";
 
     const badge = document.createElement("div");
