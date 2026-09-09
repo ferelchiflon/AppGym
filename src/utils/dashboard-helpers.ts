@@ -180,6 +180,64 @@ export function calcularReadiness({
     partes,
   };
 }
+/** Umbral de "estable" para las flechas de tendencia del banner (puntos, 0-100). */
+export const UMBRAL_TENDENCIA = 5;
+
+/**
+ * Ventana "anterior" para comparar la tendencia del readiness: excluye los últimos
+ * `dias` (4 por defecto) del wellness/saltos y las sesiones recientes, dejando una
+ * foto de cómo venía el estado antes de hoy. No muta los arrays originales.
+ */
+export function ventanaAnteriorReadiness(
+  { wellness = [], saltos = [], historial = [] }: {
+    wellness?: WellnessMin[];
+    saltos?: SaltoMin[];
+    historial?: SesionHistorial[];
+  },
+  dias = 4
+): { wellness: WellnessMin[]; saltos: SaltoMin[]; historial: SesionHistorial[] } {
+  const corte = new Date(Date.now() - dias * 86400000).toISOString().slice(0, 10);
+  return {
+    wellness: wellness.slice(0, -dias),
+    saltos: saltos.slice(0, -dias),
+    historial: historial.filter((s) =>
+      ((s.fechaISO || s.timestamp || s.fecha) || "").toString().slice(0, 10) < corte
+    ),
+  };
+}
+
+export type TendenciaReadiness = Record<
+  string,
+  { actual: number | null; anterior: number | null; direccion: "subio" | "bajo" | "estable" | "nuevo"; delta: number | null }
+>;
+
+/**
+ * Compara hoy vs. la ventana anterior por componente (wellness/cmj/acwr) para las
+ * flechas del banner. Es una señal/heurística, no un diagnóstico.
+ */
+export function tendenciaReadiness(
+  hoy: { partes: Record<string, number> } | null,
+  anterior: { partes: Record<string, number> } | null
+): TendenciaReadiness {
+  const res: TendenciaReadiness = {};
+  if (!hoy) return res;
+  Object.keys(hoy.partes).forEach((k) => {
+    const a = hoy.partes[k];
+    const b = anterior ? anterior.partes[k] : undefined;
+    let direccion: TendenciaReadiness[string]["direccion"] = "nuevo";
+    if (b !== undefined && b !== null) {
+      const d = a - b;
+      direccion = d > UMBRAL_TENDENCIA ? "subio" : d < -UMBRAL_TENDENCIA ? "bajo" : "estable";
+    }
+    res[k] = {
+      actual: a,
+      anterior: b === undefined || b === null ? null : b,
+      direccion,
+      delta: b === undefined || b === null ? null : Math.round((a - b) * 10) / 10,
+    };
+  });
+  return res;
+}
 
 /** Últimos 7 registros de wellness (sólo datos reales). */
 export function wellnessSerie<T>(wellness: T[] = [], n = 7): T[] {

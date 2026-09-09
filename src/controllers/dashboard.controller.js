@@ -78,22 +78,6 @@ export class DashboardController {
       .replace(/"/g, "&quot;");
   }
 
-  /** Anillo de readiness 100% SVG (sin librerías). */
-  _readinessRing(score, color) {
-    const r = 42;
-    const c = 2 * Math.PI * r;
-    const offset = c * (1 - score / 100);
-    return `
-      <svg class="readiness-ring" viewBox="0 0 100 100" role="img" aria-label="Readiness ${score} puntos">
-        <circle class="readiness-bg" cx="50" cy="50" r="${r}"></circle>
-        <circle class="readiness-val" cx="50" cy="50" r="${r}"
-          stroke="${color}" stroke-dasharray="${c}" stroke-dashoffset="${offset}"
-          transform="rotate(-90 50 50)"></circle>
-        <text x="50" y="53" text-anchor="middle" class="readiness-score">${score}</text>
-        <text x="50" y="69" text-anchor="middle" class="readiness-label">READY</text>
-      </svg>`;
-  }
-
   /** Tarjeta de arranque rápido (3 casos según estado). */
   _quickStart() {
     const hist = this.rutina.historial || [];
@@ -639,20 +623,6 @@ export class DashboardController {
       </div>`;
   }
 
-  /** Alerta de fatiga ajustable (baja readiness). */
-  _fatigaCard(senales, diag) {
-    if (!senales.length) return "";
-    const color = diag && diag.ultimoSalto < diag.media * 0.9 ? "#FF7A7A" : "#FFD166";
-    return `
-      <div class="panel-card fatiga-card" style="border-color:${color}66;background:${color}12">
-        <div class="fatiga-head">
-          <div class="eyebrow" style="color:${color}">ALERTA · FATIGA</div>
-          <button class="link-safe" id="fatigaAjustarBtn">Ajustar</button>
-        </div>
-        ${senales.map((s) => `<p>${this._esc(s)}</p>`).join("")}
-      </div>`;
-  }
-
   /** Franja de calendario (7 días). */
   _calendario(days) {
     const cells = days
@@ -700,21 +670,13 @@ export class DashboardController {
       bloque: this.periodizacion ? this.periodizacion.getBloqueActual() : null,
     });
     const ultimo = H.ultimoTrabajoPorMusculo(hist, grupo);
-    const senales = H.senalesFatiga({ perfil, historial: hist });
-    const diag = H.diagnosticoCMJ(saltos);
     const days = H.ultimos7Dias(hist);
 
     const html = `
       <div class="dashboard">
         ${this._quickStart()}
-        ${this._fatigaCard(senales, diag)}
+        ${this._estadoAtletaBanner()}
         <div class="dashboard-section">
-          <div class="panel-card readiness-card">
-            <div class="eyebrow">READINESS</div>
-            ${readiness ? this._readinessRing(readiness.score, readiness.color) : this._noReadiness()}
-            ${readiness ? `<div class="readiness-chips">${this._readinessChips(readiness)}</div>` : ""}
-            <p class="readiness-sugerencia">${readiness ? this._sugerenciaReadiness(readiness.score) : ""}</p>
-          </div>
           ${this._wellnessCard(wellness, readiness)}
         </div>
 
@@ -760,6 +722,94 @@ export class DashboardController {
     if (score >= 70) return "Listo para rendir a plena capacidad 💪";
     if (score >= 50) return "Cuidá la fatiga antes de cargar pesado.";
     return "Priorizá recuperación: dormí, hidratate y ajustá el volumen.";
+  }
+
+  /**
+   * Banner único del estado del atleta: readiness (score + semáforo), desglose por
+   * componente con flecha de tendencia (hoy vs. ventana anterior) y alertas de
+   * senalesFatiga. Reemplaza a las 2 tarjetas separadas (ring de readiness + fatiga).
+   * SEÑAL/heurística, nunca diagnóstico médico ni causalidad.
+   */
+  _estadoAtletaBanner() {
+    const hist = this.rutina ? this.rutina.historial || [] : [];
+    const perfil = this.perfil;
+    const wellness = (perfil && perfil.data && perfil.data.wellness) || [];
+    const saltos = (perfil && perfil.data && perfil.data.saltos) || [];
+
+    const hoy = H.calcularReadiness({ wellness, saltos, historial: hist });
+    // Estado vacío: mismo comportamiento que la tarjeta vieja sin datos.
+    if (!hoy) return `<div class="panel-card estado-banner">${this._noReadiness()}</div>`;
+
+    const senales = H.senalesFatiga({ perfil, historial: hist });
+    const acwr = H.acwrDatos(hist);
+    const ventana = H.ventanaAnteriorReadiness({ wellness, saltos, historial: hist }, 4);
+    const anterior = H.calcularReadiness(ventana);
+    const tend = H.tendenciaReadiness(hoy, anterior);
+
+    const color = hoy.color;
+    let emoji;
+    let titulo;
+    if (hoy.score >= 70) {
+      emoji = "🟢";
+      titulo = "BUEN MOMENTO PARA ENTRENAR";
+    } else if (hoy.score >= 50) {
+      emoji = "🟡";
+      titulo = "RECUPERACIÓN MODERADA";
+    } else {
+      emoji = "🔴";
+      titulo = "NECESITÁS DESCANSAR";
+    }
+
+    const filas = [
+      { key: "wellness", icon: "🛌", label: "Bienestar" },
+      { key: "acwr", icon: "🏋️", label: "Carga · ACWR" },
+      { key: "cmj", icon: "⚡", label: "Potencia · CMJ" },
+    ];
+
+    const desglose = filas
+      .map((f) => {
+        const t = tend[f.key] || { actual: null, anterior: null, direccion: "nuevo", delta: null };
+        const actual = t.actual;
+        const bar =
+          actual !== null
+            ? `<span class="estado-barra"><i style="width:${Math.max(0, Math.min(100, actual))}%"></i></span>`
+            : `<span class="estado-barra estado-barra--empty"></span>`;
+        const score = actual !== null ? `<b>${Math.round(actual)}</b>` : "<b>—</b>";
+        const flecha =
+          t.direccion === "subio"
+            ? '<span class="trend up" title="Subió">▲</span>'
+            : t.direccion === "bajo"
+              ? '<span class="trend down" title="Bajó">▼</span>'
+              : t.direccion === "estable"
+                ? '<span class="trend flat" title="Estable">→</span>'
+                : '<span class="trend flat" title="Sin dato previo">—</span>';
+        const delta =
+          t.delta !== null ? `<span class="trend-delta">${t.delta >= 0 ? "+" : ""}${t.delta}</span>` : "";
+        const subEtiqueta =
+          f.key === "acwr" && actual !== null && acwr && acwr.zona !== "sin_datos"
+            ? `<span class="estado-sub">${this._esc(acwr.etiqueta || "")}</span>`
+            : "";
+        const labelCell = `<span class="estado-label">${this._esc(f.label)}${subEtiqueta}</span>`;
+        return `<div class="estado-row">${f.icon}${labelCell}${bar}${score}${flecha}${delta}</div>`;
+      })
+      .join("");
+
+    const alertas = senales.length
+      ? `<div class="estado-alertas">${senales.map((s) => `<p>⚠️ ${this._esc(s)}</p>`).join("")}</div>`
+      : "";
+
+    return `
+      <div class="panel-card estado-banner" style="border-left:4px solid ${color};border-color:${color}66;background:linear-gradient(135deg,${color}1f,${color}08)">
+        <div class="estado-head">
+          <span class="eyebrow" style="color:${color}">ESTADO DEL ATLETA · HOY</span>
+          <span class="estado-score" style="color:${color}">${hoy.score} · READY</span>
+          <button class="link-safe" id="fatigaAjustarBtn">Ajustar</button>
+        </div>
+        <h3 class="estado-titulo">${emoji} ${titulo}</h3>
+        <p class="estado-sugerencia">${this._sugerenciaReadiness(hoy.score)}</p>
+        <div class="estado-desglose">${desglose}</div>
+        ${alertas}
+      </div>`;
   }
 
   /** Vincula todos los eventos tras renderizar (reconstrucción idempotente). */

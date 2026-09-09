@@ -926,5 +926,42 @@
     left: 0;
     top: 0;
     font-size: 0.8rem;
+/* Banner unificado: estado del atleta (readiness + fatiga + tendencia) */
+.estado-banner { position: relative; border-radius: 14px; }
+.estado-head { display: flex; align-items: center; gap: 12px; }
+.estado-head .eyebrow { margin: 0; flex: 1; }
+.estado-score { font-weight: 700; font-size: 1.15rem; letter-spacing: .03em; font-variant-numeric: tabular-nums; }
+.estado-titulo {
+  margin: .4rem 0 .15rem;
+  font-family: "Oswald", system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--text-primary);
+}
+.estado-sugerencia { margin: 0 0 .85rem; color: var(--text-secondary); }
+.estado-desglose { display: grid; gap: .55rem; margin-bottom: .8rem; }
+.estado-row {
+  display: grid;
+  grid-template-columns: auto auto minmax(6rem, 1fr) auto auto auto;
+  align-items: center;
+  gap: .55rem;
+  font-size: .9rem;
+  color: var(--text-primary);
+}
+.estado-label { color: var(--text-secondary); }
+.estado-sub { display: block; font-size: .72rem; color: var(--text-tertiary); }
+.estado-barra { height: 8px; border-radius: 5px; background: var(--surface-alt); overflow: hidden; }
+.estado-barra i { display: block; height: 100%; border-radius: 5px; background: var(--accent); }
+.estado-row b { font-variant-numeric: tabular-nums; width: 1.9rem; text-align: right; font-size: .95rem; }
+.trend { font-weight: 700; width: 1.1rem; text-align: center; }
+.trend.up { color: #3dbf58; }
+.trend.down { color: #e8590c; }
+.trend.flat { color: var(--text-tertiary); }
+.trend-delta { font-size: .78rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.estado-alertas { border-top: 1px solid var(--surface-alt); padding-top: .55rem; }
+.estado-alertas p { margin-bottom: .35rem; color: var(--text-primary); }
+.estado-alertas p:last-child { margin-bottom: 0; }
 }
 }
