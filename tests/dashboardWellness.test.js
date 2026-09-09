@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { DashboardController } from "../src/controllers/dashboard.controller.js";
 import { COLORS_SPARKLINE } from "../src/utils/dashboard-helpers.ts";
+import { calcularReadiness } from "../src/utils/dashboard-helpers.ts";
 import { PerfilAtleta } from "../src/perfil-atleta.js";
 import { Store } from "../src/store.js";
 import { Toast } from "../src/toast.js";
@@ -185,6 +186,38 @@ describe("PerfilAtleta · check-in de 8 métricas (Fase 3)", () => {
   });
 });
 
+describe("calcularReadiness · fórmula de wellness unificada (8 métricas, sin 4-campos)", () => {
+  const solo = (wellness) => calcularReadiness({ wellness, saltos: [], historial: [] });
+
+  it("todo bien en las 8 métricas → wellness 100", () => {
+    const r = solo([{ sueno: 5, motivacion: 5, estres: 1, doms: 1, energia: 5, fatiga: 1, alimentacion: 5, hidratacion: 5 }]);
+    expect(r.partes.wellness).toBe(100);
+  });
+
+  it("escenario mixto: bien en las viejas, mal en las nuevas → wellness 60 en vez del falso 100", () => {
+    const r = solo([{ sueno: 5, motivacion: 5, estres: 1, doms: 1, energia: 1, fatiga: 5, alimentacion: 1, hidratacion: 1 }]);
+    expect(r.partes.wellness).toBe(60);
+  });
+
+  it("todo mal en las 8 métricas → wellness 20", () => {
+    const r = solo([{ sueno: 1, motivacion: 1, estres: 5, doms: 5, energia: 1, fatiga: 5, alimentacion: 1, hidratacion: 1 }]);
+    expect(r.partes.wellness).toBe(20);
+  });
+
+  it("registro viejo sin las 4 métricas nuevas cae en NEUTRAL=3 (no NaN, no rompe)", () => {
+    const r = solo([{ sueno: 3, estres: 3, doms: 3, motivacion: 3 }]);
+    expect(r).not.toBeNull();
+    expect(Number.isNaN(r.partes.wellness)).toBe(false);
+    expect(r.partes.wellness).toBe(60); // las 4 faltantes → 3 (neutral)
+  });
+
+  it("regresión: calcularReadiness y getEstadoGeneral dan el mismo wellness (escalado x20)", () => {
+    const wellness = [{ sueno: 5, motivacion: 5, estres: 1, doms: 1, energia: 1, fatiga: 5, alimentacion: 1, hidratacion: 1 }];
+    const read = calcularReadiness({ wellness, saltos: [], historial: [] });
+    const gen = new PerfilAtleta({ wellness }).getEstadoGeneral(1);
+    expect(read.partes.wellness).toBe(Math.round(gen.score * 20));
+  });
+});
 describe("DashboardController · tarjeta wellness con 8 métricas", () => {
   it("renderiza las 8 filas de estrellas (1 por métrica) con sus claves y etiquetas", () => {
     const c = makeController();

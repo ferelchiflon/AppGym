@@ -4,7 +4,7 @@
  * Depende de: ./utils.ts (Utils), ./store.js (Store)
  */
 
-import { Utils } from './utils.ts';
+import { Utils, wellnessScore } from './utils.ts';
 import { Store } from './store.js';
 
 export class PerfilAtleta {
@@ -55,32 +55,10 @@ export class PerfilAtleta {
         const recientes = this.data.wellness.slice(-ventana);
         if (recientes.length === 0) return null;
 
-        // Tabla de dirección de cada métrica wellness (escala 1-5):
-        //  - "directa":   mayor puntaje = mejor  → sueño, motivación, energía, alimentación, hidratación.
-        //  - "invertida": menor puntaje = mejor  → estrés, DOMS, fatiga (se normalizan como 6 - valor).
-        const DIRECCION = {
-            sueno: 'directa', motivacion: 'directa', energia: 'directa',
-            alimentacion: 'directa', hidratacion: 'directa',
-            estres: 'invertida', doms: 'invertida', fatiga: 'invertida',
-        };
-        const KEYS = Object.keys(DIRECCION);
-        // Registros wellness viejos no tienen los campos nuevos: se tratan como
-        // "neutral" (3/5) en tiempo de lectura (sin migrar ni reescribir datos).
-        const NEUTRAL = 3;
-
-        // Promedios CRUDOS por métrica (1-5), con NEUTRAL si el campo falta.
-        const promedios = {};
-        KEYS.forEach((k) => {
-            promedios[k] = Utils.promedio(recientes.map((w) => {
-                const v = (typeof w[k] === 'number' && !Number.isNaN(w[k])) ? w[k] : NEUTRAL;
-                return v;
-            }));
-        });
-
-        // Las invertidas se dan vuelta aquí para el score, dejando los promedios crudos.
-        const score = Utils.promedio(KEYS.map((k) => (
-            DIRECCION[k] === 'invertida' ? 6 - promedios[k] : promedios[k]
-        )));
+        // El score de wellness (1-5) y los promedios crudos viven en wellnessScore()
+        // (utils.ts), única fuente de verdad compartida con calcularReadiness() del
+        // dashboard. Si cambiás direcciones/neutral, cambia en ambos lados sin divergir.
+        const { score, promedios } = wellnessScore(recientes);
 
         let estado;
         if (score >= 4) estado = 'Óptimo';

@@ -16,10 +16,12 @@ function makeController() {
   return new DashboardController({ el: { container: document.createElement("div") } });
 }
 
-// Bienestar = (sueno + motivacion + (6-estres) + (6-doms)) / 4
-const ALTO = { sueno: 5, motivacion: 5, estres: 1, doms: 1 }; // avg 5 → 100
-const NEUTRAL = { sueno: 3, motivacion: 3, estres: 3, doms: 3 }; // avg 3 → 60
-const BAJO = { sueno: 2, motivacion: 2, estres: 4, doms: 4 }; // avg 2 → 40
+// Bienestar (score 1-5) = promedio PLANO de las 8 métricas ya ajustadas por
+// dirección (wellnessScore). ×20 → 0-100. Directa: sueño/motivación/energía/
+// alimentación/hidratación; invertida (6−v): estrés/DOMS/fatiga.
+const ALTO = { sueno: 5, motivacion: 5, estres: 1, doms: 1, energia: 5, fatiga: 1, alimentacion: 5, hidratacion: 5 }; // 5.0 → 100
+const NEUTRAL = { sueno: 3, motivacion: 3, estres: 3, doms: 3, energia: 3, fatiga: 3, alimentacion: 3, hidratacion: 3 }; // 3.0 → 60
+const BAJO = { sueno: 1, motivacion: 1, estres: 5, doms: 5, energia: 1, fatiga: 5, alimentacion: 1, hidratacion: 1 }; // 1.0 → 20
 
 /** Controller con solo wellness (una componente) para dirigir el score 0-100. */
 function controllerCon(wellness) {
@@ -31,7 +33,7 @@ function controllerCon(wellness) {
 
 describe("banner · colores del semáforo (título con emoji)", () => {
   it("verde (score ≥ 70): 'BUEN MOMENTO PARA ENTRENAR' + flecha de tendencia en bienestar", () => {
-    // índice 0 viejo/bajo; los últimos 3 altos → hoy 100, ventana anterior 40.
+    // índice 0 viejo/bajo; los últimos 3 altos → hoy 100, ventana anterior 20.
     const c = controllerCon([BAJO, ALTO, ALTO, ALTO, ALTO]);
     const html = c._estadoAtletaBanner();
 

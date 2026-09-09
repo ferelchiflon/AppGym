@@ -6,6 +6,7 @@
  */
 
 import { Utils } from "../utils.ts";
+import { wellnessScore } from "../utils.ts";
 import { FormulasRM } from "../formulas.js";
 import { FisiologiaCargas } from "../fisiologia-cargas.js";
 import { VolumeLandmarks, VOLUME_LANDMARKS } from "../landmarks-volumen.js";
@@ -147,11 +148,11 @@ export function calcularReadiness({
 
   const ultimos3 = wellness.slice(-3);
   if (ultimos3.length) {
-    const avg =
-      ultimos3.reduce((acc, w) => {
-        return acc + (w.sueno + w.motivacion + (6 - w.estres) + (6 - w.doms)) / 4;
-      }, 0) / ultimos3.length;
-    partes.wellness = Math.round(Utils.clamp(avg * 20, 0, 100));
+    // Score de bienestar compartido con getEstadoGeneral() (wellnessScore en utils.ts):
+    // 8 métricas + dirección + NEUTRAL. Reemplaza la vieja fórmula de 4 campos para que
+    // readiness y perfil no vuelvan a divergir. Es un promedio 1-5 → *20 para 0-100.
+    const { score } = wellnessScore(ultimos3 as unknown as Array<Record<string, unknown>>);
+    partes.wellness = Math.round(Utils.clamp(score * 20, 0, 100));
     total += partes.wellness * 0.4;
     pesoAcum += 0.4;
   }

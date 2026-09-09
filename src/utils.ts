@@ -115,3 +115,52 @@ export const Utils = {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   },
 };
+/**
+ * Única fuente de verdad para la dirección de cada métrica wellness (escala 1-5).
+ * La usan `PerfilAtleta.getEstadoGeneral()` y `calcularReadiness()` (dashboard) para
+ * NO volver a divergir: si cambiás una dirección acá, cambia en ambos lados.
+ *  - "directa":   mayor puntaje = mejor  → sueño, motivación, energía, alimentación, hidratación.
+ *  - "invertida": menor puntaje = mejor  → estrés, DOMS, fatiga (se normalizan como 6 - valor).
+ */
+export const WELLNESS_DIRECCION: Record<string, "directa" | "invertida"> = {
+    sueno: "directa", motivacion: "directa", energia: "directa",
+    alimentacion: "directa", hidratacion: "directa",
+    estres: "invertida", doms: "invertida", fatiga: "invertida",
+};
+
+/** Registros wellness viejos sin los campos nuevos se leen como "neutral" (3/5). */
+export const WELLNESS_NEUTRAL = 3;
+
+export interface WellnessScored {
+    /** Score 1-5: promedio PLANO de las 8 métricas ya ajustadas por dirección. */
+    score: number;
+    /** Promedios CRUDOS por métrica (sin invertir), con WELLNESS_NEUTRAL si el campo falta. */
+    promedios: Record<string, number>;
+}
+
+/**
+ * Score de bienestar agregado (1-5) a partir de una lista de registros wellness.
+ * Promedio PLANO de las 8 métricas ajustadas por dirección: las invertidas se dan
+ * vuelta (6 - valor); las directas pasan tal cual. Los campos que faltan (registros
+ * viejos) cuentan como WELLNESS_NEUTRAL (3) y NO contaminan el cálculo (sin NaN).
+ * Mismo algoritmo que getEstadoGeneral(); no hace clasificación por tramos.
+ */
+export function wellnessScore(registros: Array<Record<string, unknown>>): WellnessScored {
+    const promedios: Record<string, number> = {};
+    const keys = Object.keys(WELLNESS_DIRECCION);
+
+    keys.forEach((k) => {
+        promedios[k] = Utils.promedio(
+            registros.map((w) => {
+                const v = (typeof w[k] === 'number' && !Number.isNaN(w[k])) ? (w[k] as number) : WELLNESS_NEUTRAL;
+                return v;
+            })
+        );
+    });
+
+    const score = Utils.promedio(
+        keys.map((k) => (WELLNESS_DIRECCION[k] === 'invertida' ? 6 - promedios[k] : promedios[k]))
+    );
+
+    return { score, promedios };
+}
