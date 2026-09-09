@@ -13,10 +13,128 @@ import { Store } from './store.js';
 import { EJERCICIOS_DISPONIBLES } from './config.ts';
 import { reordenarArrayEjercicios } from './dnd.js';
 
+/**
+ * Límites de validación razonables para pesos y repeticiones.
+ * Evita errores de entrada y valores imposibles que corrompan cálculos.
+ */
+const LIMITES_VALIDACION = {
+    pesoMin: 0,
+    pesoMax: 500, // kg, cubre barra + discos en cualquier ejercicio
+    repsMin: 0,
+    repsMax: 100, // cubre series de alta repetición / resistencia
+    rpeMin: 1,
+    rpeMax: 10,
+    rirMin: 0,
+    rirMax: 10,
+};
+
 export class GestorRutina {
     constructor(rutinaData) {
         this.data = rutinaData;
         this.ejercicioSeleccionado = this.data.rutina.length > 0 ? this.data.rutina[0] : null;
+
+        // Caché de 1RM por ejercicio para evitar recálculos innecesarios.
+        // Clave: ejercicioId, Valor: { rm, peso, reps, rpe, timestamp, version }
+        this._cache1RM = new Map();
+
+        // Versión de datos para invalidar caché al mutar series/historial.
+        this._dataVersion = 0;
+    }
+
+    /** Incrementa la versión interna para invalidar caché de 1RM. */
+    _incrementarVersion() {
+        this._dataVersion++;
+        this._cache1RM.clear();
+    }
+
+    /**
+     * Valida y normaliza los valores de entrada de una serie.
+     * Lanza Error si los valores están fuera de límites razonables.
+     * @param {number} peso Peso en kg.
+     * @param {number} reps Repeticiones.
+     * @param {number|null} [rpe] RPE opcional (1-10).
+     * @param {number|null} [rir] RIR opcional (0-10).
+     * @returns {{peso: number, reps: number, rpe: number|null, rir: number|null}}
+     */
+    _validarSerie({ peso, reps, rpe = null, rir = null }) {
+        const p = parseFloat(peso);
+        const r = parseInt(reps, 10);
+        const rpeVal = rpe !== null ? parseFloat(rpe) : null;
+        const rirVal = rir !== null ? parseFloat(rir) : null;
+
+        if (isNaN(p) || p < LIMITES_VALIDACION.pesoMin || p > LIMITES_VALIDACION.pesoMax) {
+            throw new Error(`Peso inválido: ${peso}. Debe estar entre ${LIMITES_VALIDACION.pesoMin} y ${LIMITES_VALIDACION.pesoMax} kg.`);
+        }
+        if (isNaN(r) || r < LIMITES_VALIDACION.repsMin || r > LIMITES_VALIDACION.repsMax) {
+            throw new Error(`Repeticiones inválidas: ${reps}. Debe estar entre ${LIMITES_VALIDACION.repsMin} y ${LIMITES_VALIDACION.repsMax}.`);
+        }
+        if (rpeVal !== null && (isNaN(rpeVal) || rpeVal < LIMITES_VALIDACION.rpeMin || rpeVal > LIMITES_VALIDACION.rpeMax)) {
+            throw new Error(`RPE inválido: ${rpe}. Debe estar entre ${LIMITES_VALIDACION.rpeMin} y ${LIMITES_VALIDACION.rpeMax}.`);
+        }
+        if (rirVal !== null && (isNaN(rirVal) || rirVal < LIMITES_VALIDACION.rirMin || rirVal > LIMITES_VALIDACION.rirMax)) {
+            throw new Error(`RIR inválido: ${rir}. Debe estar entre ${LIMITES_VALIDACION.rirMin} y ${LIMITES_VALIDACION.rirMax}.`);
+        }
+
+        return { peso: p, reps: r, rpe: rpeVal, rir: rirVal };
+    }
+
+    /**
+     * Obtiene el 1RM estimado (promedio de fórmulas) para un ejercicio,
+     * usando caché para evitar recálculos si las series no cambiaron.
+     * @param {string} ejercicioId
+     * @returns {{rm: number, peso: number, reps: number, rpe: number|null, fuente: string}|null}
+     */
+    get1RMEstimado(ejercicioId) {
+        const cache = this._cache1RM.get(ejercicioId);
+        if (cache && cache.version === this._dataVersion) {
+            return cache;
+        }
+
+        const series = this.data.seriesPorEjercicio[ejercicioId] || [];
+        if (series.length === 0) return null;
+
+        // Usa la última serie registrada como base.
+        const ultima = series[series.length - 1];
+        const rm = FormulasRM.calcularTodos(ultima.peso, ultima.reps);
+        if (!rm) return null;
+
+        const resultado = {
+            rm: rm.promedio,
+            peso: ultima.peso,
+            reps: ultima.reps,
+            rpe: ultima.rpe ?? null,
+            fuente: 'epley+brzycki+lombardi',
+            version: this._dataVersion,
+        };
+        this._cache1RM.set(ejercicioId, resultado);
+        return resultado;
+    }
+
+    /**
+     * Obtiene el 1RM por RPE si la última serie tiene RPE registrado.
+     * También cacheado.
+     * @param {string} ejercicioId
+     * @returns {{rm: number, porcentaje: number, rpe: number, reps: number}|null}
+     */
+    get1RMPorRPE(ejercicioId) {
+        const cacheKey = `${ejercicioId}:rpe`;
+        const cache = this._cache1RM.get(cacheKey);
+        if (cache && cache.version === this._dataVersion) {
+            return cache;
+        }
+
+        const series = this.data.seriesPorEjercicio[ejercicioId] || [];
+        if (series.length === 0) return null;
+
+        const ultima = series[series.length - 1];
+        if (ultima.rpe === null || ultima.rpe === undefined) return null;
+
+        const rmRPE = FormulasRM.calcular1RMPorRPE(ultima.peso, ultima.reps, ultima.rpe);
+        if (!rmRPE) return null;
+
+        const resultado = { ...rmRPE, version: this._dataVersion };
+        this._cache1RM.set(cacheKey, resultado);
+        return resultado;
     }
 
     get rutina() { return this.data.rutina; }
@@ -24,11 +142,17 @@ export class GestorRutina {
     get historial() { return this.data.historial; }
     get superseries() { return this.data.superseries; }
 
+    /** Expone los límites para que la UI pueda usarlos (p. ej. en steppers). */
+    static get LIMITES() {
+        return { ...LIMITES_VALIDACION };
+    }
+
     agregarEjercicio(id) {
         if (!this.data.rutina.includes(id)) {
             this.data.rutina.push(id);
             this.data.seriesPorEjercicio[id] = [];
             this.ejercicioSeleccionado = id;
+            this._incrementarVersion();
             Store.guardar();
             return true;
         }
@@ -43,6 +167,7 @@ export class GestorRutina {
         if (this.ejercicioSeleccionado === id) {
             this.ejercicioSeleccionado = this.data.rutina.length > 0 ? this.data.rutina[0] : null;
         }
+        this._incrementarVersion();
         Store.guardar();
     }
 
@@ -93,6 +218,7 @@ export class GestorRutina {
             this.ejercicioSeleccionado = this.data.rutina[0];
         }
 
+        this._incrementarVersion();
         Store.guardar();
         return true;
     }
@@ -123,14 +249,13 @@ export class GestorRutina {
         if (!this.data.seriesPorEjercicio[ejercicioId]) {
             this.data.seriesPorEjercicio[ejercicioId] = [];
         }
-        const pesoNum = parseFloat(peso) || 0;
-        const repsNum = parseInt(reps) || 0;
+        const validated = this._validarSerie({ peso, reps, rpe, rir });
         const serie = {
             id: Utils.generarId(),
-            peso: pesoNum,
-            reps: repsNum,
-            rpe: rpe !== null ? parseFloat(rpe) : null,
-            rir: rir !== null ? parseFloat(rir) : null,
+            peso: validated.peso,
+            reps: validated.reps,
+            rpe: validated.rpe,
+            rir: validated.rir,
             notas: notas || '',
             timestamp: new Date().toISOString(),
             esPR: false,
@@ -140,6 +265,7 @@ export class GestorRutina {
         serie.esPR = esRecordNuevo;
 
         this.data.seriesPorEjercicio[ejercicioId].push(serie);
+        this._incrementarVersion();
         Store.guardar();
         return serie;
     }
@@ -172,6 +298,7 @@ export class GestorRutina {
         if (this.data.seriesPorEjercicio[ejercicioId]) {
             this.data.seriesPorEjercicio[ejercicioId] = this.data.seriesPorEjercicio[ejercicioId]
                 .filter(s => s.id !== serieId);
+            this._incrementarVersion();
             Store.guardar();
         }
     }
@@ -179,6 +306,7 @@ export class GestorRutina {
     eliminarTodasSeries(ejercicioId) {
         if (this.data.seriesPorEjercicio[ejercicioId]) {
             this.data.seriesPorEjercicio[ejercicioId] = [];
+            this._incrementarVersion();
             Store.guardar();
         }
     }
@@ -238,6 +366,7 @@ export class GestorRutina {
 
         this.data.historial.push(sesion);
         this.data.rutina.forEach(id => { this.data.seriesPorEjercicio[id] = []; });
+        this._incrementarVersion();
         Store.guardar();
         return sesion;
     }
@@ -282,6 +411,7 @@ export class GestorRutina {
         });
 
         this.ejercicioSeleccionado = nuevosIds.length > 0 ? nuevosIds[0] : null;
+        this._incrementarVersion();
         Store.guardar();
         return true;
     }

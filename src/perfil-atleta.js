@@ -90,6 +90,126 @@ export class PerfilAtleta {
 
         return recientes.every(w => w.estres >= 4 && w.doms >= 4 && w.sueno <= 2 && w.motivacion <= 2);
     }
+/**
+     * Detección avanzada de sobreentrenamiento combinando tres señales:
+     *   1. Frecuencia cardíaca / esfuerzo percibido reciente (cardio → FC/RPE).
+     *   2. Volumen acumulado de fuerza (historial) respecto a la línea base.
+     *   3. Días consecutivos de alta intensidad (volumen o carga elevada).
+     *
+     * Devuelve un diagnóstico con nivel de fatiga (`nivel`: 'bajo'|'moderado'|
+     * 'alto'|'critico') y una puntuación 0-100 para mostrarlo como alerta o
+     * indicador de advertencia en la UI.
+     *
+     * @param {object} [opciones]
+     * @param {number} [opciones.dias=7] Ventana de análisis en días.
+     * @param {number} [opciones.umbralDiasAltaIntensidad=3] Días consecutivos para marcar alerta.
+     * @returns {{fatiga: string, puntuacion: number, nivel: string,
+     *   senales: string[], recomendacion: string, rachaAltaIntensidad: number,
+     *   volumenTotal: number, fcMedia: number|null, rpeMedio: number|null}|null}
+     */
+    getRiesgoSobreentrenamiento({ dias = 7, umbralDiasAltaIntensidad = 3 } = {}) {
+        const limite = new Date();
+        limite.setDate(limite.getDate() - dias);
+        const recientes = (this.data.historial || []).filter(
+            (s) => new Date(s.fechaISO || s.fecha || s.timestamp) >= limite
+        );
+
+        if (recientes.length === 0) return null;
+
+        // --- Señal 1: esfuerzo cardiovascular (FC / RPE) -------------------
+        const cardios = (this.data.sesionesCardio || []).filter(
+            (c) => new Date(c.fecha || c.timestamp) >= limite
+        );
+        const fcs = cardios.map((c) => parseFloat(c.fc)).filter((f) => !isNaN(f) && f > 0);
+        const rpes = cardios.map((c) => parseFloat(c.rpe)).filter((r) => !isNaN(r) && r > 0);
+
+        // --- Señal 2: volumen acumulado -------------------------------------
+        const volumenes = recientes.map((s) => parseFloat(s.volumenTotal)).filter((v) => !isNaN(v) && v >= 0);
+        const volumenTotal = volumenes.reduce((a, b) => a + b, 0);
+        const volumenMedio = volumenes.length ? volumenTotal / volumenes.length : 0;
+        const volumenMax = Math.max(0, ...volumenes);
+
+        // --- Señal 3: días consecutivos de alta intensidad ------------------
+        const diasAltaIntensidad = recientes.map((s) => {
+            const v = parseFloat(s.volumenTotal) || 0;
+            const esAltoVol = volumenMax > 0 && v >= volumenMax * 0.8;
+            const fecha = s.fechaISO || s.fecha || s.timestamp || '';
+            const cardioIntensoEseDia = cardios.some(
+                (c) => (c.fecha || c.timestamp) === fecha && (parseFloat(c.rpe) || 0) >= 8
+            );
+            return esAltoVol || cardioIntensoEseDia;
+        });
+
+        let racha = 0;
+        for (let i = diasAltaIntensidad.length - 1; i >= 0; i--) {
+            if (diasAltaIntensidad[i]) racha++;
+            else break;
+        }
+
+        const fcMedia = fcs.length ? Utils.promedio(fcs) : null;
+        const rpeMedio = rpes.length ? Utils.promedio(rpes) : null;
+
+        const senales = [];
+        let puntuacion = 0;
+
+        if (fcMedia !== null && fcMedia >= 140) {
+            puntuacion += 30;
+            senales.push(`FC media elevada (${Math.round(fcMedia)} ppm)`);
+        }
+        if (rpeMedio !== null && rpeMedio >= 8) {
+            puntuacion += 20;
+            senales.push(`Esfuerzo percibido alto sostenido (RPE ${Math.round(rpeMedio * 10) / 10})`);
+        }
+        if (racha >= umbralDiasAltaIntensidad) {
+            puntuacion += 35;
+            senales.push(`${racha} días consecutivos de alta intensidad`);
+        }
+        if (volumenTotal > 0 && volumenes.length >= 3 && volumenTotal > volumenMedio * (volumenes.length * 0.9)) {
+            puntuacion += 10;
+            senales.push(`Volumen acumulado elevado (${Math.round(volumenTotal)} kg en ${dias} días)`);
+        }
+
+        puntuacion = Utils.clamp(puntuacion, 0, 100);
+
+        let nivel;
+        let recomendacion;
+        if (puntuacion >= 65) {
+            nivel = 'critico';
+            recomendacion = 'Fatiga crítica detectada. Considerá un deload completo o una semana de descarga (reduce volumen 40-50%).';
+        } else if (puntuacion >= 45) {
+            nivel = 'alto';
+            recomendacion = 'Fatiga acumulada elevada. Reducí volumen un 20-30% y priorizá recuperación (sueño, hidratación).';
+        } else if (puntuacion >= 25) {
+            nivel = 'moderado';
+            recomendacion = 'Fatiga moderada. Mantené cargas controladas con RIR 2-3 y vigilá el sueño.';
+        } else {
+            nivel = 'bajo';
+            recomendacion = 'Nivel de fatiga normal. Podés continuar con la planificación.';
+        }
+
+        return {
+            fatiga: nivel === 'bajo' ? 'Baja' : nivel === 'moderado' ? 'Moderada' : nivel === 'alto' ? 'Alta' : 'Crítica',
+            puntuacion,
+            nivel,
+            senales,
+            recomendacion,
+            rachaAltaIntensidad: racha,
+            volumenTotal,
+            fcMedia: fcMedia !== null ? Math.round(fcMedia) : null,
+            rpeMedio: rpeMedio !== null ? Math.round(rpeMedio * 10) / 10 : null,
+        };
+    }
+
+    /**
+     * Booleano de sobreentrenamiento avanzado (atajo sobre
+     * `getRiesgoSobreentrenamiento`): true si el nivel es 'alto' o 'critico'.
+     * @param {object} [opciones] Igual que getRiesgoSobreentrenamiento.
+     * @returns {boolean}
+     */
+    isSobreentrenadoAvanzado(opciones = {}) {
+        const riesgo = this.getRiesgoSobreentrenamiento(opciones);
+        return !!riesgo && (riesgo.nivel === 'alto' || riesgo.nivel === 'critico');
+    }
 
     registrarSalto(alturaCm, fecha = new Date()) {
         const entry = { fecha: Utils.fechaISO(fecha), altura: alturaCm };
