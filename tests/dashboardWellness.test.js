@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { DashboardController } from "../src/controllers/dashboard.controller.js";
-import { COLORS_SPARKLINE } from "../src/utils/dashboard-helpers.ts";
-import { calcularReadiness } from "../src/utils/dashboard-helpers.ts";
+import { COLORS_SPARKLINE, calcularReadiness, senalesFatiga } from "../src/utils/dashboard-helpers.ts";
 import { PerfilAtleta } from "../src/perfil-atleta.js";
 import { Store } from "../src/store.js";
 import { Toast } from "../src/toast.js";
@@ -216,6 +215,31 @@ describe("calcularReadiness · fórmula de wellness unificada (8 métricas, sin 
     const read = calcularReadiness({ wellness, saltos: [], historial: [] });
     const gen = new PerfilAtleta({ wellness }).getEstadoGeneral(1);
     expect(read.partes.wellness).toBe(Math.round(gen.score * 20));
+  });
+});
+describe("senalesFatiga · umbral < 2.5 con las 8 métricas (sin 4-campos)", () => {
+  const check = (wellness) => senalesFatiga({ perfil: { data: { wellness } }, historial: [] });
+
+  it("bienestar alto (5.0) → sin alerta de fatiga", () => {
+    const s = check([{ sueno: 5, motivacion: 5, estres: 1, doms: 1, energia: 5, fatiga: 1, alimentacion: 5, hidratacion: 5 }]);
+    expect(s).toEqual([]);
+  });
+
+  it("bienestar bajo (1.0) → alerta de fatiga acumulada", () => {
+    const s = check([{ sueno: 1, motivacion: 1, estres: 5, doms: 5, energia: 1, fatiga: 5, alimentacion: 1, hidratacion: 1 }]);
+    expect(s).toContain("Fatiga acumulada detectada. Considera un deload o día de descanso activo.");
+  });
+
+  it("escenario mixto: bien en las viejas, mal en las nuevas → score 2.5 exacto NO dispara (límite inclusive)", () => {
+    // sueno/motivacion/estres/doms buenas (5,5,1,1) + energia/fatiga/alimentacion/hidratacion malas (1,5,1,1)
+    // ajustadas: 5,5,5,5,(1),(1),(1),(1) → promedio plano (5+5+5+5+1+1+1+1)/8 = 3.0 → sin alerta.
+    const s = check([{ sueno: 5, motivacion: 5, estres: 1, doms: 1, energia: 1, fatiga: 5, alimentacion: 1, hidratacion: 1 }]);
+    expect(s).toEqual([]);
+  });
+
+  it("registro viejo sin campos nuevos (NEUTRAL=3) NO da NaN ni dispara en falso", () => {
+    const s = check([{ sueno: 3, estres: 3, doms: 3, motivacion: 3 }]);
+    expect(s).toEqual([]);
   });
 });
 describe("DashboardController · tarjeta wellness con 8 métricas", () => {

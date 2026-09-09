@@ -552,11 +552,12 @@ export function senalesFatiga({ perfil, historial = [] }: {
   const wellness = (perfil && perfil.data && perfil.data.wellness) || [];
   const last3 = wellness.slice(-3);
   if (last3.length) {
-    const avg =
-      last3.reduce((acc, w) => {
-        return acc + (w.sueno + w.motivacion + (6 - w.estres) + (6 - w.doms)) / 4;
-      }, 0) / last3.length;
-    if (avg < 2.5)
+    // Misma fuente de verdad que getEstadoGeneral()/calcularReadiness(): promedio
+    // plano 1-5 de las 8 métricas (wellnessScore). Antes era la fórmula de 4 campos,
+    // que ignoraba energía/fatiga/alimentación/hidratación y podía dar NaN con
+    // registros viejos. Umbral < 2.5 conservado (equivalente a < 50 en 0-100).
+    const { score } = wellnessScore(last3 as unknown as Array<Record<string, unknown>>);
+    if (score < 2.5)
       senales.push("Fatiga acumulada detectada. Considera un deload o día de descanso activo.");
   }
 
