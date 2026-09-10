@@ -45,6 +45,7 @@
 
 /* Icon buttons (hamburger / cerrar) */
 .icon-btn {
+    flex-shrink: 0;
     display: inline-flex; align-items: center; justify-content: center;
     width: 48px; height: 48px; min-width: 48px; padding: 0; margin: 0;
     border-radius: var(--radius-control);
@@ -60,7 +61,8 @@
 
 /* Atajo de tema en el header (claro/oscuro) */
 .theme-header-btn {
-    width: 38px; height: 38px; min-width: 38px;
+    flex-shrink: 0;
+    width: 48px; height: 48px; min-width: 48px;
     border-radius: 9999px; font-size: 1.05rem; line-height: 1;
 }
 .theme-header-btn[aria-pressed="true"] {

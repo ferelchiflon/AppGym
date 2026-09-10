@@ -982,6 +982,9 @@
 .estado-insight strong { color: var(--text-primary); }
 .estado-insight .insight-note { font-size: .72rem; color: var(--text-tertiary); font-style: italic; margin-top: .35rem; }
 
+/* Prevent flex container collapse when many exercises are added */
+.badge-list { min-width: 0; max-height: calc(100vh - 220px); overflow-y: auto; padding-right: var(--space-2, 0.5rem); overscroll-behavior: contain; }
+
 /* Progress bar styles for periodization */
 .progress-wrapper { display: flex; align-items: center; gap: 0.5rem; margin: 1rem 0; }
 .progress-label { font-size: 0.875rem; display: flex; justify-content: space-between; align-items: center; }
