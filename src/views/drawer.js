@@ -28,7 +28,7 @@ export default `    <div id="drawerOverlay" class="drawer-overlay"></div>
             </div>
 
             <div class="drawer-group">
-                <div class="drawer-group-title" data-i18n="drawer.group.entrenamiento">🏋️ Entrenamiento</div>
+                <div class="drawer-group-title" data-i18n="drawer.group.entrenamiento">Entrenamiento</div>
                 <button type="button" class="drawer-item" data-nav-target="workout" data-i18n="drawer.item.rutina">Rutina y series</button>
                 <button type="button" class="drawer-item" data-nav-target="workout" data-scroll="timerCard" data-i18n="drawer.item.timer">Timer de descanso</button>
                 <button type="button" class="drawer-item" data-nav-target="workout" data-scroll="metricasSesionCard" data-i18n="drawer.item.metricas">Métricas de sesión</button>
@@ -57,7 +57,9 @@ export default `    <div id="drawerOverlay" class="drawer-overlay"></div>
                     <span class="theme-toggle-label">Modo oscuro</span>
                 </button>
                 <button type="button" class="drawer-item theme-toggle" id="gymModeDrawerBtn" aria-pressed="false" aria-label="Modo Gimnasio">
-                    <span class="theme-toggle-icon" aria-hidden="true">🏋️</span>
+                    <span class="theme-toggle-icon" aria-hidden="true">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h4M14 12h4M6 18h4M14 18h4"/></svg>
+</span>
                     <span class="theme-toggle-label" data-i18n="gym.etiqueta">Modo Gimnasio</span>
                 </button>
                 <label class="drawer-settings-label" for="langSelect" data-i18n="idioma.label">🌐 Idioma</label>

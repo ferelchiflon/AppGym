@@ -31,13 +31,13 @@ function controllerCon(wellness) {
   return c;
 }
 
-describe("banner · colores del semáforo (título con emoji)", () => {
+describe("banner · semáforo de colores (indicador circular)", () => {
   it("verde (score ≥ 70): 'BUEN MOMENTO PARA ENTRENAR' + flecha de tendencia en bienestar", () => {
     // índice 0 viejo/bajo; los últimos 3 altos → hoy 100, ventana anterior 20.
     const c = controllerCon([BAJO, ALTO, ALTO, ALTO, ALTO]);
     const html = c._estadoAtletaBanner();
 
-    expect(html).toContain("🟢");
+    expect(html).toContain("class=\"semaphore-circle\"");
     expect(html).toContain("BUEN MOMENTO PARA ENTRENAR");
     // tendencia: bienestar 100 vs 40 = +60 (> umbral) → subió ▲
     expect(html).toContain('class="trend up"');
@@ -49,7 +49,8 @@ describe("banner · colores del semáforo (título con emoji)", () => {
     const c = controllerCon([NEUTRAL]);
     const html = c._estadoAtletaBanner();
 
-    expect(html).toContain("🟡");
+    expect(html).toContain("class=\"semaphore-circle\"");
+    expect(html).toMatch(/fill="var\(--warning-text\)"/);
     expect(html).toContain("RECUPERACIÓN MODERADA");
   });
 
@@ -57,7 +58,8 @@ describe("banner · colores del semáforo (título con emoji)", () => {
     const c = controllerCon([BAJO]);
     const html = c._estadoAtletaBanner();
 
-    expect(html).toContain("🔴");
+    expect(html).toContain("class=\"semaphore-circle\"");
+    expect(html).toMatch(/fill="var\(--danger-text\)"/);
     expect(html).toContain("NECESITÁS DESCANSAR");
   });
 

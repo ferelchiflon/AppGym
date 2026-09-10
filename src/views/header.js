@@ -20,7 +20,9 @@ export default `    <header class="app-header">
             <span class="theme-header-icon" aria-hidden="true">🌙</span>
         </button>
         <button type="button" id="gymModeBtn" class="icon-btn theme-header-btn" aria-label="Activar Modo Gimnasio" aria-pressed="false" title="Activar Modo Gimnasio">
-            <span class="theme-header-icon" aria-hidden="true">🏋️</span>
+            <span class="theme-header-icon" aria-hidden="true">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h4M14 12h4M6 18h4M14 18h4"/></svg>
+</span>
         </button>
         <button type="button" id="miniTimerBtn" class="mini-timer" aria-label="Abrir timer de descanso">
             <svg class="mini-timer-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>
