@@ -10,8 +10,8 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 4px;
-    margin: -8px -8px 14px;
+    padding: var(--space-3) var(--space-1);
+    margin: calc(var(--space-2) * -1) calc(var(--space-2) * -1) calc(var(--space-3) + var(--space-1));
     background: rgba(18, 22, 31, 0.75);
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
@@ -46,7 +46,7 @@
 /* Icon buttons (hamburger / cerrar) */
 .icon-btn {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 42px; height: 42px; min-width: 42px; padding: 0; margin: 0;
+    width: 48px; height: 48px; min-width: 48px; padding: 0; margin: 0;
     border-radius: var(--radius-control);
     background: transparent; border: 1px solid var(--border);
     color: var(--text-primary); box-shadow: none; cursor: pointer;

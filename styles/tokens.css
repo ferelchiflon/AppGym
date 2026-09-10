@@ -35,7 +35,7 @@
     /* Text on dark */
     --text-primary: #F4F6FB;
     --text-secondary: #9AA4BD;
-    --text-tertiary: #77829C;
+    --text-tertiary: #8892A8;
 
     /* Structural borders on dark */
     --border: rgba(255, 255, 255, 0.07);
@@ -289,7 +289,7 @@ html[data-theme="dark"] {
 
     --text-primary: #F4F6FB;
     --text-secondary: #9AA4BD;
-    --text-tertiary: #77829C;
+    --text-tertiary: #8892A8;
 
     --border: rgba(255, 255, 255, 0.07);
     --border-strong: rgba(255, 255, 255, 0.14);
