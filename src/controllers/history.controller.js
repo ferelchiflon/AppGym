@@ -165,7 +165,7 @@ export class HistoryController {
       const prescBox = document.createElement("div");
       prescBox.className = "autoreg-box mt-1";
       prescBox.innerHTML = `
-        <strong>🎯 Prescripción Semanal (${prescripcion.fase}):</strong><br>
+        <strong><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Prescripción Semanal (${prescripcion.fase}):</strong><br>
         • Series por ejercicio: <strong>${prescripcion.seriesRango} series</strong><br>
         • Repeticiones objetivo: <strong>${prescripcion.repsRango} reps</strong><br>
         • Carga sugerida: <strong>${prescripcion.pct1RM} 1RM</strong> (RPE objetivo: <strong>${prescripcion.rpeObjetivo}</strong>)

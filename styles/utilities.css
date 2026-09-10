@@ -260,7 +260,7 @@
     flex-shrink: 0;
     border: 1px solid var(--border-strong);
     background: var(--accent);
-    color: #fff;
+    color: var(--accent-contrast);
     font-size: 0.8rem;
     font-weight: 600;
     padding: 0.35rem 0.7rem;

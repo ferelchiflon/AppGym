@@ -1002,7 +1002,7 @@
 
 /* Color coding based on progress */
 .progress-fill.accent { background: var(--accent); }
-.progress-fill.warning { background: var(--color-warning); }
-.progress-fill.error { background: var(--color-error); }
-}
+.progress-fill.warning { background: var(--warning-text); }
+.progress-fill.error { background: var(--danger-text); }
 
+}

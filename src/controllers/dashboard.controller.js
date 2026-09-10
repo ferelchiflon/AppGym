@@ -741,7 +741,7 @@ export class DashboardController {
 
     const hoy = H.calcularReadiness({ wellness, saltos, historial: hist });
     // Estado vacío: mismo comportamiento que la tarjeta vieja sin datos.
-    if (!hoy) return `<div class="panel-card estado-banner">${this._noReadiness()}</div>`;
+    if (!hoy) return `<div class="panel-card card--hero estado-banner">${this._noReadiness()}</div>`;
 
     const senales = H.senalesFatiga({ perfil, historial: hist });
     const acwr = H.acwrDatos(hist);
@@ -750,23 +750,23 @@ export class DashboardController {
     const tend = H.tendenciaReadiness(hoy, anterior);
 
     const color = hoy.color;
-    let emoji;
     let titulo;
+    let circleSvg;
     if (hoy.score >= 70) {
-      emoji = "🟢";
       titulo = "BUEN MOMENTO PARA ENTRENAR";
+      circleSvg = '<svg viewBox="0 0 24 24" width="16" height="16" class="semaphore-circle"><circle cx="8" cy="8" r="6" fill="var(--success-text)"/></svg>';
     } else if (hoy.score >= 50) {
-      emoji = "🟡";
       titulo = "RECUPERACIÓN MODERADA";
+      circleSvg = '<svg viewBox="0 0 24 24" width="16" height="16" class="semaphore-circle"><circle cx="8" cy="8" r="6" fill="var(--warning-text)"/></svg>';
     } else {
-      emoji = "🔴";
       titulo = "NECESITÁS DESCANSAR";
+      circleSvg = '<svg viewBox="0 0 24 24" width="16" height="16" class="semaphore-circle"><circle cx="8" cy="8" r="6" fill="var(--danger-text)"/></svg>';
     }
 
     const filas = [
-      { key: "wellness", icon: "🛌", label: "Bienestar" },
+      { key: "wellness", icon: "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 6h18M3 12h18M3 18h18\"/></svg>", label: "Bienestar" },
       { key: "acwr", icon: "🏋️", label: "Carga · ACWR" },
-      { key: "cmj", icon: "⚡", label: "Potencia · CMJ" },
+      { key: "cmj", icon: "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z\"/><circle cx=\"12\" cy=\"12\" r=\"4\"/></svg>", label: "Potencia · CMJ" },
     ];
 
     const desglose = filas
@@ -804,13 +804,13 @@ export class DashboardController {
     const insight = this._correlacionWellnessBanner();
 
     return `
-      <div class="panel-card estado-banner" style="border-left:4px solid ${color};border-color:${color}66;background:linear-gradient(135deg,${color}1f,${color}08)">
+      <div class="panel-card card--hero estado-banner" style="border-left:4px solid ${color};border-color:${color}66;background:linear-gradient(135deg,${color}1f,${color}08)">
         <div class="estado-head">
           <span class="eyebrow" style="color:${color}">ESTADO DEL ATLETA · HOY</span>
           <span class="estado-score" style="color:${color}">${hoy.score} · READY</span>
           <button class="link-safe" id="fatigaAjustarBtn">Ajustar</button>
         </div>
-        <h3 class="estado-titulo">${emoji} ${titulo}</h3>
+        <h3 class="estado-titulo">${circleSvg} ${titulo}</h3>
         <p class="estado-sugerencia">${this._sugerenciaReadiness(hoy.score)}</p>
         <div class="estado-desglose">${desglose}</div>
         ${alertas}
@@ -854,7 +854,7 @@ export class DashboardController {
       const signo = d.diffPct >= 0 ? "+" : "";
       lineas.push({
         fuerza: Math.abs(d.diffPct),
-        html: `📊 Con ${etiquetas[m]} alto vs bajo: <strong>${signo}${d.diffPct}%</strong> de volumen promedio.`,
+        html: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16h8"/><path d="M7 11h12"/><path d="M7 6h3"/></svg> Con ${etiquetas[m]} alto vs bajo: <strong>${signo}${d.diffPct}%</strong> de volumen promedio.`,
       });
     });
 

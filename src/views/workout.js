@@ -5,8 +5,8 @@
  */
 export default `    <section id="tab-workout" class="tab-pane" aria-labelledby="nav-tab-workout">
         <div class="grid-2">
-            <!-- RUTINA -->
-            <div class="card" id="rutinaCard">
+            <!-- RUTINA (hero: la rutina activa es lo más importante del entrenamiento) -->
+            <div class="card card--hero" id="rutinaCard">
                 <h2><span data-i18n="workout.titulo.rutina">Rutina de hoy</span> <span class="count-tag" id="ejerciciosCount">0</span></h2>
 
                 <div class="flex-wrap">
@@ -45,7 +45,7 @@ export default `    <section id="tab-workout" class="tab-pane" aria-labelledby="
                 <div class="plantillas-predefinidas mt-1" id="plantillasPredefinidasContainer"></div>
             </div>
 
-            <!-- REGISTRO DE SERIES -->
+            <!-- REGISTRO DE SERIES (normal: la mayoría de acciones del entrenamiento) -->
             <div class="card" id="seriesCard">
                 <h2 data-i18n="workout.titulo.series">Registro de series</h2>
 
@@ -109,8 +109,8 @@ export default `    <section id="tab-workout" class="tab-pane" aria-labelledby="
                 <div id="serieFormEmpty" class="empty-message"></div>
             </div>
 
-            <!-- CALCULADORA DE DISCOS -->
-            <div class="card" id="discosCard">
+            <!-- CALCULADORA DE DISCOS (subtle: herramienta secundaria) -->
+            <div class="card card--subtle" id="discosCard">
                 <h2>Calculadora de discos</h2>
                 <div class="flex-wrap">
                     <div>
@@ -126,7 +126,7 @@ export default `    <section id="tab-workout" class="tab-pane" aria-labelledby="
                 <div id="discosResultado" class="mt-1"></div>
             </div>
 
-            <!-- TIMER DE DESCANSO -->
+            <!-- TIMER DE DESCANSO (normal: importante durante el workout) -->
             <div class="card" id="timerCard">
                 <h2 data-i18n="workout.titulo.timer">Timer de descanso</h2>
                 <div class="timer-display" id="timerDisplay">02:30</div>
@@ -148,8 +148,8 @@ export default `    <section id="tab-workout" class="tab-pane" aria-labelledby="
                 </div>
             </div>
 
-            <!-- MÉTRICAS DE SESIÓN -->
-            <div class="card" id="metricasSesionCard">
+            <!-- MÉTRICAS DE SESIÓN (subtle: métricas configurables/secundarias) -->
+            <div class="card card--subtle" id="metricasSesionCard">
                 <h2>Métricas de sesión</h2>
                 <div class="flex-wrap">
                     <div>

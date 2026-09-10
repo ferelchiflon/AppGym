@@ -4,7 +4,7 @@
  * NO editar inline: es mantenida por la estructura modular de vistas.
  */
 export default `    <section id="tab-progress" class="tab-pane" aria-labelledby="nav-tab-progress">
-        <div class="card" id="graficosCard">
+        <div class="card card--hero" id="graficosCard">
             <h2>Evolución y Rendimiento</h2>
 
             <label for="chartEjercicioSelect">1RM estimado en el tiempo</label>
@@ -36,14 +36,14 @@ export default `    <section id="tab-progress" class="tab-pane" aria-labelledby=
         </div>
 
         <!-- LANDMARKS DE VOLUMEN (MEV / MAV / MRV) -->
-        <div class="card" id="landmarksCard">
+        <div class="card card--subtle" id="landmarksCard">
             <h2>Landmarks de Volumen Semanal (MEV / MAV / MRV)</h2>
             <p class="small-note-inline">Control científico de series efectivas (RPE ≥ 7 o RIR ≤ 3) en los últimos 7 días respecto a umbrales de adaptación.</p>
             <div id="landmarksContainer" class="mt-1"></div>
         </div>
 
         <!-- PROGRESO ACUMULADO -->
-        <div class="card" id="progresoAcumuladoCard">
+        <div class="card card--subtle" id="progresoAcumuladoCard">
             <h2>Progreso acumulado</h2>
             <div class="stats-grid">
                 <div class="stat-box"><div class="number" id="fuerzaAcumulada">0</div><div class="label">Fuerza acum.</div></div>

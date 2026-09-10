@@ -6,7 +6,7 @@
 export default `    <section id="tab-history" class="tab-pane" aria-labelledby="nav-tab-history">
         <div class="grid-2">
             <!-- HISTORIAL -->
-            <div class="card" id="historialCard">
+            <div class="card card--hero" id="historialCard">
                 <h2>Historial de sesiones</h2>
                 <div class="row-buttons">
                     <button id="exportHistorialBtn" class="secondary" type="button">Exportar CSV</button>
@@ -17,7 +17,7 @@ export default `    <section id="tab-history" class="tab-pane" aria-labelledby="
             </div>
 
             <!-- PERIODIZACIÓN -->
-            <div class="card" id="periodizacionCard">
+            <div class="card card--subtle" id="periodizacionCard">
                 <h2>Periodización</h2>
                 <label for="bloqueNombre">Nombre del bloque</label>
                 <input type="text" id="bloqueNombre" placeholder="Bloque de fuerza — otoño">
@@ -43,7 +43,7 @@ export default `    <section id="tab-history" class="tab-pane" aria-labelledby="
             </div>
 
             <!-- WELLNESS -->
-            <div class="card" id="wellnessCard">
+            <div class="card card--subtle" id="wellnessCard">
                 <h2>Wellness diario</h2>
                 <div class="medidas-grid">
                     <div><label for="wellnessSueno">Sueño (1-5)</label><input type="number" id="wellnessSueno" min="1" max="5" value="3" inputmode="numeric"></div>

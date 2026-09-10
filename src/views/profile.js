@@ -5,8 +5,8 @@
  */
 export default `    <section id="tab-profile" class="tab-pane" aria-labelledby="nav-tab-profile">
         <div class="grid-2">
-            <!-- PERFIL -->
-            <div class="card" id="perfilCard">
+            <!-- PERFIL (hero: el perfil de usuario es el foco principal) -->
+            <div class="card card--hero" id="perfilCard">
                 <h2>Perfil del atleta</h2>
                 <div class="flex-wrap">
                     <div>
@@ -37,8 +37,8 @@ export default `    <section id="tab-profile" class="tab-pane" aria-labelledby="
                 <button id="guardarPerfilBtn" class="w-100" type="button">Guardar perfil</button>
             </div>
 
-            <!-- MEDIDAS CORPORALES -->
-            <div class="card" id="medidasCard">
+            <!-- MEDIDAS CORPORALES (subtle: información secundaria del perfil) -->
+            <div class="card card--subtle" id="medidasCard">
                 <h2>Medidas corporales & IMC</h2>
                 <div class="medidas-grid">
                     <div><label for="pechoCm">Pecho (cm)</label><input type="number" id="pechoCm" step="0.5" min="0" inputmode="decimal"></div>
@@ -66,8 +66,8 @@ export default `    <section id="tab-profile" class="tab-pane" aria-labelledby="
                 <div class="small-note" id="medidasGuardadas"></div>
             </div>
 
-            <!-- BACKUP COMPLETO -->
-            <div class="card" id="backupCard">
+            <!-- BACKUP COMPLETO (subtle: configuración/ajsets) -->
+            <div class="card card--subtle" id="backupCard">
                 <h2>Backup completo</h2>
                 <p class="small-note-inline">Exporta o restaura perfiles, wellness, saltos, rutinas, historial y bloques.</p>
                 <div class="row-buttons">
@@ -77,8 +77,8 @@ export default `    <section id="tab-profile" class="tab-pane" aria-labelledby="
                 </div>
             </div>
 
-            <!-- EXPORTAR HISTORIAL DE SERIES -->
-            <div class="card" id="exportarSeriesCard">
+            <!-- EXPORTAR HISTORIAL DE SERIES (subtle: configuración/ajsets) -->
+            <div class="card card--subtle" id="exportarSeriesCard">
                 <h2>Exportar historial de series</h2>
                 <p class="small-note-inline">Descarga el historial de series de este atleta en CSV (fecha, ejercicio, peso, reps, RPE/RIR, esPR) o imprímelo como PDF.</p>
                 <div class="row-buttons">

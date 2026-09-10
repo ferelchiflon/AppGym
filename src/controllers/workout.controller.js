@@ -163,7 +163,7 @@ export class WorkoutController {
         if (peso > 0 && reps > 0 && rpe) {
           const calc = FormulasRM.calcular1RMPorRPE(peso, reps, rpe);
           if (calc) {
-            this.el.rpePorcentajeDisplay.innerHTML = `📊 Carga: <strong>${calc.porcentaje}% 1RM</strong> (Tuchscherer RTS) → 1RM est: <strong>${calc.rm} kg</strong>`;
+            this.el.rpePorcentajeDisplay.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16h8"/><path d="M7 11h12"/><path d="M7 6h3"/></svg> Carga: <strong>${calc.porcentaje}% 1RM</strong> (Tuchscherer RTS) → 1RM est: <strong>${calc.rm} kg</strong>`;
             return;
           }
         }
@@ -826,16 +826,43 @@ export class WorkoutController {
       return;
     }
 
-    const serie = this.rutina.agregarSerie(ejercicioId, { peso, reps, rpe, rir, notas });
-    Store.guardar();
-    Store.emit("series:updated", { ejercicioId, peso, reps });
+   // 1. Validaciones y sanitización de tipos numéricos
+    const pesoNum = parseFloat(peso);
+    const repsNum = parseInt(reps, 10);
+    const rpeNum = rpe !== null && rpe !== undefined && rpe !== "" ? parseFloat(rpe) : null;
+    const rirNum = rir !== null && rir !== undefined && rir !== "" ? parseFloat(rir) : null;
 
-    if (serie && serie.esPR) {
-      GestorTimer.vibrarPR();
-      Toast.mostrar("🏆 ¡Nuevo récord personal (PR) registrado!", "success");
-    } else {
-      GestorTimer.vibrarExito();
-      Toast.mostrar("Serie agregada", "success");
+    if (isNaN(pesoNum) || pesoNum < 0 || isNaN(repsNum) || repsNum <= 0) {
+      Toast.mostrar("Por favor ingresa valores válidos para peso y repeticiones", "warning");
+      return;
+    }
+
+    try {
+      // 2. Ejecución segura de la adición de la serie
+      const serie = this.rutina.agregarSerie(ejercicioId, {
+        peso: pesoNum,
+        reps: repsNum,
+        rpe: rpeNum,
+        rir: rirNum,
+        notas: (notas || "").trim()
+      });
+
+      // 3. Persistencia y emisión de eventos con try/catch explícito
+      Store.guardar();
+      Store.emit("series:updated", { ejercicioId, peso: pesoNum, reps: repsNum });
+
+      // 4. Notificación y feedback (Uso de template literals `` para evitar conflicto de comillas)
+      if (serie && serie.esPR) {
+        GestorTimer.vibrarPR?.();
+        const svgIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg>`;
+        Toast.mostrar(`${svgIcon} ¡Nuevo récord personal (PR) registrado!`, "success");
+      } else {
+        GestorTimer.vibrarExito?.();
+        Toast.mostrar("Serie agregada", "success");
+      }
+    } catch (error) {
+      console.error("[WorkoutController] Error al agregar serie:", error);
+      Toast.mostrar("No se pudo guardar la serie. Inténtalo de nuevo.", "error");
     }
 
     // Iniciar timer de descanso automáticamente si el usuario lo desea
