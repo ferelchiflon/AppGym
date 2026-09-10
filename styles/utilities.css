@@ -415,7 +415,7 @@
     }
 }
 /* ========== CARD HOVER GLOW ==========
-   Tarjeta con degradado radial sutil en la parte superior para métricas destacadas o PRs. */
+ /* Tarjeta con degradado radial sutil en la parte superior para métricas destacadas o PRs. */
 .card-hero-glow {
     background: var(--surface-raised);
     border: 1px solid var(--border-strong);
@@ -432,10 +432,13 @@
     left: 0;
     right: 0;
     height: 60px;
-    background: radial-gradient(ellipse at center, var(--accent-soft) 0/* ========== CARD HOVER GLOW ========== */
-/* ========== CARD HOVER GLOW ========== */
-/* Tarjeta con degradado radial sutil en la parte superior para métricas destacadas o PRs. */
-.card-hero-glow { background: var(--surface-raised); border: 1px solid var(--border-strong); border-radius: var(--radius-card); padding: var(--space-3, 1rem); position: relative; overflow: hidden; }
+    background: radial-gradient(ellipse at center, var(--accent-soft) 0%, transparent 70%);
+    pointer-events: none;
+}
+
 /* ========== DIVIDER GLOW ========== */
-.divider-glow { height: 1px; background: linear-gradient(90deg, transparent, var(--border-strong), transparent); margin: var(--space-2, 1rem) 0; }
+.divider-glow {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+    margin: var(--space-2, 1rem) 0;
 }
