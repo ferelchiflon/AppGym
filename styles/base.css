@@ -9,9 +9,11 @@
     font-weight: 100 900;
     font-display: swap;
     font-named-instance: 'Regular';
-    src: local('Inter Variable'), local('Inter'),
-         url('https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2') format('woff2-variations');
+    src: url('./fonts/inter-variable.woff2') format('woff2-variations');
     unicode-range: U+0020-007E, U+00A0-00FF, U+0100-024F, U+1E00-1EFF, U+2018-201F, U+2032-2033;
+    /* Inter autohosteada para PWA 100% offline-first.
+       Antes cargaba vía <link> de Google Fonts en index.html; hoy se sirve localmente
+       para que funcione sin conexión. */
 }
 
 /* Oswald Variable — display de marca autohosteada (PWA offline-first).
