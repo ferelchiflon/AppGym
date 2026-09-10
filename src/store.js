@@ -455,7 +455,17 @@ export const Store = {
     },
 
     exportarTodo() {
-        return JSON.stringify(Store.cargar(), null, 2);
+        const json = JSON.stringify(Store.cargar(), null, 2);
+        // Marcamos el timestamp del backup exitoso en localStorage
+        try {
+            const ls = _ls();
+            if (ls) {
+                ls.setItem(CONFIG.STORAGE_KEY + "_ultimoBackup", Date.now().toString());
+            }
+        } catch (e) {
+            console.warn('No se pudo guardar timestamp de backup', e);
+        }
+        return json;
     },
 
     importarTodo(jsonStr) {
@@ -479,4 +489,18 @@ export const Store = {
         Store.guardarInmediato();
         return data;
     },
+
+    getUltimoBackup() {
+        try {
+            const ls = _ls();
+            if (ls) {
+                const raw = ls.getItem(CONFIG.STORAGE_KEY + "_ultimoBackup");
+                if (raw) return Number(raw);
+            }
+        } catch (e) {
+            console.warn('No se pudo leer timestamp de backup', e);
+        }
+        return null;
+    },
+
 };

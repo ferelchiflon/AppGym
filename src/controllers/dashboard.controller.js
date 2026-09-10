@@ -43,6 +43,7 @@ export class DashboardController {
     this.perfil = perfil;
     this.cardio = cardio;
     this.container = (el && el.container) || document.getElementById("dashboardContainer");
+    verificarYMostrarRecordatorioBackup();
   }
 
   /** Actualiza referencias tras cambiar de perfil y re-renderiza. */
@@ -1030,4 +1031,84 @@ function zonaVolumen(l) {
     sub_mev: { color: "#77829C", label: "Bajo estímulo" },
   };
   return map[l.estado] || map.sub_mev;
+}
+
+/** ⏰ Verificar y mostrar recordatorio de backup */
+function verificarYMostrarRecordatorioBackup() {
+  // Helper: obtener fecha del registro más viejo en historial como proxy de "primera vez"
+  function fechaPrimerRegistro() {
+    const data = Store.cargar ? Store.cargar() : {};
+    const perfiles = data.profiles || {};
+    const historial = Object.values(perfiles).flatMap(p => p.historial || []);
+    const fechas = historial.filter(f => f && f.fecha).map(f => new Date(f.fecha));
+    if (fechas.length === 0) return null;
+    return new Date(Math.min(...fechas));
+  }
+
+  // Caso 1: Nunca hizo backup Y ya pasaron 14 días desde el primer uso (proxy: fecha más vieja del historial)
+  const nuncaHizoBackup = Store.getUltimoBackup() === null;
+  const primerUso = fechaPrimerRegistro();
+  const catorceDiasMs = 14 * 24 * 60 * 60 * 1000;
+
+  if (nuncaHizoBackup && primerUso && Date.now() - primerUso.getTime() > catorceDiasMs) {
+    const avisoExistente = document.getElementById("_recordatorio-backup");
+    if (!avisoExistente) {
+      const aviso = document.createElement("div");
+      aviso.id = "_recordatorio-backup";
+      aviso.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#e8e8e8;border:1px solid #d0d0d0;padding:12px 20px;border-radius:20px;font-size:14px;color:#333;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,0.15);backdrop-filter:blur(4px);animation:slideUp 300ms ease-out;";
+      aviso.innerHTML = "<span style='margin-right:8px;'>💾</span><span>Hacé un backup de tus datos para no perderlos. <a href='#' id='_recordatorio-backup-link' style='color:#0066ff;text-decoration:underline;'>Exportar backup ahora</a></span><button id='_recordatorio-backup-close' style='background:none;border:none;padding:0;font-size:16px;cursor:pointer;'>×</button>";
+      document.body.appendChild(aviso);
+
+      aviso.querySelector("#_recordatorio-backup-close").addEventListener("click", () => {
+        aviso.style.display = "none";
+        try { sessionStorage.setItem("_backup_avisado", "1"); } catch {/* ignore */} 
+      });
+
+      aviso.querySelector("#_recordatorio-backup-link").addEventListener("click", e => {
+        e.preventDefault();
+        if (typeof window.app?.controllerPerfil?.exportTodoBtn?.click === "function") {
+          window.app.controllerPerfil.exportTodoBtn.click();
+        }
+        aviso.style.display = "none";
+        try { sessionStorage.setItem("_backup_avisado", "1"); } catch {/* ignore */} 
+      });
+    }
+    return;
+  }
+
+  // Caso 2: Ya hizo backup alguna vez pero pasaron más de 30 días desde el último
+  const ultimoBackup = Store.getUltimoBackup();
+  const treintaDiasMs = 30 * 24 * 60 * 60 * 1000;
+
+  if (ultimoBackup && Date.now() - Number(ultimoBackup) > treintaDiasMs) {
+    const avisoExistente = document.getElementById("_recordatorio-backup");
+    if (!avisoExistente) {
+      const aviso = document.createElement("div");
+      aviso.id = "_recordatorio-backup";
+      aviso.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#fff3cd;border:1px solid #ffe8c5;padding:12px 20px;border-radius:20px;font-size:14px;color:#856404;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,0.15);backdrop-filter:blur(4px);animation:slideUp 300ms ease-out;";
+      aviso.innerHTML = "<span style='margin-right:8px;'>💾</span><span>Hace más de 30 días que no haces backup. <a href='#' id='_recordatorio-backup-link2' style='color:#0066ff;text-decoration:underline;'>Exportar backup ahora</a> para tener una copia segura.</span><button id='_recordatorio-backup-close2' style='background:none;border:none;padding:0;font-size:16px;cursor:pointer;'>×</button>";
+      document.body.appendChild(aviso);
+
+      aviso.querySelector("#_recordatorio-backup-close2").addEventListener("click", () => {
+        aviso.style.display = "none";
+        try { sessionStorage.setItem("_backup_avisado", "1"); } catch {/* ignore */} 
+      });
+
+      aviso.querySelector("#_recordatorio-backup-link2").addEventListener("click", e => {
+        e.preventDefault();
+        if (typeof window.app?.controllerPerfil?.exportTodoBtn?.click === "function") {
+          window.app.controllerPerfil.exportTodoBtn.click();
+        }
+        aviso.style.display = "none";
+        try { sessionStorage.setItem("_backup_avisado", "1"); } catch {/* ignore */} 
+      });
+    }
+    return;
+  }
+
+  // Ocultar aviso si existía y ya no corresponde mostrar
+  const avisoExistente = document.getElementById("_recordatorio-backup");
+  if (avisoExistente) {
+    avisoExistente.style.display = "none";
+  }
 }
