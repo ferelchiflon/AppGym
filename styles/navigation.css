@@ -231,7 +231,7 @@
     /* Header a sangre con el ancho de pantalla (app nativa) */
     .app-header {
         margin: -8px -0.9rem calc(0.9rem + env(safe-area-inset-top, 0px));
-        padding: 10px 0.9rem;
+        padding: 10px 0.9rem;        gap: 8px;
     }
     .brand-name { font-size: 0.95rem; }
     .header-title { font-size: 0.88rem; }
