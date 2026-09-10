@@ -816,6 +816,11 @@
     border-color: var(--accent);
 }
 
+.btn-scale:active {
+    transform: scale(0.96);
+    transition: transform 0.1s ease;
+}
+
 .btn-scale.cta-block {
     background: var(--accent);
     border-color: transparent;
@@ -967,5 +972,28 @@
 .estado-insight p { margin: .15rem 0; }
 .estado-insight strong { color: var(--text-primary); }
 .estado-insight .insight-note { font-size: .72rem; color: var(--text-tertiary); font-style: italic; margin-top: .35rem; }
+
+/* Progress bar styles for periodization */
+.progress-wrapper { display: flex; align-items: center; gap: 0.5rem; margin: 1rem 0; }
+.progress-label { font-size: 0.875rem; display: flex; justify-content: space-between; align-items: center; }
+.progress-bar {
+    width: 200px;
+    height: 0.5rem;
+    border-radius: 0.25rem;
+    background-color: var(--color-background-subtle);
+    overflow: hidden;
+    position: relative;
+}
+.progress-bar .progress-fill {
+    height: 100%;
+    border-radius: 0.25rem;
+    transition: width 0.3s ease;
+}
+.progress-text { font-size: 0.75rem; color: var(--text-tertiary); margin-top: 0.25rem; }
+
+/* Color coding based on progress */
+.progress-fill.accent { background: var(--accent); }
+.progress-fill.warning { background: var(--color-warning); }
+.progress-fill.error { background: var(--color-error); }
 }
 }

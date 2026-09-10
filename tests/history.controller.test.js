@@ -497,5 +497,58 @@ describe("HistoryController", () => {
       expect(() => controller._renderWellness()).not.toThrow();
       expect(el.wellnessEstado.textContent).toContain("Moderado (ajustar RPE)"); // 3.0 → total 12
     });
+
+    describe("_renderPeriodizacion · barra de progreso semanal", () => {
+      it("muestra mensaje de no hay bloque activo cuando getBloqueActual returns null", () => {
+        const el = mountHistoryDOM();
+        const periodizacion = makePeriodizacion(null);
+        periodizacion.getBloqueActual = vi.fn(() => null);
+        const controller = crearController({ el, periodizacion });
+        controller._renderPeriodizacion();
+        expect(el.bloqueActualInfo.textContent).toContain("No hay bloque activo de periodización.");
+      });
+
+      it("muestra barra de progreso con colores según progreso", () => {
+        const el = mountHistoryDOM();
+        const bloque = { id: "1", nombre: "Fuerza Base", tipo: "acumulacion", semanas: 6 };
+        const periodizacion = makePeriodizacion();
+        periodizacion.getBloqueActual = vi.fn(() => bloque);
+        periodizacion.getSemanaActual = vi.fn(() => 3); // 3 de 6 = 50% → warning color
+        const controller = crearController({ el, periodizacion });
+        controller._renderPeriodizacion();
+        expect(el.bloqueActualInfo.innerHTML).toContain("progress-bar");
+        expect(el.bloqueActualInfo.innerHTML).toContain("3/6 semanas");
+        const progressFill = el.bloqueActualInfo.querySelector(".progress-fill");
+        expect(progressFill).not.toBeNull();
+        expect(progressFill.style.background).toContain("var(--color-warning)");
+      });
+
+      it("muestra barra de progreso en rojo para bloque casi completado (>= 80%)", () => {
+        const el = mountHistoryDOM();
+        const bloque = { id: "1", nombre: "Realización", tipo: "realizacion", semanas: 5 };
+        const periodizacion = makePeriodizacion();
+        periodizacion.getBloqueActual = vi.fn(() => bloque);
+        periodizacion.getSemanaActual = vi.fn(() => 4); // 4 de 5 = 80% → error color
+        const controller = crearController({ el, periodizacion });
+        controller._renderPeriodizacion();
+        expect(el.bloqueActualInfo.innerHTML).toContain("progress-bar");
+        expect(el.bloqueActualInfo.innerHTML).toContain("4/5 semanas");
+        const progressFill = el.bloqueActualInfo.querySelector(".progress-fill");
+        expect(progressFill).not.toBeNull();
+        expect(progressFill.style.background).toContain("var(--color-error)");
+      });
+
+      it("muestra semanas restantes en el texto de progreso", () => {
+        const el = mountHistoryDOM();
+        const bloque = { semanas: 8, nombre: "Intensificación", tipo: "intensificacion" };
+        const periodizacion = makePeriodizacion();
+        periodizacion.getBloqueActual = vi.fn(() => bloque);
+        periodizacion.getSemanaActual = vi.fn(() => 5); // 5 de 8, quedan 3
+        const controller = crearController({ el, periodizacion });
+        controller._renderPeriodizacion();
+        expect(el.bloqueActualInfo.innerHTML).toContain("Semanas restantes:");
+        expect(el.bloqueActualInfo.textContent || "").toContain("3"); // 8-5=3
+      });
+    });
   });
 });

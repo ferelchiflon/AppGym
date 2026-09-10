@@ -103,6 +103,24 @@ export class AppNavigator {
 
     // 1) Mostrar sólo la sección objetivo
     const panes = document.querySelectorAll(".tab-pane");
+
+    // Reset page-transition class en todos los panes (por si ya estaba de una visita anterior)
+    panes.forEach((p) => p.classList.remove("page-transition"));
+
+    // Agregarle la clase de transición al pane objetivo antes de hacerlo active
+    // así la animación se dispara al momento de togglear "active"
+    const targetPane = document.getElementById(targetId);
+    if (targetPane) {
+      targetPane.classList.add("page-transition");
+      // Quitamos la clase después de que termine la animación (0.28s)
+      // usando { once: true } para que el listener se auto-remueva
+      targetPane.addEventListener(
+        "animationend",
+        () => targetPane.classList.remove("page-transition"),
+        { once: true }
+      );
+    }
+
     panes.forEach((p) => p.classList.toggle("active", p.id === targetId));
 
     // 2) Sincronizar bottom-nav

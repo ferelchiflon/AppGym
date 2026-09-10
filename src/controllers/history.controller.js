@@ -125,6 +125,30 @@ export class HistoryController {
 
     const semanaActual = this.periodizacion.getSemanaActual(bloque);
     const totalSemanas = bloque.semanas || bloque.duracionSemanas || 4;
+    const progresoSemana = semanaActual / totalSemanas;
+
+    // Determinar color basado en el progreso usando tokens CSS
+    let colorClase = 'var(--color-primary)';
+    const progresoPct = Math.round(progresoSemana * 100);
+    if (progresoSemana >= 0.8) {
+      colorClase = 'var(--color-error)';
+    } else if (progresoSemana >= 0.5) {
+      colorClase = 'var(--color-warning)';
+    }
+
+    // Barra de progreso
+    const progressHTML = `
+      <div class="progress-wrapper">
+        <label class="progress-label">
+          ${progresoPct}% completado
+          <span>${semanaActual}/${totalSemanas} semanas</span>
+        </label>
+        <div class="progress-bar" style="width: ${progresoPct}%;">
+          <div class="progress-fill" style="background: ${colorClase}"></div>
+        </div>
+      </div>
+      <p class="progress-text">Semanas restantes: ${totalSemanas - semanaActual}</p>
+    `;
 
     const box = document.createElement("div");
     box.className = "stats-grid";
@@ -134,6 +158,7 @@ export class HistoryController {
       '<div class="stat-box"><div class="number">Semana ' + semanaActual + '/' + totalSemanas + '</div><div class="label">Microciclo</div></div>';
 
     info.appendChild(box);
+    info.insertAdjacentHTML('beforeend', progressHTML);
 
     const prescripcion = this.periodizacion.getPrescripcionActual();
     if (prescripcion && prescripcionContainer) {
