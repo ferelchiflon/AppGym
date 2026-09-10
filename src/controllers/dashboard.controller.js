@@ -7,6 +7,7 @@
 
 import { Store } from "../store.js";
 import { Toast } from "../toast.js";
+import { Utils } from "../utils.ts";
 import { EJERCICIOS_DISPONIBLES } from "../config.ts";
 import { ExerciseGuide } from "../components/exercise-guide.js";
 import { CardioForm } from "../components/cardio-form.js";
@@ -1032,10 +1033,8 @@ function zonaVolumen(l) {
   };
   return map[l.estado] || map.sub_mev;
 }
-
-/** ⏰ Verificar y mostrar recordatorio de backup */
 function verificarYMostrarRecordatorioBackup() {
-  // Helper: obtener fecha del registro más viejo en historial como proxy de "primera vez"
+  // Helper: obtener fecha del registro más viejo en historial
   function fechaPrimerRegistro() {
     const data = Store.cargar ? Store.cargar() : {};
     const perfiles = data.profiles || {};
@@ -1051,28 +1050,17 @@ function verificarYMostrarRecordatorioBackup() {
   const catorceDiasMs = 14 * 24 * 60 * 60 * 1000;
 
   if (nuncaHizoBackup && primerUso && Date.now() - primerUso.getTime() > catorceDiasMs) {
-    const avisoExistente = document.getElementById("_recordatorio-backup");
-    if (!avisoExistente) {
-      const aviso = document.createElement("div");
-      aviso.id = "_recordatorio-backup";
-      aviso.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#e8e8e8;border:1px solid #d0d0d0;padding:12px 20px;border-radius:20px;font-size:14px;color:#333;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,0.15);backdrop-filter:blur(4px);animation:slideUp 300ms ease-out;";
-      aviso.innerHTML = "<span style='margin-right:8px;'>💾</span><span>Hacé un backup de tus datos para no perderlos. <a href='#' id='_recordatorio-backup-link' style='color:#0066ff;text-decoration:underline;'>Exportar backup ahora</a></span><button id='_recordatorio-backup-close' style='background:none;border:none;padding:0;font-size:16px;cursor:pointer;'>×</button>";
-      document.body.appendChild(aviso);
-
-      aviso.querySelector("#_recordatorio-backup-close").addEventListener("click", () => {
-        aviso.style.display = "none";
-        try { sessionStorage.setItem("_backup_avisado", "1"); } catch {/* ignore */} 
-      });
-
-      aviso.querySelector("#_recordatorio-backup-link").addEventListener("click", e => {
-        e.preventDefault();
-        if (typeof window.app?.controllerPerfil?.exportTodoBtn?.click === "function") {
-          window.app.controllerPerfil.exportTodoBtn.click();
-        }
-        aviso.style.display = "none";
-        try { sessionStorage.setItem("_backup_avisado", "1"); } catch {/* ignore */} 
-      });
-    }
+    Toast.mostrarAccion({
+      mensaje: "Hacé un backup de tus datos para no perderlos",
+      accionLabel: "Exportar backup ahora",
+      tipo: "info",
+      onAccion: () => {
+        const json = Store.exportarTodo();
+        Utils.descargarArchivo("gympro_backup_completo.json", json);
+        Toast.mostrar("Backup descargado con éxito", "success");
+      },
+      duracionMs: 0,
+    });
     return;
   }
 
@@ -1081,34 +1069,17 @@ function verificarYMostrarRecordatorioBackup() {
   const treintaDiasMs = 30 * 24 * 60 * 60 * 1000;
 
   if (ultimoBackup && Date.now() - Number(ultimoBackup) > treintaDiasMs) {
-    const avisoExistente = document.getElementById("_recordatorio-backup");
-    if (!avisoExistente) {
-      const aviso = document.createElement("div");
-      aviso.id = "_recordatorio-backup";
-      aviso.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#fff3cd;border:1px solid #ffe8c5;padding:12px 20px;border-radius:20px;font-size:14px;color:#856404;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,0.15);backdrop-filter:blur(4px);animation:slideUp 300ms ease-out;";
-      aviso.innerHTML = "<span style='margin-right:8px;'>💾</span><span>Hace más de 30 días que no haces backup. <a href='#' id='_recordatorio-backup-link2' style='color:#0066ff;text-decoration:underline;'>Exportar backup ahora</a> para tener una copia segura.</span><button id='_recordatorio-backup-close2' style='background:none;border:none;padding:0;font-size:16px;cursor:pointer;'>×</button>";
-      document.body.appendChild(aviso);
-
-      aviso.querySelector("#_recordatorio-backup-close2").addEventListener("click", () => {
-        aviso.style.display = "none";
-        try { sessionStorage.setItem("_backup_avisado", "1"); } catch {/* ignore */} 
-      });
-
-      aviso.querySelector("#_recordatorio-backup-link2").addEventListener("click", e => {
-        e.preventDefault();
-        if (typeof window.app?.controllerPerfil?.exportTodoBtn?.click === "function") {
-          window.app.controllerPerfil.exportTodoBtn.click();
-        }
-        aviso.style.display = "none";
-        try { sessionStorage.setItem("_backup_avisado", "1"); } catch {/* ignore */} 
-      });
-    }
+    Toast.mostrarAccion({
+      mensaje: "Hace más de 30 días que no haces backup. Exportar backup ahora para tener una copia segura.",
+      accionLabel: "Exportar backup ahora",
+      tipo: "warning",
+      onAccion: () => {
+        const json = Store.exportarTodo();
+        Utils.descargarArchivo("gympro_backup_completo.json", json);
+        Toast.mostrar("Backup descargado con éxito", "success");
+      },
+      duracionMs: 0,
+    });
     return;
-  }
-
-  // Ocultar aviso si existía y ya no corresponde mostrar
-  const avisoExistente = document.getElementById("_recordatorio-backup");
-  if (avisoExistente) {
-    avisoExistente.style.display = "none";
   }
 }
