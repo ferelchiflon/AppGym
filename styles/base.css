@@ -144,6 +144,14 @@ h1 small {
         margin-bottom: var(--space-4);
         padding-bottom: 0.75rem;
     }
+    /* Defensa global: nunca permitir scroll horizontal por contenido desbordado.
+       Causa raíz del "slide a los costados" en iPhone. */
+    .app {
+        overflow-x: hidden;
+    }
+    .flex-wrap > * {
+        min-width: 0;
+    }
 }
 
 /* Prevent any child from blowing the viewport width wide on small screens. */

@@ -990,6 +990,7 @@
 .progress-label { font-size: 0.875rem; display: flex; justify-content: space-between; align-items: center; }
 .progress-bar {
     width: 200px;
+    max-width: 100%; /* no desborda en móvil: se encoge al ancho disponible */
     height: 0.5rem;
     border-radius: 0.25rem;
     background-color: var(--color-background-subtle);
