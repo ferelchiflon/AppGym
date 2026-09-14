@@ -13,9 +13,9 @@
  */
 
 /** Tarjeta base reutilizando el DS existente (panel-card + eyebrow). */
-function card(titulo, body) {
+function card(titulo, body, cls = "") {
   return `
-      <div class="dw-card panel-card">
+      <div class="dw-card panel-card ${cls}">
         <div class="eyebrow">${String(titulo).toUpperCase()}</div>
         <div class="dw-card__body">${body}</div>
       </div>`;
@@ -119,7 +119,8 @@ export function logrosRecientes({ prs = null, stre = 0, best = null } = {}) {
   const body = items.length
     ? `<ul class="dw-achievements">${items.map((i) => `<li class="dw-item">${i}</li>`).join("")}</ul>`
     : '<p class="dw-empty">Entrená para desbloquear logros.</p>';
-  return card("Logros recientes", body);
+  // Ancho completo para no dejar un ítem huérfano en la grilla de Seguimiento.
+  return card("Logros recientes", body, "full");
 }
 
 /** Sección completa reutilizable por el controlador de dashboard. */

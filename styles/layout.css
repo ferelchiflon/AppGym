@@ -11,6 +11,11 @@
     .grid-2 {
         grid-template-columns: 1fr 1fr;
     }
+    /* Permite que una tarjeta (p.ej. la hero de Entrenar) ocupe todo el ancho
+       y el resto quede en una grilla 2×2 pareja. */
+    .grid-2 > .full {
+        grid-column: 1 / -1;
+    }
 }
 
 .card {

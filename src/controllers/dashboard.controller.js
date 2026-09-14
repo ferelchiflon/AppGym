@@ -136,7 +136,7 @@ export class DashboardController {
     // Estado vacío: no hay wellness reciente → CTA para registrar hoy.
     if (!tieneRecientes) {
       return `
-      <div class="panel-card">
+      <div class="panel-card full">
         <div class="panel-card-head">
           <div>
             <div class="eyebrow">BIENESTAR</div>
@@ -149,7 +149,7 @@ export class DashboardController {
     }
 
     return `
-      <div class="panel-card">
+      <div class="panel-card full">
         <div class="panel-card-head">
           <div>
             <div class="eyebrow">BIENESTAR</div>
@@ -582,7 +582,7 @@ export class DashboardController {
             })
             .join("");
     return `
-      <div class="panel-card">
+      <div class="panel-card full">
         <div class="panel-card-head">
           <div>
             <div class="eyebrow">MGV · VOLUMEN SEMANAL</div>
@@ -641,7 +641,7 @@ export class DashboardController {
       })
       .join("");
     return `
-      <div class="panel-card">
+      <div class="panel-card full">
         <div class="panel-card-head">
           <div>
             <div class="eyebrow">CONSISTENCIA</div>

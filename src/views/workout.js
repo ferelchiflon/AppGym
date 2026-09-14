@@ -5,8 +5,8 @@
  */
 export default `    <section id="tab-workout" class="tab-pane" aria-labelledby="nav-tab-workout">
         <div class="grid-2">
-            <!-- RUTINA (hero: la rutina activa es lo más importante del entrenamiento) -->
-            <div class="card card--hero" id="rutinaCard">
+            <!-- RUTINA (hero: la rutina activa es lo más importante del entrenamiento; ocupa todo el ancho) -->
+            <div class="card card--hero full" id="rutinaCard">
                 <h2><span data-i18n="workout.titulo.rutina">Rutina de hoy</span> <span class="count-tag" id="ejerciciosCount">0</span></h2>
 
                 <div class="flex-wrap">
