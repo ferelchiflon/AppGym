@@ -28,16 +28,16 @@ body.gym-mode .stat-box .label {
 
 /* --- Botones principales grandes y táctiles ---------------------- */
 body.gym-mode .card button:not(.stepper-chip):not(.nav-tab):not(.icon-btn):not(.float-btn):not(.badge-delete):not(.badge-guide):not(.drawer-item):not(.sync-status):not(.mini-timer):not(.guide-trigger) {
-  min-height: 58px;
-  font-size: 1.08rem;
+  min-height: 52px;
+  font-size: 1rem;
   font-weight: 700;
   border-width: 2px;
 }
 body.gym-mode #addSerieBtn,
 body.gym-mode #guardarSesionBtn,
 body.gym-mode #startTimerBtn {
-  min-height: 64px;
-  font-size: 1.18rem;
+  min-height: 56px;
+  font-size: 1.08rem;
 }
 /* Botón "completar serie": siempre accesible pegando abajo */
 body.gym-mode #guardarSesionBtn {
@@ -53,30 +53,30 @@ body.gym-mode #serieReps,
 body.gym-mode #serieRPE,
 body.gym-mode #serieRIR {
   font-family: var(--font-display);
-  min-height: 58px;
-  font-size: 1.2rem;
+  min-height: 52px;
+  font-size: 1.05rem;
   font-weight: 700;
 }
 body.gym-mode .stepper-chip {
-  min-height: 48px;
-  font-size: 1rem;
+  min-height: 44px;
+  font-size: 0.9rem;
 }
 
 /* --- Temporizador protagonista ------------------------------------ */
 body.gym-mode #timerDisplay {
   font-family: var(--font-display);
-  font-size: clamp(4.25rem, 20vw, 7.5rem);
+  font-size: clamp(3rem, 14vw, 5rem);
   font-weight: 700;
   line-height: 1.05;
   letter-spacing: -0.01em;
 }
 body.gym-mode .floating-timer-display {
   font-family: var(--font-display);
-  font-size: 2.8rem;
+  font-size: 2.2rem;
   font-weight: 700;
 }
 body.gym-mode .mini-timer-display {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 800;
 }
 body.gym-mode .floating-timer {

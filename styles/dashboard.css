@@ -27,7 +27,8 @@
     background: var(--surface-raised);
     border: 1px solid var(--border);
     border-radius: var(--radius-card);
-    padding: clamp(1rem, 2.2vw, 1.5rem);
+    /* Igualado al padding de .card (layout.css) para coherencia de densidad entre vistas */
+    padding: clamp(1.1rem, 2.5vw, 1.75rem);
     overflow: hidden;
 }
 
@@ -41,15 +42,16 @@
 
 .panel-card h3 {
     font-family: var(--font-display);
-    font-size: clamp(1rem, 0.95rem + 0.5vw, 1.15rem);
+    /* Igualado al h2 de .card (layout.css) para coherencia de escala entre vistas */
+    font-size: clamp(1.05rem, 0.95rem + 0.8vw, 1.25rem);
     font-weight: 600;
-    letter-spacing: -0.005em;
+    letter-spacing: -0.01em;
     line-height: 1.25;
 }
 
 .section-title {
     font-family: var(--font-display);
-    font-size: clamp(1.1rem, 1rem + 0.8vw, 1.35rem);
+    font-size: clamp(1.2rem, 1.05rem + 1vw, 1.5rem);
     font-weight: 700;
     letter-spacing: -0.01em;
     margin: 0.25rem 0 0;
@@ -108,10 +110,11 @@
 
 .greeting {
     font-family: var(--font-display);
-    font-size: clamp(1.35rem, 1.1rem + 2vw, 1.9rem);
+    /* Reducido para coherencia con el h2 de .card (1.25rem máx.) y no dominar la vista */
+    font-size: clamp(1.25rem, 1.05rem + 1.4vw, 1.6rem);
     font-weight: 700;
     letter-spacing: -0.02em;
-    line-height: 1.1;
+    line-height: 1.15;
 }
 
 .greeting-date {
@@ -940,6 +943,8 @@
     left: 0;
     top: 0;
     font-size: 0.8rem;
+}
+
 /* Banner unificado: estado del atleta (readiness + fatiga + tendencia) */
 .estado-banner { position: relative; border-radius: 14px; }
 .estado-head { display: flex; align-items: center; gap: 12px; }
@@ -1008,5 +1013,3 @@
 .progress-fill.accent { background: var(--accent); }
 .progress-fill.warning { background: var(--warning-text); }
 .progress-fill.error { background: var(--danger-text); }
-
-}

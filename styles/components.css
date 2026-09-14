@@ -437,11 +437,11 @@ button.success:hover {
 .chart-wrap {
     position: relative;
     width: 100%;
-    height: clamp(230px, 44vw, 320px);
+    height: clamp(220px, 34vh, 300px);
     margin-top: 0.75rem;
 }
 .chart-wrap-sm {
-    height: clamp(190px, 36vw, 250px);
+    height: clamp(180px, 28vh, 240px);
 }
 .chart-wrap canvas {
     max-width: 100% !important;

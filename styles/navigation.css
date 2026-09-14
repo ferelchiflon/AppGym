@@ -16,15 +16,17 @@
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    min-width: 0;
+    overflow: hidden;
 }
 
-.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; overflow: hidden; }
 .brand-logo {
     width: 22px; height: 22px;
     stroke: var(--accent); stroke-width: 2; fill: none;
     stroke-linecap: round; stroke-linejoin: round;
 }
-.brand-name { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; }
+.brand-name { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .brand-name .version-tag {
     background: var(--accent-soft);
     color: var(--accent);
@@ -268,17 +270,17 @@
 }
 /* ---------- Indicador de sincronización (offline-first) en header ---------- */
 .sync-status {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 6px 12px; margin: 0; border-radius: 9999px;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 10px; margin: 0; border-radius: 9999px;
     background: var(--surface-alt); border: 1px solid var(--border);
     color: var(--text-primary); cursor: pointer;
-    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.01em;
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.01em;
     transition: border-color 0.16s ease, background 0.16s ease;
     white-space: nowrap;
 }
 .sync-status:hover { border-color: var(--accent); background: var(--accent-soft); }
 .sync-status-dot {
-    width: 8px; height: 8px; border-radius: 9999px; flex: none;
+    width: 7px; height: 7px; border-radius: 9999px; flex: none;
     background: var(--text-tertiary);
     transition: background 0.2s ease, box-shadow 0.2s ease;
 }
@@ -295,7 +297,19 @@
 }
 @media (max-width: 480px) {
     .sync-status-label { display: none; }
-    .sync-status { padding: 6px 10px; }
+    .sync-status { padding: 5px 9px; gap: 5px; }
+}
+
+/* Header compacto en anchos intermedios: reduce el espacio que consumen el
+   branding y el estado de sincronización para que convivan con el título de
+   la sección (p. ej. "Entrenamiento") sin desbordarse. */
+@media (max-width: 880px) {
+    .app-header { gap: 8px; }
+    .brand-name .version-tag { display: none; }
+}
+@media (max-width: 768px) {
+    .sync-status-label { display: none; }
+    .sync-status { padding: 5px 9px; gap: 5px; }
 }
 
 /* --- Selector de idioma del drawer (i18n) --- */
