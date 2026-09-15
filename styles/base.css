@@ -77,6 +77,7 @@ main,
     /* Fluid inset padding: collapses on phones, opens up on desktop. */
     padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1.5rem, 3vw, 2.5rem);
     box-shadow: var(--shadow-md);
+    overflow-x: hidden;
 }
 
 /* ========== FOCUS ACCESIBLE ==========
