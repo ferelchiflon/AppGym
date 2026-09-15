@@ -209,6 +209,22 @@ describe("HistoryController", () => {
       expect(el.saltosRecientes.textContent).toContain("2026-09-04");
     });
 
+    it("escapa el nombre y tipo del bloque de periodización (XSS en dato importado/manipulado)", () => {
+      const el = mountHistoryDOM();
+      const payload = "<img src=x onerror=alert(1)>";
+      const bloque = { nombre: payload, tipo: payload, semanas: 4 };
+      const periodizacion = makePeriodizacion(bloque, null);
+
+      crearController({ el, periodizacion, perfil: makePerfil() });
+
+      const html = el.bloqueActualInfo.innerHTML;
+      // El payload debe verse como TEXTO escapado, no como HTML ejecutable.
+      expect(html).toContain("&lt;img src=x onerror=alert(1)&gt;");
+      expect(html).not.toContain(payload);
+      // El render sigue insertando el texto (legible) dentro de la tarjeta.
+      expect(el.bloqueActualInfo.textContent).toContain("<img src=x onerror=alert(1)>");
+    });
+
     it("no rompe ni deja la pantalla en blanco sin datos (historial/bloque/wellness/saltos vacíos)", () => {
       const el = mountHistoryDOM();
 

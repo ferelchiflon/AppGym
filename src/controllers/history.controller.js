@@ -5,7 +5,7 @@
  */
 
 import { Store } from "../store.js";
-import { Utils, wellnessScore } from "../utils.ts";
+import { Utils, wellnessScore, esc } from "../utils.ts";
 import { Toast } from "../toast.js";
 import { Dialog } from "../dialog.js";
 import { seriesHistorialACSV } from "../export/csv.js";
@@ -91,7 +91,7 @@ export class HistoryController {
 
       const header = document.createElement("div");
       header.className = "session-header";
-      header.innerHTML = "<strong>" + (sesion.fecha || "Sesión") + "</strong> (" + (sesion.duracionMinutos || 45) + " min) — Vol: <strong>" + (sesion.volumenTotal || 0) + "kg</strong>";
+      header.innerHTML = "<strong>" + esc(sesion.fecha || "Sesión") + "</strong> (" + (sesion.duracionMinutos || 45) + " min) — Vol: <strong>" + (sesion.volumenTotal || 0) + "kg</strong>";
 
       const list = document.createElement("ul");
       list.className = "session-details";
@@ -153,8 +153,8 @@ export class HistoryController {
     const box = document.createElement("div");
     box.className = "stats-grid";
     box.innerHTML =
-      '<div class="stat-box"><div class="number">' + bloque.nombre + '</div><div class="label">Bloque</div></div>' +
-      '<div class="stat-box"><div class="number">' + bloque.tipo + '</div><div class="label">Tipo</div></div>' +
+      '<div class="stat-box"><div class="number">' + esc(bloque.nombre) + '</div><div class="label">Bloque</div></div>' +
+      '<div class="stat-box"><div class="number">' + esc(bloque.tipo) + '</div><div class="label">Tipo</div></div>' +
       '<div class="stat-box"><div class="number">Semana ' + semanaActual + '/' + totalSemanas + '</div><div class="label">Microciclo</div></div>';
 
     info.appendChild(box);
@@ -194,7 +194,7 @@ export class HistoryController {
 
     const badge = document.createElement("div");
     badge.className = "badge";
-    badge.innerHTML = "Estado actual: <strong>" + estado + "</strong> (" + ultimo.fecha + ")";
+    badge.innerHTML = "Estado actual: <strong>" + estado + "</strong> (" + esc(ultimo.fecha) + ")";
     estadoDiv.appendChild(badge);
   }
 

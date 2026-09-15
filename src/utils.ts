@@ -20,8 +20,24 @@ export function debounce<A extends unknown[]>(
   };
 }
 
+/**
+ * Escapa caracteres HTML para prevenir inyección de HTML/XSS cuando se interpola
+ * dato del usuario (nombres, notas, tipos, etc.) dentro de un template HTML.
+ * null/undefined → cadena vacía; escapa & < > ". Misma lógica que tenía
+ * DashboardController._esc; ahora es la ÚNICA fuente compartida para los
+ * controladores (no duplicar esta lógica en ningún otro lado).
+ */
+export function esc(s: unknown): string {
+  return String(s === null || s === undefined ? "" : s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 /** Convertir un valor a número (cuidado: para redes neuronales usar parseFloat). */
 export const Utils = {
+  esc,
   /**
    * Genera un ID único. Usa crypto.randomUUID() (sin colisiones, rápido)
    * y cae a un fallback Date.now+random solo si la API no está disponible

@@ -7,7 +7,7 @@
 
 import { Store } from "../store.js";
 import { Toast } from "../toast.js";
-import { Utils } from "../utils.ts";
+import { Utils, esc } from "../utils.ts";
 import { EJERCICIOS_DISPONIBLES } from "../config.ts";
 import { ExerciseGuide } from "../components/exercise-guide.js";
 import { CardioForm } from "../components/cardio-form.js";
@@ -74,11 +74,8 @@ export class DashboardController {
   }
 
   _esc(s) {
-    return String(s === null || s === undefined ? "" : s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+    // Wrapper fino: la lógica vive en utils.esc (única fuente compartida).
+    return esc(s);
   }
 
   /** Tarjeta de arranque rápido (3 casos según estado). */
@@ -313,7 +310,7 @@ export class DashboardController {
             <div class="eyebrow">PERIODIZACIÓN</div>
             <h3>${this._esc(per.nombre || "Bloque activo")}</h3>
           </div>
-          <span class="tag" style="color:#7DB7FF;border-color:#7DB7FF55;background:#7DB7FF18">${tipoLabel[per.tipo] || per.tipo}</span>
+          <span class="tag" style="color:#7DB7FF;border-color:#7DB7FF55;background:#7DB7FF18">${this._esc(tipoLabel[per.tipo] || per.tipo)}</span>
         </div>
         <div class="periodizacion-row">
           <div class="ring-small" style="--pct:${per.progresoPct}"><span>${per.progresoPct}%</span></div>
@@ -617,7 +614,7 @@ export class DashboardController {
         <div class="sugerencia-main">
           <span class="sugerencia-icon" aria-hidden="true">${STAR_ICON}</span>
           <div>
-            <h3>${nombre}</h3>
+            <h3>${this._esc(nombre)}</h3>
             <p class="muted">${this._esc(ult)}</p>
           </div>
         </div>

@@ -1,5 +1,31 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { Utils } from '../src/utils.ts';
+import { Utils, esc } from '../src/utils.ts';
+
+describe('esc', () => {
+  const payload = '<img src=x onerror=alert(1)>';
+
+  it('escapa caracteres HTML para prevenir inyección/XSS', () => {
+    expect(esc(payload)).toBe('&lt;img src=x onerror=alert(1)&gt;');
+  });
+
+  it('escapa &, <, > y " de forma consistente', () => {
+    expect(esc('& < > "')).toBe('&amp; &lt; &gt; &quot;');
+  });
+
+  it('devuelve cadena vacía para null y undefined (sin lanzar)', () => {
+    expect(esc(null)).toBe('');
+    expect(esc(undefined)).toBe('');
+    expect(esc()).toBe('');
+  });
+
+  it('convierte no-string a texto antes de escapar', () => {
+    expect(esc(0)).toBe('0');
+  });
+
+  it('deja intactos los strings que no tienen caracteres peligrosos', () => {
+    expect(esc('Bloque Fuerza')).toBe('Bloque Fuerza');
+  });
+});
 
 describe('Utils.clamp', () => {
   it('should return the value itself if it is within the range', () => {
