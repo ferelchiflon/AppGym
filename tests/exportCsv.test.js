@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { seriesHistorialACSV, formatoRpeRir, escaparCSV } from '../src/export/csv.js';
+import { seriesHistorialACSV, formatoRpeRir, esFormulaPeligrosa, escaparCSV } from '../src/export/csv.js';
 import { seriesATablaHTML, crearHTMLImprimible } from '../src/export/pdf.js';
 
 describe('escaparCSV', () => {
@@ -13,6 +13,52 @@ describe('escaparCSV', () => {
     expect(escaparCSV('a,b')).toBe('"a,b"');
     expect(escaparCSV('Peso "molón"')).toBe('"Peso ""molón"""');
     expect(escaparCSV('x\ny')).toBe('"x\ny"');
+  });
+});
+describe('escaparCSV / esFormulaPeligrosa (Inyección de Fórmulas, CWE-1236)', () => {
+  it('esFormulaPeligrosa detecta los marcadores = + - @ y tabulación', () => {
+    expect(esFormulaPeligrosa('=1+1')).toBe(true);
+    expect(esFormulaPeligrosa('+123')).toBe(true);
+    expect(esFormulaPeligrosa('-SUM(A1:A2)')).toBe(true);
+    expect(esFormulaPeligrosa('@cmd')).toBe(true);
+    expect(esFormulaPeligrosa('\t=1')).toBe(true);
+    expect(esFormulaPeligrosa('Press banca')).toBe(false);
+    expect(esFormulaPeligrosa('100')).toBe(false);
+    expect(esFormulaPeligrosa('')).toBe(false);
+  });
+
+  it('neutraliza con comilla simple las celdas que empiezan con = + - @', () => {
+    expect(escaparCSV('=1+1')).toBe("'=1+1");
+    expect(escaparCSV('+123')).toBe("'+123");
+    expect(escaparCSV('-SUM(A1:A2)')).toBe("'-SUM(A1:A2)");
+    expect(escaparCSV('@cmd')).toBe("'@cmd");
+  });
+
+  it('no altera texto y números normales', () => {
+    expect(escaparCSV('Press banca')).toBe('Press banca');
+    expect(escaparCSV(100)).toBe('100');
+    expect(escaparCSV('')).toBe('');
+    expect(escaparCSV(null)).toBe('');
+  });
+
+  it('mantiene el enmascarado bajo entrecomillado (fórmula + coma)', () => {
+    expect(escaparCSV('=1+1, x')).toBe('"\'=1+1, x"');
+  });
+
+  it('aplica la protección en la salida completa del historial', () => {
+    const historial = [
+      {
+        fecha: '01/09/2026',
+        ejercicios: [
+          { nombre: '=HYPERLINK("http://evil")', series: [{ peso: 100, reps: 5 }] },
+        ],
+      },
+    ];
+    const csv = seriesHistorialACSV(historial);
+    // El campo, además de entrecomillarse por contener comillas, queda
+    // prefijado con ' para que Excel no lo ejecute como fórmula.
+    expect(csv).toContain("'=HYPERLINK(");
+    expect(csv).not.toMatch(/(^|,)=HYPERLINK/);
   });
 });
 

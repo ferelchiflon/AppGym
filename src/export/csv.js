@@ -5,14 +5,32 @@
  */
 
 /**
+ * Detecta si una celda es un riesgo de Inyección de Fórmulas (CSV Formula
+ * Injection, CWE-1236). Las planillas (Excel/Sheets/LibreOffice) tratan como
+ * fórmula cualquier campo que comienza con `=`, `+`, `-`, `@` o tabulación.
+ * @param {string} s
+ * @returns {boolean}
+ */
+export function esFormulaPeligrosa(s) {
+  return /^[=+\-@\t]/.test(s);
+}
+
+/**
  * Escapa un valor para una celda/campo de CSV:
+ *  - Si comienza con un marcador de fórmula (`= + - @`) se neutraliza con una
+ *    comilla simple inicial para que las planillas lo traten como texto literal
+ *    (mitiga el "CSV Formula Injection", CWE-1236).
  *  - Si contiene coma, comilla o salto de línea → se envuelve entre comillas
  *    y las comillas internas se duplican (regla estándar RFC 4180).
  * @param {*} valor
  * @returns {string}
  */
 export function escaparCSV(valor) {
-  const s = String(valor ?? '');
+  let s = String(valor ?? '');
+  if (esFormulaPeligrosa(s)) {
+    // Neutraliza la celda para que las planillas no la ejecuten como fórmula.
+    s = "'" + s;
+  }
   if (/[",\n\r]/.test(s)) {
     return '"' + s.replace(/"/g, '""') + '"';
   }

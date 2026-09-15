@@ -4,7 +4,7 @@
  * Maneja perfil del atleta, medidas corporales, IMC, métricas acumuladas y centro de backup.
  */
 
-import { Store } from "../store.js";
+import { Store, LIMITE_BACKUP_BYTES } from "../store.js";
 import { Utils } from "../utils.ts";
 import { Toast } from "../toast.js";
 import { Dialog } from "../dialog.js";
@@ -196,6 +196,12 @@ export class ProfileController {
     if (!file) return;
 
     try {
+      // Defensa en profundidad vs vuelco de un archivo local sobredimensionado
+      // (además del límite interno de Store.importarTodo).
+      if (file.size > LIMITE_BACKUP_BYTES) {
+        throw new Error("El backup supera el tamaño máximo permitido (10 MB)");
+      }
+
       const text = await file.text();
       Store.importarTodo(text);
       Toast.mostrar("Backup restaurado con éxito", "success");

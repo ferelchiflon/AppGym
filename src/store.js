@@ -26,6 +26,21 @@ const IDB_NAME = 'gympro';
 const IDB_STORE = 'kv';
 const IDB_KEY = 'gympro_data';
 
+/** Límite máximo aceptado para un backup de importación (10 MB). */
+export const LIMITE_BACKUP_BYTES = 10 * 1024 * 1024;
+
+/**
+ * Allowlists para la sanitización de backups importados (defensa contra
+ * Prototype Pollution y contra la restauración de claves desconocidas o
+ * maliciosas que no forman parte del modelo de datos).
+ */
+const CLAVES_PERFIL = new Set([
+  'id', 'nombre', 'fecha', 'perfil', 'medidas', 'ejerciciosPersonalizados',
+  'sesionesCardio', 'plantillas', 'rutina', 'seriesPorEjercicio', 'superseries',
+  'historial', 'bloques', 'wellness', 'saltos', 'records', 'acumulados',
+]);
+const CLAVES_PROHIBIDAS = new Set(['__proto__', 'prototype', 'constructor']);
+
 /**
  * Acceso seguro a localStorage. En entornos sin storage (p. ej. Node >20
  * sin --localstorage-file, o tests sin polyfill), devuelve null en lugar de
@@ -468,26 +483,115 @@ export const Store = {
         return json;
     },
 
+    /**
+     * Clon profundo de seguridad: devuelve una copia fresca del árbol de datos
+     * descartando claves que permitirían Prototype Pollution (`__proto__`,
+     * `constructor`, `prototype`) y omitiendo cualquier valor que no sea dato
+     * plano de JSON (funciones, instancias no planas, ciclos demasiado profundos).
+     * @param {*} valor
+     * @param {number} profundidad
+     * @returns {*}
+     */
+    _clonarSeguro(valor, profundidad = 0) {
+        if (valor === null || typeof valor !== 'object') return valor;
+        if (profundidad > 40) return undefined;
+        if (Array.isArray(valor)) {
+            const arr = [];
+            for (const elem of valor) {
+                if (CLAVES_PROHIBIDAS.has(elem)) continue;
+                const clon = Store._clonarSeguro(elem, profundidad + 1);
+                if (clon !== undefined) arr.push(clon);
+            }
+            return arr;
+        }
+        const proto = Object.getPrototypeOf(valor);
+        if (proto !== Object.prototype && proto !== null) return undefined;
+        const out = {};
+        for (const k of Object.keys(valor)) {
+            if (CLAVES_PROHIBIDAS.has(k)) continue;
+            const v = Store._clonarSeguro(valor[k], profundidad + 1);
+            if (v !== undefined) out[k] = v;
+        }
+        return out;
+    },
+
+    /**
+     * Sanitiza un backup recién parseado antes de volcarlo al estado:
+     * reconstruye la raíz y cada perfil con allowlists (CLAVES_PERFIL),
+     * elimina claves no permitidas/prohibidas y repara el activeProfileId si
+     * apuntaba a un perfil inexistente. Lanza si la estructura es inválida.
+     * @param {*} data estructura parseada (aún sin tocar)
+     * @returns {object} backup "limpio"
+     */
+    _sanitizarImport(data) {
+        if (!data || typeof data !== 'object' || Array.isArray(data)) {
+            throw new Error('Formato de backup inválido: falta la sección "profiles"');
+        }
+
+        const limpio = Store._clonarSeguro(data) || {};
+
+        const raiz = {};
+        raiz.version = typeof limpio.version === 'string' && limpio.version ? limpio.version : CONFIG.VERSION;
+        raiz.activeProfileId = typeof limpio.activeProfileId === 'string' ? limpio.activeProfileId : '';
+
+        const perfilesOrigen = (limpio.profiles && typeof limpio.profiles === 'object' && !Array.isArray(limpio.profiles))
+            ? limpio.profiles : {};
+        const ids = Object.keys(perfilesOrigen).filter((k) => !CLAVES_PROHIBIDAS.has(k));
+        if (ids.length === 0) {
+            throw new Error('Formato de backup inválido: falta la sección "profiles"');
+        }
+
+        raiz.profiles = {};
+        ids.forEach((k) => {
+            const p = perfilesOrigen[k];
+            if (!p || typeof p !== 'object' || Array.isArray(p)) return;
+            // Allowlist: solo claves conocidas de perfil (elimina las claves
+            // prohibidas, que ya se descartaron en el clonado, y las desconocidas).
+            const perfil = {};
+            Object.keys(p).forEach((ck) => {
+                if (CLAVES_PERFIL.has(ck)) perfil[ck] = p[ck];
+            });
+            let pid = typeof perfil.id === 'string' && perfil.id
+                ? perfil.id
+                : k;
+            if (CLAVES_PROHIBIDAS.has(pid)) pid = Utils.generarId();
+            perfil.id = pid;
+            // defineProperty evita cualquier invocación del setter de __proto__.
+            Object.defineProperty(raiz.profiles, pid, {
+                value: perfil, enumerable: true, configurable: true, writable: true,
+            });
+        });
+
+        if (Object.keys(raiz.profiles).length === 0) {
+            throw new Error('El backup no contiene ningún perfil');
+        }
+        if (!raiz.profiles[raiz.activeProfileId]) {
+            raiz.activeProfileId = Object.keys(raiz.profiles)[0];
+        }
+        return raiz;
+    },
+
     importarTodo(jsonStr) {
+        // Defensa en profundidad: límite de tamaño aunque el caller no lo valide.
+        const bytes = (typeof TextEncoder !== 'undefined')
+            ? new TextEncoder().encode(jsonStr).length
+            : String(jsonStr).length;
+        if (bytes > LIMITE_BACKUP_BYTES) {
+            throw new Error('El archivo supera el tamaño máximo permitido (10 MB)');
+        }
+
         let data;
         try {
             data = JSON.parse(jsonStr);
         } catch {
             throw new Error('El archivo no es un JSON válido');
         }
-        if (!data || typeof data !== 'object' || !data.profiles || typeof data.profiles !== 'object') {
-            throw new Error('Formato de backup inválido: falta la sección "profiles"');
-        }
-        if (Object.keys(data.profiles).length === 0) {
-            throw new Error('El backup no contiene ningún perfil');
-        }
-        if (!data.profiles[data.activeProfileId]) {
-            data.activeProfileId = Object.keys(data.profiles)[0];
-        }
-        if (!data.version) data.version = CONFIG.VERSION;
-        Store._cache = data;
+
+        const limpio = Store._sanitizarImport(data);
+        Store._asegurarColeccionesNuevas(limpio);
+        Store._cache = limpio;
         Store.guardarInmediato();
-        return data;
+        return limpio;
     },
 
     getUltimoBackup() {
