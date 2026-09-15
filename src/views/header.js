@@ -21,7 +21,7 @@ export default `    <header class="app-header">
         </button>
         <button type="button" id="gymModeBtn" class="icon-btn theme-header-btn" aria-label="Activar Modo Gimnasio" aria-pressed="false" title="Activar Modo Gimnasio">
             <span class="theme-header-icon" aria-hidden="true">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h4M14 12h4M6 18h4M14 18h4"/></svg>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M4 8.5v7M6.5 8.5v7M17.5 8.5v7M20 8.5v7"/></svg>
 </span>
         </button>
         <button type="button" id="miniTimerBtn" class="mini-timer" aria-label="Abrir timer de descanso">

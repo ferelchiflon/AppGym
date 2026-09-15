@@ -69,7 +69,7 @@ export default `    <div id="drawerOverlay" class="drawer-overlay"></div>
                     <span class="theme-toggle-label">Modo oscuro</span>
                 </button>
                 <button type="button" class="drawer-item theme-toggle" id="gymModeDrawerBtn" aria-pressed="false" aria-label="Modo Gimnasio">
-                    <span class="theme-toggle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg></span>
+                    <span class="theme-toggle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M4 8.5v7M6.5 8.5v7M17.5 8.5v7M20 8.5v7"/></svg></span>
                     <span class="theme-toggle-label" data-i18n="gym.etiqueta">Modo Gimnasio</span>
                 </button>
                 <label class="drawer-settings-label" for="langSelect">
