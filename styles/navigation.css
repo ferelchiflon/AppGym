@@ -163,8 +163,9 @@
     padding: 2px 6px 4px;
     border-bottom: 1px solid var(--border); margin-bottom: 2px;
 }
-.drawer-group-title svg {
-    width: 14px; height: 14px; flex: 0 0 auto;
+.drawer-group-title svg,
+.drawer-icon {
+    width: 16px; height: 16px; flex: 0 0 auto;
     stroke: var(--accent); stroke-width: 2; fill: none;
     stroke-linecap: round; stroke-linejoin: round;
 }
@@ -187,6 +188,11 @@
 .theme-toggle-icon {
     width: 20px; text-align: center; flex: none;
     font-size: 1.05rem; line-height: 1;
+}
+.theme-toggle-icon svg {
+    width: 18px; height: 18px;
+    stroke: currentColor; stroke-width: 2; fill: none;
+    stroke-linecap: round; stroke-linejoin: round;
 }
 .drawer-item.theme-toggle[aria-pressed="true"] {
     border-color: var(--border-strong);
@@ -314,7 +320,9 @@
 
 /* --- Selector de idioma del drawer (i18n) --- */
 .drawer-settings-label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
   padding: .6rem 1rem .2rem;
   font-size: .78rem;
   font-weight: 600;

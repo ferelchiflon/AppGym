@@ -26,12 +26,12 @@ export const es = {
 
   drawer: {
     group: {
-      inicio: "🏠 Inicio",
+      inicio: "Inicio",
       entrenamiento: "🏋️ Entrenamiento",
-      progreso: "📊 Progreso",
-      perfil: "👤 Perfil y configuración",
-      apariencia: "🎨 Apariencia",
-      herramientas: "⚙️ Herramientas extra",
+      progreso: "Progreso",
+      perfil: "Perfil y configuración",
+      apariencia: "Apariencia",
+      herramientas: "Herramientas extra",
     },
     item: {
       dashboard: "Dashboard",
@@ -72,7 +72,7 @@ export const es = {
   },
 
   idioma: {
-    label: "🌐 Idioma",
+    label: "Idioma",
   },
 
   shortcuts: {
