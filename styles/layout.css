@@ -26,6 +26,8 @@
     /* Subtle top highlight on dark for depth */
     box-shadow: var(--shadow-inset);
     margin-bottom: 0;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 .card h2 {
