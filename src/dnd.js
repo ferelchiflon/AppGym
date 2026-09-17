@@ -16,6 +16,20 @@
  *   dnd.destroy();
  */
 
+/**
+ * Hace reordenable un contenedor (lista) mediante Pointer Events.
+ * El JSDoc tipa el contrato real de `onReorder(fromIndex, toIndex)` para que
+ * TypeScript (callers .ts en strict) acepte callbacks de 2 parámetros: el
+ * default `() => {}` sin parámetros infería `() => void` y los rechazaba.
+ * @param {Element} container Contenedor cuyos ítems se reordenan.
+ * @param {object} [opciones] Opciones de comportamiento.
+ * @param {string} [opciones.selector=".badge"] Selector de los ítems arrastrables.
+ * @param {string} [opciones.handleSel=".drag-handle"] Selector del manejador dentro del ítem.
+ * @param {(fromIndex: number, toIndex: number) => void} [opciones.onReorder] Callback al soltar con el nuevo orden.
+ * @param {string} [opciones.activeClass="dnd-active"] Clase del contenedor durante el arrastre.
+ * @param {string} [opciones.draggingClass="dnd-dragging"] Clase del ítem arrastrado.
+ * @param {string} [opciones.overClass="dnd-over"] Clase del ítem destino bajo el cursor.
+ */
 export function hacerReordenable(
   container,
   {

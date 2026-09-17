@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { DashboardController } from "../src/controllers/dashboard.controller.js";
 import controllerSrc from "../src/controllers/dashboard.controller.js?raw";
+import eventsSrc from "../src/controllers/renderers/dashboard/events.ts?raw";
 import { Store } from "../src/store.js";
 import * as H from "../src/utils/dashboard-helpers.ts";
 
@@ -66,8 +67,14 @@ function mountApp(extra = {}) {
 }
 
 describe("DashboardController · regresión de navegación", () => {
-  it("todas las llamadas a _ir(\"...\") usan tabs que existen como pane real", () => {
-    const targets = [...controllerSrc.matchAll(/_ir\(\s*"([a-z_]+)"/g)].map(
+  it("todas las llamadas a _ir(\"...\") (controlador + wiring en events.ts) usan tabs que existen como pane real", () => {
+    // Desde Fase 2 el wiring vive en dos fuentes: el controlador (navegación de
+    // negocio: _iniciarRutina) y renderers/dashboard/events.ts (listeners del
+    // DOM renderizado). Ambas deben usar sólo tabs válidos.
+    const targets = [
+      ...controllerSrc.matchAll(/_ir\(\s*"([a-z_]+)"/g),
+      ...eventsSrc.matchAll(/_ir\(\s*"([a-z_]+)"/g),
+    ].map(
       (m) => m[1]
     );
 

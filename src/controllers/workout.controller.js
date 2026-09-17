@@ -3,6 +3,10 @@
  * Controlador de la vista "Entrenar".
  * Maneja catálogo de ejercicios, filtro por grupo muscular, creación de ejercicios personalizados,
  * rutina del día, formulario rápido de series, cálculo de 1RM, warm-up y calculadora de discos.
+ *
+ * Fase 2 (Paso B): renders DOM en renderers/workout/renders.ts y wiring de eventos en
+ * renderers/workout/events.ts. Aquí queda la lógica de negocio (series, plantillas, 1RM,
+ * warm-up, discos, métricas) + delegación fina que conserva los nombres de los métodos.
  */
 
 import { Store } from "../store.js";
@@ -11,13 +15,19 @@ import { Toast } from "../toast.js";
 import { Dialog } from "../dialog.js";
 import { FormulasRM, PlateCalculator } from "../formulas.js";
 import { Autoregulacion } from "../autorregulacion.js";
-import { GRUPOS_MUSCULARES, PATRONES_MOVIMIENTO } from "../data/exercises.js";
-import { EJERCICIOS_DISPONIBLES } from "../config.ts";
-import { PLANTILLAS_PREDEFINIDAS } from "../data/plantillas-predefinidas.js";
 import { GestorTimer } from "../gestor-timer.js";
 import { ExerciseGuide } from "../components/exercise-guide.js";
-import { hacerReordenable } from "../dnd.js";
-import { t } from "../i18n.js";
+import { bindWorkoutEvents } from "./renderers/workout/events.ts";
+import {
+  renderFiltroGrupos,
+  renderFiltroPatrones,
+  renderSelectorEjercicios,
+  renderRutina,
+  renderPlantillas,
+  renderPlantillasPredefinidas,
+  renderSeries,
+  renderAutoreg,
+} from "./renderers/workout/renders.ts";
 
 export class WorkoutController {
   constructor({ app, el, rutina, timer }) {
@@ -60,195 +70,13 @@ export class WorkoutController {
     });
   }
 
+  /**
+   * Vincula una sola vez los listeners estáticos de la vista (el HTML base no se
+   * reconstruye; el contenido dinámico re-vincula al renderizarse).
+   * Wiring completo en renderers/workout/events.ts.
+   */
   _bindEvents() {
-    // Filtro de grupo muscular
-    if (this.el.filtroMusculoSelect) {
-      this.el.filtroMusculoSelect.addEventListener("change", () => {
-        this._grupoFiltroActual = this.el.filtroMusculoSelect.value;
-        this._renderSelectorEjercicios();
-      });
-    }
-
-    // Filtro de patrón de movimiento biomecánico
-    if (this.el.filtroPatronSelect) {
-      this.el.filtroPatronSelect.addEventListener("change", () => {
-        this._patronFiltroActual = this.el.filtroPatronSelect.value;
-        this._renderSelectorEjercicios();
-      });
-    }
-
-    // Botón para crear ejercicio personalizado
-    if (this.el.crearEjercicioBtn) {
-      this.el.crearEjercicioBtn.addEventListener("click", () => this._abrirModalCrearEjercicio());
-    }
-
-    // Botón para guardar la rutina actual como plantilla
-    if (this.el.guardarPlantillaBtn) {
-      this.el.guardarPlantillaBtn.addEventListener("click", () => this._guardarComoPlantilla());
-    }
-
-    // Agregar ejercicio a la rutina
-    this.el.agregarBtn.addEventListener("click", () => {
-      const id = this.el.selectEjercicio.value;
-      if (!id) return;
-      if (this.rutina.agregarEjercicio(id)) {
-        Store.guardar();
-        Store.emit("routine:updated", this.rutina.data.rutina);
-        GestorTimer.vibrarCorto();
-        Toast.mostrar("Ejercicio agregado a la rutina", "success");
-      } else {
-        Toast.mostrar("Este ejercicio ya está en la rutina", "error");
-      }
-    });
-
-    // Botón "Guía" junto al selector: abre la guía del ejercicio seleccionado.
-    const guiaBtn = document.getElementById("guiaBtn");
-    if (guiaBtn) {
-      guiaBtn.addEventListener("click", () => {
-        const id = this.el.selectEjercicio.value;
-        if (!id) return;
-        if (!ExerciseGuide.abrirPorEjercicio(id)) {
-          Toast.mostrar("Este ejercicio todavía no tiene guía técnica", "warning");
-        }
-      });
-    }
-
-    // Actualiza el estado visual del botón "Guía" al cambiar de ejercicio.
-    if (this.el.selectEjercicio) {
-      this.el.selectEjercicio.addEventListener("change", () => this._syncGuiaBtn());
-    }
-
-    // Reiniciar rutina completa
-    this.el.resetRutinaBtn.addEventListener("click", async () => {
-      const ok = await Dialog.confirm("¿Reiniciar toda la rutina de hoy?", {
-        peligroso: true,
-        textoConfirmar: "Reiniciar",
-      });
-      if (ok) {
-        this.rutina.data.rutina = [];
-        this.rutina.data.seriesPorEjercicio = {};
-        this.rutina.data.superseries = {};
-        this.rutina.ejercicioSeleccionado = null;
-        Store.guardar();
-        Store.emit("routine:updated", []);
-        Toast.mostrar("Rutina reiniciada", "info");
-      }
-    });
-
-    // Agregar serie individual
-    this.el.addSerieBtn.addEventListener("click", () => this._agregarSerie());
-
-    // Limpiar series del ejercicio actual
-    this.el.limpiarSeriesBtn.addEventListener("click", async () => {
-      const id = this.rutina.getEjercicioActual();
-      if (!id) return;
-      const ok = await Dialog.confirm("¿Borrar todas las series de este ejercicio?", { peligroso: true });
-      if (ok) {
-        this.rutina.eliminarTodasSeries(id);
-        Store.guardar();
-        Store.emit("series:updated", { ejercicioId: id });
-        Toast.mostrar("Series eliminadas", "info");
-      }
-    });
-
-    // Guardar sesión completa de entrenamiento
-    this.el.guardarSesionBtn.addEventListener("click", () => this._guardarSesionCompleta());
-
-    // Cálculos de RPE/RIR automáticos y cálculo de %1RM RTS en tiempo real
-    const actualizarRPE1RMRealTime = () => {
-      const peso = parseFloat(this.el.seriePeso?.value) || 0;
-      const reps = parseInt(this.el.serieReps?.value, 10) || 0;
-      const rpe = parseFloat(this.el.serieRPE?.value) || null;
-      if (this.el.rpePorcentajeDisplay) {
-        if (peso > 0 && reps > 0 && rpe) {
-          const calc = FormulasRM.calcular1RMPorRPE(peso, reps, rpe);
-          if (calc) {
-            this.el.rpePorcentajeDisplay.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16h8"/><path d="M7 11h12"/><path d="M7 6h3"/></svg> Carga: <strong>${calc.porcentaje}% 1RM</strong> (Tuchscherer RTS) → 1RM est: <strong>${calc.rm} kg</strong>`;
-            return;
-          }
-        }
-        this.el.rpePorcentajeDisplay.textContent = "";
-      }
-    };
-
-    this.el.serieRPE.addEventListener("input", () => {
-      if (!this._rirTocadoPorUsuario) {
-        const rpe = parseFloat(this.el.serieRPE.value);
-        if (!isNaN(rpe)) {
-          this.el.serieRIR.value = Math.max(0, 10 - rpe);
-        }
-      }
-      actualizarRPE1RMRealTime();
-    });
-
-    this.el.serieRIR.addEventListener("input", () => {
-      this._rirTocadoPorUsuario = true;
-      const rir = parseFloat(this.el.serieRIR.value);
-      if (!isNaN(rir)) {
-        this.el.serieRPE.value = Math.max(1, Math.min(10, 10 - rir));
-      }
-      actualizarRPE1RMRealTime();
-    });
-
-    this.el.seriePeso?.addEventListener("input", actualizarRPE1RMRealTime);
-    this.el.serieReps?.addEventListener("input", actualizarRPE1RMRealTime);
-
-    // Atajo de teclado: Enter en los campos numéricos de la serie agrega la serie rápido.
-    // No se vincula a textareas/selects para no interferir con la edición de texto.
-    ["seriePeso", "serieReps", "serieRPE", "serieRIR"].forEach((id) => {
-      const inp = document.getElementById(id);
-      if (inp) {
-        inp.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            this._agregarSerie();
-          }
-        });
-      }
-    });
-
-    // Warm-up calculator
-    this.el.calcularWarmUpBtn.addEventListener("click", () => this._calcularWarmUp());
-
-    // Plate calculator
-    this.el.calcularDiscosBtn.addEventListener("click", () => this._calcularDiscos());
-
-    // Timer controls
-    this.el.setTimerBtn.addEventListener("click", () => {
-      const min = parseInt(this.el.timerMinutes.value, 10) || 0;
-      const sec = parseInt(this.el.timerSeconds.value, 10) || 0;
-      this.timer.setTiempo(min, sec);
-      Toast.mostrar("Tiempo fijado", "info");
-    });
-
-    this.el.startTimerBtn.addEventListener("click", () => this.timer.iniciar());
-    this.el.pauseTimerBtn.addEventListener("click", () => this.timer.pausar());
-    this.el.resetTimerBtn.addEventListener("click", () => this.timer.reset());
-  // Búsqueda por texto dentro del selector de ejercicios (Feature: Búsqueda + Filtros)
-    if (this.el.ejercicioBusqueda) {
-      this.el.ejercicioBusqueda.addEventListener(
-        "input",
-        Utils.debounce((e) => {
-          this._busquedaActual = (e.target.value || "").trim().toLowerCase();
-          this._renderSelectorEjercicios();
-        }, 180)
-      );
-    }
-
-    // Drag & Drop para reordenar ejercicios (escritorio + táctil vía Pointer Events)
-    if (this.el.rutinaContainer) {
-      hacerReordenable(this.el.rutinaContainer, {
-        selector: ".badge.routine-badge",
-        handleSel: ".drag-handle",
-        onReorder: (fromIdx, toIdx) => {
-          if (this.rutina.reordenarEjercicio(fromIdx, toIdx)) {
-            Store.emit("routine:updated", this.rutina.data.rutina);
-            GestorTimer.vibrarCorto();
-          }
-        },
-      });
-    }
-
+    bindWorkoutEvents(this);
   }
 
   _subscribeStore() {
@@ -292,233 +120,29 @@ export class WorkoutController {
     btn.title = disponible ? "Ver guía de ejecución" : "Este ejercicio no tiene guía disponible";
   }
 
+  /** Filtro de grupos musculares. Render en renderers/workout/renders.ts. */
   _renderFiltroGrupos() {
-    if (!this.el.filtroMusculoSelect) return;
-    const frag = document.createDocumentFragment();
-    GRUPOS_MUSCULARES.forEach((g) => {
-      const opt = document.createElement("option");
-      opt.value = g.id;
-      opt.textContent = g.nombre;
-      frag.appendChild(opt);
-    });
-    this.el.filtroMusculoSelect.replaceChildren(frag);
+    renderFiltroGrupos(this);
   }
 
+  /** Filtro de patrones de movimiento. Render en renderers/workout/renders.ts. */
   _renderFiltroPatrones() {
-    if (!this.el.filtroPatronSelect) return;
-    const frag = document.createDocumentFragment();
-    PATRONES_MOVIMIENTO.forEach((p) => {
-      const opt = document.createElement("option");
-      opt.value = p.id;
-      opt.textContent = p.nombre;
-      frag.appendChild(opt);
-    });
-    this.el.filtroPatronSelect.replaceChildren(frag);
+    renderFiltroPatrones(this);
   }
 
+  /** Selector de ejercicios con filtros + búsqueda. Render en renderers/workout/renders.ts. */
   _renderSelectorEjercicios() {
-    const todos = Store.getEjerciciosDisponibles();
-    let filtrados = todos;
-
-    if (this._grupoFiltroActual !== "todos") {
-      filtrados = filtrados.filter(
-        (e) => e.musculo === this._grupoFiltroActual || (e.musculosSecundarios && e.musculosSecundarios.includes(this._grupoFiltroActual))
-      );
-    }
-
-    if (this._patronFiltroActual !== "todos") {
-      filtrados = filtrados.filter((e) => e.patron === this._patronFiltroActual);
-    }
-
-    // Búsqueda por texto: nombre del ejercicio y grupos musculares (principal y secundarios).
-    if (this._busquedaActual) {
-      const q = this._busquedaActual;
-      filtrados = filtrados.filter(
-        (e) =>
-          (e.nombre || "").toLowerCase().includes(q) ||
-          String(e.musculo || "").toLowerCase().includes(q) ||
-          (e.musculosSecundarios || []).some((m) => String(m).toLowerCase().includes(q))
-      );
-    }
-
-    const frag = document.createDocumentFragment();
-    filtrados.forEach((ej) => {
-      const opt = document.createElement("option");
-      opt.value = ej.id;
-      const customPrefix = ej.personalizado ? "⭐ " : "";
-      const tieneGuia = ExerciseGuide.porId(ej.id) ? " 📘" : "";
-      opt.textContent = `${customPrefix}${ej.nombre} (${ej.musculo} • ${ej.patron || "general"})${tieneGuia}`;
-      frag.appendChild(opt);
-    });
-
-    if (filtrados.length === 0) {
-      const opt = document.createElement("option");
-      opt.value = "";
-      opt.textContent = "Sin resultados para tu búsqueda / filtros";
-      frag.appendChild(opt);
-    }
-
-    this.el.selectEjercicio.replaceChildren(frag);
-
-    // Nota de conteo de resultados según búsqueda/filtros activos.
-    if (this.el.ejercicioCountNote) {
-      const filtrosActivos = this._grupoFiltroActual !== "todos" || this._patronFiltroActual !== "todos" || !!this._busquedaActual;
-      this.el.ejercicioCountNote.textContent = filtrosActivos
-        ? t("workout.resultado", { n: filtrados.length })
-        : "";
-    }
-
-    this._syncGuiaBtn();
+    renderSelectorEjercicios(this);
   }
 
+  /** Badges de la rutina del día (con drag & drop). Render en renderers/workout/renders.ts. */
   _renderRutina() {
-    const container = this.el.rutinaContainer;
-    container.replaceChildren();
-
-    const rutina = this.rutina.rutina;
-    const countEl = this.el.ejerciciosCount;
-    if (countEl) countEl.textContent = rutina.length;
-
-    if (rutina.length === 0) {
-      const empty = document.createElement("div");
-      empty.className = "empty-message";
-      empty.textContent = t("workout.emptyRutina");
-      container.appendChild(empty);
-      return;
-    }
-
-    const todos = Store.getEjerciciosDisponibles();
-    const actual = this.rutina.getEjercicioActual();
-
-    const frag = document.createDocumentFragment();
-    rutina.forEach((id) => {
-      const ej = todos.find((e) => e.id === id) || { nombre: id, musculo: "general" };
-      const seriesCount = (this.rutina.seriesPorEjercicio[id] || []).length;
-
-      const badge = document.createElement("div");
-      badge.className = "badge routine-badge" + (actual === id ? " active" : "");
-      badge.setAttribute("role", "button");
-      badge.setAttribute("tabindex", "0");
-
-      // Manejador de arrastre (handle). Sin él no se inicia el drag, para no
-      // interferir con el click de selección ni con los botones ⓘ / ×.
-      const dragHandle = document.createElement("span");
-      dragHandle.className = "drag-handle";
-      dragHandle.setAttribute("aria-label", "Arrastrar " + ej.nombre + " para reordenar");
-      dragHandle.title = "Arrastrar para reordenar";
-      dragHandle.textContent = "≡";
-
-      const nombreSpan = document.createElement("span");
-      nombreSpan.textContent = ej.nombre;
-
-      const seriesTag = document.createElement("span");
-      seriesTag.className = "count-tag";
-      seriesTag.textContent = t("workout.seriesTag", { n: seriesCount });
-
-      const guideBtn = document.createElement("button");
-      guideBtn.type = "button";
-      guideBtn.className = "badge-guide";
-      guideBtn.setAttribute("aria-label", "Ver guía de " + ej.nombre);
-      guideBtn.title = "Ver guía de " + ej.nombre;
-      guideBtn.textContent = "ⓘ";
-      guideBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (!ExerciseGuide.abrirPorEjercicio(id)) {
-          Toast.mostrar("Este ejercicio todavía no tiene guía técnica", "warning");
-        }
-      });
-
-      const deleteBtn = document.createElement("button");
-      deleteBtn.type = "button";
-      deleteBtn.className = "badge-delete";
-      deleteBtn.setAttribute("aria-label", "Quitar " + ej.nombre);
-      deleteBtn.textContent = "×";
-
-      deleteBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.rutina.eliminarEjercicio(id);
-        Store.guardar();
-        Store.emit("routine:updated", this.rutina.data.rutina);
-      });
-
-      badge.addEventListener("click", () => {
-        this.rutina.seleccionarEjercicio(id);
-        this._renderRutina();
-        this._renderSeries();
-      });
-
-      badge.append(dragHandle, nombreSpan, seriesTag, guideBtn, deleteBtn);
-      frag.appendChild(badge);
-    });
-
-    container.appendChild(frag);
+    renderRutina(this);
   }
 
+  /** Plantillas guardadas por el usuario. Render en renderers/workout/renders.ts. */
   _renderPlantillas() {
-    const container = this.el.plantillasContainer;
-    if (!container) return;
-    container.replaceChildren();
-
-    const plantillas = Store.listarPlantillas();
-
-    if (plantillas.length === 0) {
-      const empty = document.createElement("div");
-      empty.className = "empty-message";
-      empty.textContent = "No hay plantillas guardadas.";
-      container.appendChild(empty);
-      return;
-    }
-
-    const frag = document.createDocumentFragment();
-
-    plantillas.forEach((p) => {
-      const item = document.createElement("div");
-      item.className = "plantilla-item";
-
-      const info = document.createElement("div");
-      info.className = "plantilla-info";
-
-      const nombre = document.createElement("span");
-      nombre.className = "plantilla-nombre";
-      nombre.textContent = p.nombre;
-
-      const detalle = document.createElement("span");
-      detalle.className = "plantilla-detalle";
-      const fecha = p.creadaEn ? new Date(p.creadaEn).toLocaleDateString("es-ES") : "";
-      detalle.textContent = (p.ejercicios ? p.ejercicios.length : 0) + " ejercicios" + (fecha ? " · " + fecha : "");
-
-      info.append(nombre, detalle);
-
-      const ejercicios = document.createElement("span");
-      ejercicios.className = "plantilla-ejercicios";
-      ejercicios.textContent = (p.ejercicios || [])
-        .map((id) => {
-          const ej = EJERCICIOS_DISPONIBLES.find((e) => e.id === id);
-          return ej ? ej.nombre : id;
-        })
-        .join(", ");
-
-      const acciones = document.createElement("div");
-      acciones.className = "plantilla-acciones";
-
-      const cargarBtn = document.createElement("button");
-      cargarBtn.type = "button";
-      cargarBtn.textContent = "Cargar";
-      cargarBtn.addEventListener("click", () => this._cargarPlantilla(p.id));
-
-      const eliminarBtn = document.createElement("button");
-      eliminarBtn.type = "button";
-      eliminarBtn.className = "danger";
-      eliminarBtn.textContent = "Eliminar";
-      eliminarBtn.addEventListener("click", () => this._eliminarPlantilla(p.id));
-
-      acciones.append(cargarBtn, eliminarBtn);
-
-      item.append(info, ejercicios, acciones);
-      frag.appendChild(item);
-    });
-
-    container.appendChild(frag);
+    renderPlantillas(this);
   }
 
   async _guardarComoPlantilla() {
@@ -579,58 +203,9 @@ export class WorkoutController {
     }
   }
 
+  /** Plantillas predefinidas del sistema. Render en renderers/workout/renders.ts. */
   _renderPlantillasPredefinidas() {
-    const container = this.el.plantillasPredefinidasContainer;
-    if (!container) return;
-    container.replaceChildren();
-
-    const frag = document.createDocumentFragment();
-
-    PLANTILLAS_PREDEFINIDAS.forEach((tpl) => {
-      const card = document.createElement("article");
-      card.className = "predef-card";
-
-      const head = document.createElement("div");
-      head.className = "predef-head";
-
-      const titulo = document.createElement("h4");
-      titulo.textContent = tpl.nombre;
-
-      const badges = document.createElement("span");
-      badges.className = "predef-tags";
-      badges.textContent = (tpl.etiquetas || []).join(" · ");
-
-      head.append(titulo, badges);
-
-      const desc = document.createElement("p");
-      desc.className = "predef-desc";
-      desc.textContent = tpl.descripcion || "";
-
-      const ejList = document.createElement("p");
-      ejList.className = "predef-ejercicios";
-      ejList.textContent = (tpl.ejercicios || [])
-        .map((id) => {
-          const ej = EJERCICIOS_DISPONIBLES.find((e) => e.id === id);
-          return ej ? ej.nombre : id;
-        })
-        .join(" · ");
-
-      const acciones = document.createElement("div");
-      acciones.className = "predef-acciones";
-
-      const importarBtn = document.createElement("button");
-      importarBtn.type = "button";
-      importarBtn.className = "primary";
-      importarBtn.textContent = "Importar y usar";
-      importarBtn.addEventListener("click", () => this._importarPlantillaPredefinida(tpl));
-
-      acciones.appendChild(importarBtn);
-
-      card.append(head, desc, ejList, acciones);
-      frag.appendChild(card);
-    });
-
-    container.appendChild(frag);
+    renderPlantillasPredefinidas(this);
   }
 
   /** Importa una plantilla predefinida: la guarda en "Plantillas guardadas" y la carga. */
@@ -669,83 +244,9 @@ export class WorkoutController {
     }
   }
 
+  /** Formulario + lista de series del ejercicio actual (con prefill "última vez"). Render en renderers/workout/renders.ts. */
   _renderSeries() {
-    const ejercicioId = this.rutina.getEjercicioActual();
-    const serieForm = this.el.serieForm;
-    const emptyMsg = this.el.serieFormEmpty;
-
-    if (!ejercicioId) {
-      if (serieForm) serieForm.classList.add("hidden");
-      if (emptyMsg) {
-        emptyMsg.classList.remove("hidden");
-        emptyMsg.textContent = "Selecciona o agrega un ejercicio de la rutina para registrar series.";
-      }
-      return;
-    }
-
-    if (serieForm) serieForm.classList.remove("hidden");
-    if (emptyMsg) emptyMsg.classList.add("hidden");
-
-    // Recordatorio "última vez": qué hizo el usuario en este ejercicio la última
-    // vez, para reducir la fricción de cargar series. Solo texto de contexto.
-    const ultima = this.rutina.getUltimaSesionEjercicio(ejercicioId);
-    const ultimaVezEl = this.el.serieUltimaVez;
-    if (ultimaVezEl) {
-      if (ultima && (ultima.peso !== null || ultima.reps !== null)) {
-        const rpeTxt = ultima.rpe ? " · RPE " + ultima.rpe : "";
-        ultimaVezEl.textContent =
-          "Última vez: " +
-          (ultima.peso !== null ? ultima.peso : "—") + "kg × " +
-          (ultima.reps !== null ? ultima.reps : "—") + " reps" +
-          rpeTxt +
-          (ultima.fechaISO ? " (" + ultima.fechaISO.slice(0, 10) + ")" : "");
-      } else {
-        ultimaVezEl.textContent = "";
-      }
-    }
-
-    // Prefill opcional: si el usuario todavía no tocó peso/reps de la serie nueva,
-    // precargamos el valor real (editable) de la última vez. Guardamos con valor
-    // vacío para no pisar lo que ya haya escrito (ej. al cambiar de ejercicio).
-    if (ultima) {
-      if (this.el.seriePeso && this.el.seriePeso.value === "" && ultima.peso !== null) {
-        this.el.seriePeso.value = ultima.peso;
-      }
-      if (this.el.serieReps && this.el.serieReps.value === "" && ultima.reps !== null) {
-        this.el.serieReps.value = ultima.reps;
-      }
-    }
-
-    const series = this.rutina.seriesPorEjercicio[ejercicioId] || [];
-    const container = this.el.seriesContainer;
-    container.replaceChildren();
-
-    const frag = document.createDocumentFragment();
-    series.forEach((s, idx) => {
-      const item = document.createElement("div");
-      item.className = "badge serie-item";
-
-      const info = document.createElement("span");
-      const rpeTxt = s.rpe ? " | RPE " + s.rpe : "";
-      const rirTxt = s.rir !== undefined && s.rir !== null ? " | RIR " + s.rir : "";
-      info.textContent = "#" + (idx + 1) + " — " + s.peso + "kg × " + s.reps + " reps" + rpeTxt + rirTxt;
-
-      const delBtn = document.createElement("button");
-      delBtn.type = "button";
-      delBtn.className = "badge-delete";
-      delBtn.textContent = "×";
-      delBtn.addEventListener("click", () => {
-        this.rutina.eliminarSerie(ejercicioId, s.id);
-        Store.guardar();
-        Store.emit("series:updated", { ejercicioId });
-      });
-
-      item.append(info, delBtn);
-      frag.appendChild(item);
-    });
-
-    container.appendChild(frag);
-    this._actualizarMetricasEjercicio(ejercicioId, series);
+    renderSeries(this);
   }
 
   _actualizarMetricasEjercicio(ejercicioId, series) {
@@ -796,16 +297,9 @@ export class WorkoutController {
     this.el.rmPromedio.textContent = rm.promedio.toFixed(1);
   }
 
+  /** Sugerencia de autorregulación para la próxima serie. Render en renderers/workout/renders.ts. */
   _renderAutoreg(sug) {
-    const cont = this.el.autoregSugerencia;
-    cont.replaceChildren();
-    if (!sug) return;
-
-    const div = document.createElement("div");
-    div.className = "autoreg-box";
-    const deltaSign = sug.delta > 0 ? "+" : "";
-    div.textContent = "💡 Sugerencia prox. serie: " + sug.peso + "kg (" + deltaSign + sug.delta + "kg para RPE obj.)";
-    cont.appendChild(div);
+    renderAutoreg(this, sug);
   }
 
   _agregarSerie() {
