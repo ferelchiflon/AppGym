@@ -10,6 +10,14 @@ export interface AppConfig {
   BARRA_KG_DEFAULT: number;
 }
 
+/** Registro liviano de hábitos de nutrición diarios. */
+export interface NutricionRegistro {
+  fecha: string;
+  comidas: number;
+  proteina: boolean;
+  agua: boolean;
+}
+
 /** Una fase técnica de una guía de ejercicio. */
 export interface GuiaFase {
   titulo: string;

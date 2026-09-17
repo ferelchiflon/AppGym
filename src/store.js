@@ -99,6 +99,7 @@ export const Store = {
                 genero: 'masculino',
             },
             wellness: [],
+            nutricion: [],
             saltos: [],
             sesionesCardio: [],
             rutina: [],

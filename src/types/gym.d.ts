@@ -109,6 +109,7 @@ export interface PerfilAtletaData {
     genero: GeneroAtleta;
   };
   wellness: WellnessRegistro[];
+  nutricion?: NutricionRegistro[];
   saltos: SaltoCMJ[];
   sesionesCardio: SesionCardio[];
   rutina: string[];
@@ -149,6 +150,13 @@ export interface WellnessRegistro {
   motivacion: number; // 1 - 5
   puntuacionTotal: number;
   estado: "optimo" | "recuperacion" | "fatiga_alta";
+}
+
+export interface NutricionRegistro {
+  fecha: string;
+  comidas: number;
+  proteina: boolean;
+  agua: boolean;
 }
 
 export interface SaltoCMJ {

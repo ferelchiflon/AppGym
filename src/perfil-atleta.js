@@ -10,6 +10,9 @@ import { Store } from './store.js';
 export class PerfilAtleta {
     constructor(perfilData) {
         this.data = perfilData; // referencia directa al objeto dentro de Store
+        if (this.data && !Array.isArray(this.data.nutricion)) {
+            this.data.nutricion = [];
+        }
     }
 
     guardar(datos) {
@@ -47,6 +50,30 @@ export class PerfilAtleta {
 
     getWellnessUltimo() {
         return this.data.wellness.length > 0 ? this.data.wellness[this.data.wellness.length - 1] : null;
+    }
+
+    registrarNutricion({ comidas = 0, proteina = false, agua = false } = {}) {
+        if (!Array.isArray(this.data.nutricion)) {
+            this.data.nutricion = [];
+        }
+        const numComidas = Math.round(Number(comidas) || 0);
+        const entry = {
+            fecha: Utils.fechaISO(),
+            comidas: Utils.clamp(numComidas, 0, 8),
+            proteina: Boolean(proteina),
+            agua: Boolean(agua),
+        };
+        const idxHoy = this.data.nutricion.findIndex(n => n.fecha === entry.fecha);
+        if (idxHoy >= 0) this.data.nutricion[idxHoy] = entry;
+        else this.data.nutricion.push(entry);
+        Store.guardar();
+        return entry;
+    }
+
+    getNutricionHoy() {
+        if (!Array.isArray(this.data.nutricion) || this.data.nutricion.length === 0) return null;
+        const hoy = Utils.fechaISO();
+        return this.data.nutricion.find(n => n.fecha === hoy) || null;
     }
 
     // Score de readiness ponderado sobre una ventana móvil de registros recientes,
