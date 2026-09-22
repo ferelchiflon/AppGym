@@ -4,6 +4,7 @@
  * por los últimos 7 días, con leyenda. Sin estado.
  */
 import * as H from "../../../utils/dashboard-helpers.ts";
+import type { WellnessRegistro } from "../../../types/gym.d.ts";
 
 const W = 260;
 const HGT = 40;
@@ -13,9 +14,9 @@ const PAD_Y = 6;
 type Punto = [number, number];
 
 /** Proyecta la serie de una clave de bienestar a coordenadas del SVG. */
-export function sparklinePoints(wellness: any[], key: string): Punto[] {
+export function sparklinePoints(wellness: WellnessRegistro[], key: "sueno" | "motivacion" | "estres" | "doms" | "fatiga"): Punto[] {
   const n = wellness.length;
-  return wellness.map((w: any, i: number): Punto => {
+  return wellness.map((w: WellnessRegistro, i: number): Punto => {
     const raw = w[key] || 1;
     const val =
       key === "estres" || key === "doms" || key === "fatiga" ? 6 - raw : raw;
@@ -48,7 +49,7 @@ function suavePath(puntos: Punto[]): string {
 }
 
 /** Render del sparkline multi-métrica con su leyenda. */
-export function sparkline(wellness: any[]): string {
+export function sparkline(wellness: WellnessRegistro[]): string {
   const keys: [string, string, string][] = [
     ["sueno", H.COLORS_SPARKLINE.sueno, "Sueño"],
     ["motivacion", H.COLORS_SPARKLINE.motivacion, "Motivación"],
@@ -81,6 +82,7 @@ export function sparkline(wellness: any[]): string {
     .join("");
 
   return `
-      <svg class="wellness-spark" viewBox="0 0 ${W} ${HGT}" preserveAspectRatio="none" aria-hidden="true">${trazos}</svg>
-      <div class="spark-legend" role="list" aria-label="Leyenda de bienestar">${leyenda}</div>`;
+       <svg class="wellness-spark" viewBox="0 0 ${W} ${HGT}" preserveAspectRatio="none" aria-hidden="true">${trazos}</svg>
+       <div class="spark-legend" role="list" aria-label="Leyenda de bienestar">${leyenda}</div>
+  `;
 }

@@ -10,17 +10,18 @@
 import { Store } from "../store.js";
 import { Toast } from "../toast.js";
 import { Utils } from "../utils.ts";
+import type { AppStoreData, PerfilAtletaData, SesionEntrenamiento } from "../types/gym.d.ts";
 
 /** Fecha del registro más viejo del historial de todos los perfiles (proxy de "primer uso"). */
 function fechaPrimerRegistro(): Date | null {
-  const data: any = Store.cargar ? Store.cargar() : {};
+  const data: AppStoreData = Store.cargar();
   const perfiles = data.profiles || {};
-  const historial: any[] = Object.values(perfiles).flatMap((p: any) => p.historial || []);
-  const fechas: any[] = historial
-    .filter((f: any) => f && f.fecha)
-    .map((f: any) => new Date(f.fecha));
+  const historial: SesionEntrenamiento[] = Object.values(perfiles).flatMap((p: PerfilAtletaData) => p.historial || []);
+  const fechas: Date[] = historial
+    .filter((f: SesionEntrenamiento) => f && f.fecha)
+    .map((f: SesionEntrenamiento) => new Date(f.fecha));
   if (fechas.length === 0) return null;
-  return new Date(Math.min(...fechas));
+  return new Date(Math.min(...fechas.map(d => d.getTime())));
 }
 
 /** Exporta el backup completo (JSON) y avisa con un toast. */

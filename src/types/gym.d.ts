@@ -142,14 +142,15 @@ export interface PerfilAtletaData {
 }
 
 export interface WellnessRegistro {
-  id: string;
   fecha: string;
   sueno: number; // 1 - 5
   estres: number; // 1 - 5
   doms: number; // 1 - 5
   motivacion: number; // 1 - 5
-  puntuacionTotal: number;
-  estado: "optimo" | "recuperacion" | "fatiga_alta";
+  energia: number; // 1 - 5
+  fatiga: number; // 1 - 5
+  alimentacion: number; // 1 - 5
+  hidratacion: number; // 1 - 5
 }
 
 export interface NutricionRegistro {
@@ -180,10 +181,75 @@ export interface BloquePeriodizacion {
   semanaActual: number;
   fechaInicio: string;
   activo: boolean;
+  progresoPct: number;
+  totalSemanas: number;
+  estado: string;
 }
 
 export interface AppStoreData {
   version: string;
   activeProfileId: string;
   profiles: Record<string, PerfilAtletaData>;
+}
+
+/** Resultado del cruce entre historial y wellness usado en banner y analytics. */
+export interface WellnessCorrelacionResultado {
+  suficienteDatos: boolean;
+  cruces: number;
+  sueno: { diffPct: number | null; nBajos: number; nAltos: number } | undefined;
+  estres: { diffPct: number | null; nBajos: number; nAltos: number } | undefined;
+  doms: { diffPct: number | null; nBajos: number; nAltos: number } | undefined;
+  motivacion: { diffPct: number | null; nBajos: number; nAltos: number } | undefined;
+  energia: { diffPct: number | null; nBajos: number; nAltos: number } | undefined;
+  fatiga: { diffPct: number | null; nBajos: number; nAltos: number } | undefined;
+  alimentacion: { diffPct: number | null; nBajos: number; nAltos: number } | undefined;
+  hidratacion: { diffPct: number | null; nBajos: number; nAltos: number } | undefined;
+}
+
+/** Tendencia de listos para el banner (hoy vs ventana anterior). */
+export interface TendenciaReadiness {
+  [key: string]: {
+    actual: number | null;
+    anterior: number | null;
+    direccion: "subio" | "bajo" | "estable" | "nuevo";
+    delta: number | null;
+  };
+}
+
+/** Resultado del cálculo de readiness utilizado en el dashboard. */
+export interface Readiness {
+  score: number;
+  color: string;
+  partes: Record<string, number>;
+}
+
+export interface ResumenCardio {
+  sesiones: number;
+  minutos: number;
+  distancia: number;
+  fcPromedio: number | null;
+  rpePromedio: number | null;
+}
+
+interface VolumenStats {
+  total: number;
+  semana: number;
+}
+interface SEStats {
+  total: number;
+  semana: number;
+}
+interface StreStats {
+  total: number;
+  semana: number;
+}
+interface BestStats {
+  total: number;
+  semana: number;
+  ejercicio: string;
+}
+interface AcwrData {
+  ratio: number;
+  zona: string;
+  etiqueta: string;
 }

@@ -16,11 +16,12 @@ import { ExerciseGuide } from "../../../components/exercise-guide.js";
 import { CardioForm } from "../../../components/cardio-form.js";
 import { GestorTimer } from "../../../gestor-timer.js";
 import { WELLNESS_KEYS } from "./common.ts";
+import { DashboardController } from "../../dashboard.controller";
 
 /** Vincula todos los eventos tras renderizar. Recibe el DashboardController. */
-export function bindDashboardActions(c: any): void {
-  const container: any = c.container;
-  const qs = (id: string): any => container.querySelector(id);
+export function bindDashboardActions(c: DashboardController): void {
+  const container: HTMLElement = c.container;
+  const qs = (id: string): Element | null => container.querySelector(id);
 
   const quick = qs("#quickStartBtn");
   if (quick) {
@@ -63,18 +64,18 @@ export function bindDashboardActions(c: any): void {
     });
   }
 
-  container.querySelectorAll(".wstar").forEach((star: any) =>
-    star.addEventListener("click", () => c._marcarStar(star))
+  container.querySelectorAll(".wstar").forEach((star: Element) =>
+    star.addEventListener("click", () => c._marcarStar(star as HTMLElement))
   );
 
-  container.querySelectorAll("#goPeriodizacionBtn").forEach((b: any) =>
+  container.querySelectorAll("#goPeriodizacionBtn").forEach((b: Element) =>
     b.addEventListener("click", () => c._ir("history", true))
   );
   const sug = qs("#sugerenciaBtn");
   if (sug) sug.addEventListener("click", () => c._iniciarRutinaSugerida());
 
   // Botón "Ver técnica": abre la guía del ejercicio guiado del día.
-  container.querySelectorAll("#sugerenciaGuiaBtn").forEach((b: any) => {
+  container.querySelectorAll("#sugerenciaGuiaBtn").forEach((b: Element) => {
     b.addEventListener("click", () => {
       const id = b.getAttribute("data-ej-id");
       if (!id) return;
@@ -85,15 +86,17 @@ export function bindDashboardActions(c: any): void {
   });
 
   // Stepper de nutrición (+/- comidas)
-  container.querySelectorAll('.stepper-chip[data-step-target="nutricionComidas"]').forEach((btn: any) => {
-    btn.addEventListener("click", (e: any) => {
+  container.querySelectorAll('.stepper-chip[data-step-target="nutricionComidas"]').forEach((btn: Element) => {
+    btn.addEventListener("click", (e: Event) => {
       e.preventDefault();
-      const input = container.querySelector("#nutricionComidas");
-      if (!input) return;
-      const stepVal = parseFloat(btn.getAttribute("data-step-val")) || 0;
+      const inputEl = container.querySelector("#nutricionComidas");
+      if (!inputEl) return;
+       const input = inputEl as HTMLInputElement;
+       const stepValAttr = btn.getAttribute("data-step-val");
+        const stepVal = stepValAttr ? parseFloat(stepValAttr) : 0;
       const current = parseInt(input.value, 10) || 0;
       const next = Math.max(0, Math.min(8, Math.round(current + stepVal)));
-      input.value = next;
+      input.value = String(next);
       input.dispatchEvent(new Event("input", { bubbles: true }));
       GestorTimer?.vibrarCorto?.();
     });
@@ -116,7 +119,9 @@ export function bindDashboardActions(c: any): void {
   const guardarNutricion = qs("#nutricionGuardarBtn");
   if (guardarNutricion) {
     guardarNutricion.addEventListener("click", () => {
-      const input = container.querySelector("#nutricionComidas");
+      const inputEl = container.querySelector("#nutricionComidas");
+       if (!inputEl) return;
+       const input = inputEl as HTMLInputElement;
       const comidas = input ? parseInt(input.value, 10) || 0 : 0;
       const protBtn = qs("#nutricionProteinaBtn");
       const aguaBtn = qs("#nutricionAguaBtn");
