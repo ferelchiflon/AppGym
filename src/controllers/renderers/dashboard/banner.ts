@@ -3,7 +3,7 @@
  * Banner "Estado del atleta · HOY" y banner de correlación bienestar↔rendimiento.
  * Funciones puras: reciben `rutina` y `perfil` y devuelven HTML (string). Sin estado.
  */
-import * as H from "../../../utils/dashboard-helpers.ts";
+import * as H from "../../../helpers/dashboard-helpers";
 import { esc } from "../../../utils.ts";
 import { WellnessCorrelation } from "../../../wellness-correlation.js";
 import type { SesionEntrenamiento, PerfilAtletaData, Readiness, TendenciaReadiness } from "../../../types/gym.d.ts";

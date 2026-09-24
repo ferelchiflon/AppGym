@@ -4,7 +4,7 @@
  * periodización, sugerencia, calendario, RM/PRs y landmarks). Funciones puras:
  * reciben datos y devuelven HTML (string). Sin estado.
  */
-import * as H from "../../../utils/dashboard-helpers.ts";
+import * as H from "../../../helpers/dashboard-helpers";
 import { esc } from "../../../utils.ts";
 import { EJERCICIOS_DISPONIBLES } from "../../../config.ts";
 import { ExerciseGuide } from "../../../components/exercise-guide.js";

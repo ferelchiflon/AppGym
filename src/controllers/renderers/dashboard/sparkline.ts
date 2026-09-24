@@ -3,7 +3,7 @@
  * Render del sparkline de bienestar: SPA (spline de Catmull-Rom) suavizado
  * por los últimos 7 días, con leyenda. Sin estado.
  */
-import * as H from "../../../utils/dashboard-helpers.ts";
+import * as H from "../../../helpers/dashboard-helpers";
 import type { WellnessRegistro } from "../../../types/gym.d.ts";
 
 const W = 260;

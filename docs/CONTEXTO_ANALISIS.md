@@ -882,7 +882,7 @@ import { Store } from "../store.js";
 import { Toast } from "../toast.js";
 import { EJERCICIOS_DISPONIBLES } from "../config.ts";
 import { renderSeguimiento } from "../components/dashboard-widgets.js";
-import * as H from "../utils/dashboard-helpers.ts";
+import * as H from "../helpers/dashboard-helpers.ts";
 // Renderers puros extraídos (tarjetas y banners del dashboard): única fuente de HTML.
 import {
   quickStart,
@@ -1754,7 +1754,7 @@ export class ProfileController {
  * Banner "Estado del atleta · HOY" y banner de correlación bienestar↔rendimiento.
  * Funciones puras: reciben `rutina` y `perfil` y devuelven HTML (string). Sin estado.
  */
-import * as H from "../../../utils/dashboard-helpers.ts";
+import * as H from "../../../helpers/dashboard-helpers";
 import { esc } from "../../../utils.ts";
 import { WellnessCorrelation } from "../../../wellness-correlation.js";
 import type { SesionEntrenamiento, PerfilAtletaData, Readiness, TendenciaReadiness } from "../../../types/gym.d.ts";
@@ -1941,7 +1941,7 @@ export function estadoAtletaBanner(opts: { rutina: { historial: SesionEntrenamie
  * periodización, sugerencia, calendario, RM/PRs y landmarks). Funciones puras:
  * reciben datos y devuelven HTML (string). Sin estado.
  */
-import * as H from "../../../utils/dashboard-helpers.ts";
+import * as H from "../../../helpers/dashboard-helpers";
 import { esc } from "../../../utils.ts";
 import { EJERCICIOS_DISPONIBLES } from "../../../config.ts";
 import { ExerciseGuide } from "../../../components/exercise-guide.js";
@@ -2765,7 +2765,7 @@ export function bindDashboardActions(c: DashboardController): void {
  * Render del sparkline de bienestar: SPA (spline de Catmull-Rom) suavizado
  * por los últimos 7 días, con leyenda. Sin estado.
  */
-import * as H from "../../../utils/dashboard-helpers.ts";
+import * as H from "../../../helpers/dashboard-helpers";
 import type { WellnessRegistro } from "../../../types/gym.d.ts";
 
 const W = 260;
