@@ -18,11 +18,18 @@ import { GRUPOS_MUSCULARES, PATRONES_MOVIMIENTO } from "../../../data/exercises.
 import { EJERCICIOS_DISPONIBLES } from "../../../config.ts";
 import { PLANTILLAS_PREDEFINIDAS } from "../../../data/plantillas-predefinidas.js";
 import { t } from "../../../i18n.js";
+import type { WorkoutController } from "../../../types/workout-controller";
+import type { Ejercicio, MusculoGrupo, Plantilla, PlantillaPredefinida, Serie } from "../../../types/gym.d.ts";
+interface AutoregSugerencia {
+  peso: number;
+  direccion: string;
+  delta: number;
+}
 
-export function renderFiltroGrupos(c: any): void {
+export function renderFiltroGrupos(c: WorkoutController): void {
     if (!c.el.filtroMusculoSelect) return;
     const frag = document.createDocumentFragment();
-    GRUPOS_MUSCULARES.forEach((g: any) => {
+    GRUPOS_MUSCULARES.forEach((g: { id: string; nombre: string }) => {
       const opt = document.createElement("option");
       opt.value = g.id;
       opt.textContent = g.nombre;
@@ -31,10 +38,10 @@ export function renderFiltroGrupos(c: any): void {
     c.el.filtroMusculoSelect.replaceChildren(frag);
 }
 
-export function renderFiltroPatrones(c: any): void {
+export function renderFiltroPatrones(c: WorkoutController): void {
     if (!c.el.filtroPatronSelect) return;
     const frag = document.createDocumentFragment();
-    PATRONES_MOVIMIENTO.forEach((p: any) => {
+    PATRONES_MOVIMIENTO.forEach((p: { id: string; nombre: string }) => {
       const opt = document.createElement("option");
       opt.value = p.id;
       opt.textContent = p.nombre;
@@ -43,33 +50,33 @@ export function renderFiltroPatrones(c: any): void {
     c.el.filtroPatronSelect.replaceChildren(frag);
 }
 
-export function renderSelectorEjercicios(c: any): void {
-    const todos = Store.getEjerciciosDisponibles();
+export function renderSelectorEjercicios(c: WorkoutController): void {
+    const todos: Ejercicio[] = Store.getEjerciciosDisponibles();
     let filtrados = todos;
 
     if (c._grupoFiltroActual !== "todos") {
       filtrados = filtrados.filter(
-        (e: any) => e.musculo === c._grupoFiltroActual || (e.musculosSecundarios && e.musculosSecundarios.includes(c._grupoFiltroActual))
+        (e: Ejercicio) => e.musculo === c._grupoFiltroActual || (e.musculosSecundarios && e.musculosSecundarios.includes(c._grupoFiltroActual as MusculoGrupo))
       );
     }
 
     if (c._patronFiltroActual !== "todos") {
-      filtrados = filtrados.filter((e: any) => e.patron === c._patronFiltroActual);
+      filtrados = filtrados.filter((e: Ejercicio) => e.patron === c._patronFiltroActual);
     }
 
     // Búsqueda por texto: nombre del ejercicio y grupos musculares (principal y secundarios).
     if (c._busquedaActual) {
       const q = c._busquedaActual;
       filtrados = filtrados.filter(
-        (e: any) =>
+        (e: Ejercicio) =>
           (e.nombre || "").toLowerCase().includes(q) ||
           String(e.musculo || "").toLowerCase().includes(q) ||
-          (e.musculosSecundarios || []).some((m: any) => String(m).toLowerCase().includes(q))
+          (e.musculosSecundarios || []).some((m: string) => String(m).toLowerCase().includes(q))
       );
     }
 
     const frag = document.createDocumentFragment();
-    filtrados.forEach((ej: any) => {
+    filtrados.forEach((ej: Ejercicio) => {
       const opt = document.createElement("option");
       opt.value = ej.id;
       const customPrefix = ej.personalizado ? "⭐ " : "";
@@ -98,13 +105,13 @@ export function renderSelectorEjercicios(c: any): void {
     c._syncGuiaBtn();
 }
 
-export function renderRutina(c: any): void {
+export function renderRutina(c: WorkoutController): void {
     const container = c.el.rutinaContainer;
     container.replaceChildren();
 
     const rutina = c.rutina.rutina;
     const countEl = c.el.ejerciciosCount;
-    if (countEl) countEl.textContent = rutina.length;
+    if (countEl) countEl.textContent = String(rutina.length);
 
     if (rutina.length === 0) {
       const empty = document.createElement("div");
@@ -114,12 +121,12 @@ export function renderRutina(c: any): void {
       return;
     }
 
-    const todos = Store.getEjerciciosDisponibles();
+    const todos: Ejercicio[] = Store.getEjerciciosDisponibles();
     const actual = c.rutina.getEjercicioActual();
 
     const frag = document.createDocumentFragment();
-    rutina.forEach((id: any) => {
-      const ej = todos.find((e: any) => e.id === id) || { nombre: id, musculo: "general" };
+    rutina.forEach((id) => {
+      const ej = todos.find((e: Ejercicio) => e.id === id) || { nombre: id, musculo: "general" };
       const seriesCount = (c.rutina.seriesPorEjercicio[id] || []).length;
 
       const badge = document.createElement("div");
@@ -148,7 +155,7 @@ export function renderRutina(c: any): void {
       guideBtn.setAttribute("aria-label", "Ver guía de " + ej.nombre);
       guideBtn.title = "Ver guía de " + ej.nombre;
       guideBtn.textContent = "ⓘ";
-      guideBtn.addEventListener("click", (e: any) => {
+      guideBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         if (!ExerciseGuide.abrirPorEjercicio(id)) {
           Toast.mostrar("Este ejercicio todavía no tiene guía técnica", "warning");
@@ -161,7 +168,7 @@ export function renderRutina(c: any): void {
       deleteBtn.setAttribute("aria-label", "Quitar " + ej.nombre);
       deleteBtn.textContent = "×";
 
-      deleteBtn.addEventListener("click", (e: any) => {
+      deleteBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         c.rutina.eliminarEjercicio(id);
         Store.guardar();
@@ -181,12 +188,12 @@ export function renderRutina(c: any): void {
     container.appendChild(frag);
 }
 
-export function renderPlantillas(c: any): void {
+export function renderPlantillas(c: WorkoutController): void {
     const container = c.el.plantillasContainer;
     if (!container) return;
     container.replaceChildren();
 
-    const plantillas = Store.listarPlantillas();
+    const plantillas: Plantilla[] = Store.listarPlantillas();
 
     if (plantillas.length === 0) {
       const empty = document.createElement("div");
@@ -198,7 +205,7 @@ export function renderPlantillas(c: any): void {
 
     const frag = document.createDocumentFragment();
 
-    plantillas.forEach((p: any) => {
+    plantillas.forEach((p) => {
       const item = document.createElement("div");
       item.className = "plantilla-item";
 
@@ -219,8 +226,8 @@ export function renderPlantillas(c: any): void {
       const ejercicios = document.createElement("span");
       ejercicios.className = "plantilla-ejercicios";
       ejercicios.textContent = (p.ejercicios || [])
-        .map((id: any) => {
-          const ej = EJERCICIOS_DISPONIBLES.find((e: any) => e.id === id);
+        .map((id) => {
+          const ej = EJERCICIOS_DISPONIBLES.find((e) => e.id === id);
           return ej ? ej.nombre : id;
         })
         .join(", ");
@@ -248,14 +255,14 @@ export function renderPlantillas(c: any): void {
     container.appendChild(frag);
 }
 
-export function renderPlantillasPredefinidas(c: any): void {
+export function renderPlantillasPredefinidas(c: WorkoutController): void {
     const container = c.el.plantillasPredefinidasContainer;
     if (!container) return;
     container.replaceChildren();
 
     const frag = document.createDocumentFragment();
 
-    PLANTILLAS_PREDEFINIDAS.forEach((tpl: any) => {
+    PLANTILLAS_PREDEFINIDAS.forEach((tpl: PlantillaPredefinida) => {
       const card = document.createElement("article");
       card.className = "predef-card";
 
@@ -278,8 +285,8 @@ export function renderPlantillasPredefinidas(c: any): void {
       const ejList = document.createElement("p");
       ejList.className = "predef-ejercicios";
       ejList.textContent = (tpl.ejercicios || [])
-        .map((id: any) => {
-          const ej = EJERCICIOS_DISPONIBLES.find((e: any) => e.id === id);
+        .map((id) => {
+          const ej = EJERCICIOS_DISPONIBLES.find((e) => e.id === id);
           return ej ? ej.nombre : id;
         })
         .join(" · ");
@@ -302,7 +309,7 @@ export function renderPlantillasPredefinidas(c: any): void {
     container.appendChild(frag);
 }
 
-export function renderSeries(c: any): void {
+export function renderSeries(c: WorkoutController): void {
     const ejercicioId = c.rutina.getEjercicioActual();
     const serieForm = c.el.serieForm;
     const emptyMsg = c.el.serieFormEmpty;
@@ -342,10 +349,10 @@ export function renderSeries(c: any): void {
     // vacío para no pisar lo que ya haya escrito (ej. al cambiar de ejercicio).
     if (ultima) {
       if (c.el.seriePeso && c.el.seriePeso.value === "" && ultima.peso !== null) {
-        c.el.seriePeso.value = ultima.peso;
+        c.el.seriePeso.value = String(ultima.peso);
       }
       if (c.el.serieReps && c.el.serieReps.value === "" && ultima.reps !== null) {
-        c.el.serieReps.value = ultima.reps;
+        c.el.serieReps.value = String(ultima.reps);
       }
     }
 
@@ -354,7 +361,7 @@ export function renderSeries(c: any): void {
     container.replaceChildren();
 
     const frag = document.createDocumentFragment();
-    series.forEach((s: any, idx: any) => {
+    series.forEach((s: Serie, idx: number) => {
       const item = document.createElement("div");
       item.className = "badge serie-item";
 
@@ -381,7 +388,7 @@ export function renderSeries(c: any): void {
     c._actualizarMetricasEjercicio(ejercicioId, series);
 }
 
-export function renderAutoreg(c: any, sug: any): void {
+export function renderAutoreg(c: WorkoutController, sug: AutoregSugerencia | null): void {
     const cont = c.el.autoregSugerencia;
     cont.replaceChildren();
     if (!sug) return;

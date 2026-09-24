@@ -7,7 +7,7 @@
  * Controlador delgado (Fase 2 · refactor): TODO el HTML vive en
  * renderers/dashboard/ (cards.ts, sparkline.ts, banner.ts), el wiring de
  * eventos en renderers/dashboard/events.ts y el recordatorio de backup en
- * utils/backup-reminder.ts. Acá queda sólo la orquestación: leer datos,
+ * helpers/backup-reminder.ts. Acá queda sólo la orquestación: leer datos,
  * delegar el render y ejecutar las acciones de negocio (guardar/navegar).
  */
 
@@ -15,7 +15,7 @@ import { Store } from "../store.js";
 import { Toast } from "../toast.js";
 import { EJERCICIOS_DISPONIBLES } from "../config.ts";
 import { renderSeguimiento } from "../components/dashboard-widgets.js";
-import * as H from "../utils/dashboard-helpers.ts";
+import * as H from "../helpers/dashboard-helpers.ts";
 // Renderers puros extraídos (tarjetas y banners del dashboard): única fuente de HTML.
 import {
   quickStart,
@@ -38,7 +38,7 @@ import { WELLNESS_KEYS } from "./renderers/dashboard/common.ts";
 // Wiring de eventos tras el render (listeners del contenedor renderizado).
 import { bindDashboardActions } from "./renderers/dashboard/events.ts";
 // Recordatorio de backup (toast con acción "Exportar backup ahora").
-import { verificarYMostrarRecordatorioBackup } from "../utils/backup-reminder.ts";
+import { verificarYMostrarRecordatorioBackup } from "../helpers/backup-reminder.ts";
 
 export class DashboardController {
   /**

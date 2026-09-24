@@ -40,7 +40,7 @@ export interface EjercicioGuia {
 }
 
 export const CONFIG: AppConfig = {
-    VERSION: '6.0',
+    VERSION: '6.0.0',
     STORAGE_KEY: 'gympro_data',
     DEFAULT_ALTURA: 175,
     DEFAULT_PESO: 72.5,

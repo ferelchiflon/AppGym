@@ -50,7 +50,7 @@ function suavePath(puntos: Punto[]): string {
 
 /** Render del sparkline multi-métrica con su leyenda. */
 export function sparkline(wellness: WellnessRegistro[]): string {
-  const keys: [string, string, string][] = [
+  const keys: Array<["sueno" | "motivacion" | "estres" | "doms" | "fatiga", string, string]> = [
     ["sueno", H.COLORS_SPARKLINE.sueno, "Sueño"],
     ["motivacion", H.COLORS_SPARKLINE.motivacion, "Motivación"],
     ["estres", H.COLORS_SPARKLINE.estres, "Estrés"],

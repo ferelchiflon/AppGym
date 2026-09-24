@@ -10,11 +10,8 @@
  */
 
 import { formatoRpeRir } from './csv.js';
-
-/** Escapa texto para HTML (evita romper el documento / inyección). */
-function esc(valor) {
-  return String(valor ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
+// esc() canónica: única fuente compartida (src/utils.ts); no duplicar localmente.
+import { esc } from '../utils.ts';
 
 /**
  * Devuelve las filas `<tr>` de la tabla con una fila por serie.

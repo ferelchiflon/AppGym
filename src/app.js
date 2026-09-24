@@ -5,6 +5,7 @@
  *   - WorkoutController: Rutina activa, series rápidas, 1RM, warm-up, calculadora de discos, timer.
  *   - HistoryController: Historial de sesiones, periodización, wellness, saltos CMJ.
  *   - AnalyticsController: Gráficos de 1RM, volumen por músculo/sesión, correlación wellness.
+ *     (carga lazy: el módulo y Chart.js se descargan solo al entrar a "Progreso").
  *   - ProfileController: Perfil de atleta, medidas, IMC, métricas acumuladas, backups.
  */
 
@@ -19,7 +20,6 @@ import { GestorTimer } from "./gestor-timer.js";
 
 import { WorkoutController } from "./controllers/workout.controller.js";
 import { HistoryController } from "./controllers/history.controller.js";
-import { AnalyticsController } from "./controllers/analytics.controller.js";
 import { ProfileController } from "./controllers/profile.controller.js";
 import { DashboardController } from "./controllers/dashboard.controller.js";
 import { AppNavigator } from "./navigation/navigator.js";
@@ -58,11 +58,13 @@ export class AppGymPro {
       perfil: this.perfil,
     });
 
-    this.analyticsCtrl = new AnalyticsController({
-      el: this.el,
-      rutina: this.rutina,
-      perfil: this.perfil,
-    });
+    // Fase 4 (offline-first / TTI): AnalyticsController NO se instancia aquí.
+    // El módulo —y detrás ChartsManager + Chart.js (~205 kB)— se descarga con
+    // import() dinámico SOLO la primera vez que se navega a la pestaña
+    // "Progreso" (ver _asegurarAnalytics). El bundle inicial queda libre de
+    // la lógica de gráficos y la app interacciona antes.
+    this.analyticsCtrl = null;
+    this._analyticsCtrlPromise = null;
 
     this.profileCtrl = new ProfileController({
       app: this,
@@ -228,7 +230,9 @@ export class AppGymPro {
       periodizacion: this.periodizacion,
       perfil: this.perfil,
     });
-    this.analyticsCtrl.actualizarInstancias({
+    // Opcional: si el usuario aún no abrió "Progreso", el controlador no
+    // existe; se creará con estas instancias ya actualizadas al ingresar.
+    this.analyticsCtrl?.actualizarInstancias({
       rutina: this.rutina,
       perfil: this.perfil,
     });
@@ -607,13 +611,55 @@ export class AppGymPro {
     this.el.profileSelect.replaceChildren(frag);
   }
 
+  /**
+   * Fase 4 (offline-first): carga lazy del controlador de "Progreso".
+   * AnalyticsController —y detrás ChartsManager + Chart.js— solo se
+   * descargan con import() dinámico la primera vez que el usuario navega a
+   * la pestaña "Progreso" (code-splitting: chunks "analytics" y
+   * "vendor-chart" quedan fuera del bundle inicial).
+   *
+   * La promesa se cachea (una única descarga por sesión) y nunca se rechaza:
+   * si el chunk no está disponible (p.ej. primera visita offline), devuelve
+   * null, degrada la vista sin romper el arranque y reintenta en el próximo
+   * ingreso a la pestaña.
+   *
+   * @returns {Promise<object|null>} El controlador listo, o null si falló la carga.
+   */
+  _asegurarAnalytics() {
+    if (this.analyticsCtrl) return Promise.resolve(this.analyticsCtrl);
+    if (!this._analyticsCtrlPromise) {
+      this._analyticsCtrlPromise = import("./controllers/analytics.controller.js")
+        .then((mod) => {
+          if (!this.analyticsCtrl) {
+            this.analyticsCtrl = new mod.AnalyticsController({
+              el: this.el,
+              rutina: this.rutina,
+              perfil: this.perfil,
+            });
+          }
+          return this.analyticsCtrl;
+        })
+        .catch((err) => {
+          this._analyticsCtrlPromise = null; // reintenta en el próximo ingreso
+          console.warn("[App] No se pudo cargar el módulo de Progreso:", err);
+          return null;
+        });
+    }
+    return this._analyticsCtrlPromise;
+  }
+
   _setupNavigation() {
     // Drawer hamburguesa + vista única + título de sección en el header.
     this.navigator = new AppNavigator();
     this.navigator.init();
     this.navigator.setOnTabEnter((tab) => {
       if (tab === "progress") {
-        requestAnimationFrame(() => this.analyticsCtrl.render());
+        // Lazy-loading (Fase 4): la primera entrada descarga el chunk async
+        // de gráficos y renderiza cuando resuelve; las siguientes reutilizan
+        // el módulo cacheado (promesa única) y solo re-renderizan.
+        this._asegurarAnalytics().then((ctrl) => {
+          if (ctrl) requestAnimationFrame(() => ctrl.render());
+        });
       }
       if (tab === "dashboard") {
         requestAnimationFrame(() => this.dashboardCtrl.render());

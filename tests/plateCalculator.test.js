@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { PlateCalculator } from '../src/formulas.js';
-import { CONFIG } from '../src/config.ts';
 
 describe('PlateCalculator', () => {
   // 1. Combinación óptima estándar

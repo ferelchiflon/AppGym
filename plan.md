@@ -96,7 +96,7 @@ Modifica MÍNIMAMENTE:
 1. **NO modificar `Store.js`, `PerfilAtleta.js`, `GestorRutina.js`, `GestorPeriodizacion.js`**
 
    - Solo leer de ellos mediante sus métodos públicos
-   - Si necesitas un dato que no expone el modelo, crea un helper en `src/utils/dashboard-helpers.js`
+   - Si necesitas un dato que no expone el modelo, crea un helper en `src/helpers/dashboard-helpers.ts`
 2. **Patrón de controlador**
 
    - `DashboardController` debe seguir el mismo patrón que los existentes:

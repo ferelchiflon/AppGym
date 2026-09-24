@@ -12,6 +12,9 @@
  * Estilos: `.dw-*` en styles/dashboard.css (ds lima + Oswald).
  */
 
+// esc() canónica: única fuente compartida (src/utils.ts); no duplicar localmente.
+import { esc } from "../utils.ts";
+
 /** Tarjeta base reutilizando el DS existente (panel-card + eyebrow). */
 function card(titulo, body, cls = "") {
   return `
@@ -19,14 +22,6 @@ function card(titulo, body, cls = "") {
         <div class="eyebrow">${String(titulo).toUpperCase()}</div>
         <div class="dw-card__body">${body}</div>
       </div>`;
-}
-
-function esc(s) {
-  return String(s === null || s === undefined ? "" : s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }
 
 function capitalizar(s) {

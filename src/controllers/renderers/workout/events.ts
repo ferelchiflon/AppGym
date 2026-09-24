@@ -13,6 +13,7 @@
  * re-vincula sus propios listeners al renderizarse.
  */
 import { Store } from "../../../store.js";
+import type { WorkoutController } from "../../../types/workout-controller";
 import { Utils } from "../../../utils.ts";
 import { Toast } from "../../../toast.js";
 import { Dialog } from "../../../dialog.js";
@@ -22,7 +23,7 @@ import { ExerciseGuide } from "../../../components/exercise-guide.js";
 import { hacerReordenable } from "../../../dnd.js";
 
 /** Vincula los listeners estáticos de la vista. Recibe el WorkoutController. */
-export function bindWorkoutEvents(c: any): void {
+export function bindWorkoutEvents(c: WorkoutController): void {
     // Filtro de grupo muscular
     if (c.el.filtroMusculoSelect) {
       c.el.filtroMusculoSelect.addEventListener("change", () => {
@@ -137,7 +138,7 @@ export function bindWorkoutEvents(c: any): void {
       if (!c._rirTocadoPorUsuario) {
         const rpe = parseFloat(c.el.serieRPE.value);
         if (!isNaN(rpe)) {
-          c.el.serieRIR.value = Math.max(0, 10 - rpe);
+          c.el.serieRIR.value = String(Math.max(0, 10 - rpe));
         }
       }
       actualizarRPE1RMRealTime();
@@ -147,7 +148,7 @@ export function bindWorkoutEvents(c: any): void {
       c._rirTocadoPorUsuario = true;
       const rir = parseFloat(c.el.serieRIR.value);
       if (!isNaN(rir)) {
-        c.el.serieRPE.value = Math.max(1, Math.min(10, 10 - rir));
+        c.el.serieRPE.value = String(Math.max(1, Math.min(10, 10 - rir)));
       }
       actualizarRPE1RMRealTime();
     });
@@ -157,10 +158,10 @@ export function bindWorkoutEvents(c: any): void {
 
     // Atajo de teclado: Enter en los campos numéricos de la serie agrega la serie rápido.
     // No se vincula a textareas/selects para no interferir con la edición de texto.
-    ["seriePeso", "serieReps", "serieRPE", "serieRIR"].forEach((id: any) => {
+    ["seriePeso", "serieReps", "serieRPE", "serieRIR"].forEach((id: string) => {
       const inp = document.getElementById(id);
       if (inp) {
-        inp.addEventListener("keydown", (e: any) => {
+        inp.addEventListener("keydown", (e: KeyboardEvent) => {
           if (e.key === "Enter") {
             e.preventDefault();
             c._agregarSerie();
@@ -190,8 +191,8 @@ export function bindWorkoutEvents(c: any): void {
     if (c.el.ejercicioBusqueda) {
       c.el.ejercicioBusqueda.addEventListener(
         "input",
-        Utils.debounce((e: any) => {
-          c._busquedaActual = (e.target.value || "").trim().toLowerCase();
+        Utils.debounce((e: Event) => {
+          c._busquedaActual = ((e.target as HTMLInputElement).value || "").trim().toLowerCase();
           c._renderSelectorEjercicios();
         }, 180)
       );
@@ -202,7 +203,7 @@ export function bindWorkoutEvents(c: any): void {
       hacerReordenable(c.el.rutinaContainer, {
         selector: ".badge.routine-badge",
         handleSel: ".drag-handle",
-        onReorder: (fromIdx: any, toIdx: any) => {
+        onReorder: (fromIdx: number, toIdx: number) => {
           if (c.rutina.reordenarEjercicio(fromIdx, toIdx)) {
             Store.emit("routine:updated", c.rutina.data.rutina);
             GestorTimer.vibrarCorto();

@@ -1,8 +1,9 @@
 /* ========== BASE ========== */
 
-/* Inter Variable — se carga vía <link> de Google Fonts en index.html.
-   Este @font-face declara la fuente variable con font-display: swap para
-   que el texto se muestre antes con fallback y se "swap"ee cuando llega. */
+/* Inter Variable — autohosteada en styles/fonts/ (PWA 100% offline-first):
+   index.html NO tiene <link> a Google Fonts, así que la tipografía funciona
+   sin conexión. Este @font-face declara la fuente variable con font-display:
+   swap para que el texto se muestre antes con fallback y se "swap"ee al cargar. */
 @font-face {
     font-family: 'Inter';
     font-style: normal;

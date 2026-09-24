@@ -4,3 +4,8 @@ dist/
 *.log
 .vite/
 coverage/
+
+# Residuos de edición y backups temporales (nunca versionar)
+*.bak
+*.tmp
+*.orig

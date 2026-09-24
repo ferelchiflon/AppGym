@@ -3,7 +3,6 @@ import { AnalyticsController } from "../src/controllers/analytics.controller.js"
 import { ChartsManager } from "../src/charts-manager.js";
 import { Store } from "../src/store.js";
 import { WellnessCorrelation } from "../src/wellness-correlation.js";
-import { VolumeLandmarks } from "../src/landmarks-volumen.js";
 import progressViewHtml from "../src/views/progress.js";
 
 /**
@@ -53,26 +52,26 @@ describe("AnalyticsController", () => {
   });
 
   describe("Inicialización y render principal", () => {
-    it("puebla el selector de ejercicios al inicializarse o renderizarse", () => {
+    it("puebla el selector de ejercicios al inicializarse o renderizarse", async () => {
       const el = mountProgressDOM();
       const rutina = makeRutina();
       const perfil = makePerfil();
 
       const controller = new AnalyticsController({ el, rutina, perfil });
-      controller.render();
+      await controller.render();
 
       expect(el.chartEjercicioSelect.children.length).toBeGreaterThan(0);
       const options = Array.from(el.chartEjercicioSelect.options);
       expect(options.some((opt) => opt.value === "peso_muerto" || opt.value === "sentadilla")).toBe(true);
     });
 
-    it("invoca ChartsManager con los datos correspondientes en renderRM y renderVolumen", () => {
+    it("invoca ChartsManager con los datos correspondientes en renderRM y renderVolumen", async () => {
       const el = mountProgressDOM();
       const rutina = makeRutina();
       const perfil = makePerfil();
 
       const controller = new AnalyticsController({ el, rutina, perfil });
-      controller.render();
+      await controller.render();
 
       expect(ChartsManager.renderProgresoRM).toHaveBeenCalledWith(
         "chartRM",
@@ -93,19 +92,19 @@ describe("AnalyticsController", () => {
       );
     });
 
-    it("binds el evento change del select para volver a renderizar el gráfico de RM", () => {
+    it("binds el evento change del select para volver a renderizar el gráfico de RM", async () => {
       const el = mountProgressDOM();
       const controller = new AnalyticsController({ el, rutina: makeRutina(), perfil: makePerfil() });
 
       const renderRMSpy = vi.spyOn(controller, "renderRM");
-      controller.render();
+      await controller.render();
 
       el.chartEjercicioSelect.dispatchEvent(new Event("change"));
 
       expect(renderRMSpy).toHaveBeenCalled();
     });
 
-    it("render() invoca todos los sub-renders del controlador", () => {
+    it("render() invoca todos los sub-renders del controlador", async () => {
       const el = mountProgressDOM();
       const controller = new AnalyticsController({ el, rutina: makeRutina(), perfil: makePerfil() });
 
@@ -114,7 +113,7 @@ describe("AnalyticsController", () => {
       const spyVol = vi.spyOn(controller, "renderVolumen");
       const spyWellness = vi.spyOn(controller, "renderWellnessCorrelacion");
 
-      controller.render();
+      await controller.render();
 
       expect(spyLandmarks).toHaveBeenCalled();
       expect(spyRM).toHaveBeenCalled();
@@ -122,7 +121,7 @@ describe("AnalyticsController", () => {
       expect(spyWellness).toHaveBeenCalled();
     });
 
-    it("actualizarInstancias reemplaza rutina/perfil y vuelve a ejecutar render()", () => {
+    it("actualizarInstancias reemplaza rutina/perfil y vuelve a ejecutar render()", async () => {
       const el = mountProgressDOM();
       const rutina1 = makeRutina();
       const perfil1 = makePerfil();
@@ -137,32 +136,39 @@ describe("AnalyticsController", () => {
       expect(controller.rutina).toBe(rutina2);
       expect(controller.perfil).toBe(perfil2);
       expect(renderSpy).toHaveBeenCalledTimes(1);
+
+      // render() es async (import dinámico de ChartsManager): drenamos las
+      // continuaciones pendientes para que no se filtren a otros tests.
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
   });
 
   describe("Interacciones DOM y suscripciones al Store", () => {
-    it("al cambiar el select de ejercicios en el DOM se actualiza el gráfico de RM", () => {
+    it("al cambiar el select de ejercicios en el DOM se actualiza el gráfico de RM", async () => {
       const el = mountProgressDOM();
       const rutina = makeRutina();
       const perfil = makePerfil();
       const controller = new AnalyticsController({ el, rutina, perfil });
-      controller.render();
+      await controller.render();
 
       const renderRMSpy = vi.spyOn(controller, "renderRM");
 
       el.chartEjercicioSelect.value = "peso_muerto";
       el.chartEjercicioSelect.dispatchEvent(new Event("change"));
 
+      // El handler dispara renderRM(), que es async por el import dinámico.
       expect(renderRMSpy).toHaveBeenCalledTimes(1);
-      expect(rutina.getProgresoRM).toHaveBeenCalledWith("peso_muerto");
-      expect(ChartsManager.renderProgresoRM).toHaveBeenLastCalledWith(
-        "chartRM",
-        expect.any(Array),
-        "Peso muerto convencional"
-      );
+      await vi.waitFor(() => {
+        expect(rutina.getProgresoRM).toHaveBeenCalledWith("peso_muerto");
+        expect(ChartsManager.renderProgresoRM).toHaveBeenLastCalledWith(
+          "chartRM",
+          expect.any(Array),
+          "Peso muerto convencional"
+        );
+      });
     });
 
-    it("reacciona a eventos del Store (session:completed, exercises:updated, wellness:updated)", () => {
+    it("reacciona a eventos del Store (session:completed, exercises:updated, wellness:updated)", async () => {
       const el = mountProgressDOM();
       const rutina = makeRutina();
       const perfil = makePerfil();
@@ -181,17 +187,20 @@ describe("AnalyticsController", () => {
 
       Store.emit("wellness:updated");
       expect(wellnessSpy).toHaveBeenCalledTimes(2);
+
+      // Drenar las continuaciones async de los render() disparados por eventos.
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
   });
 
   describe("Wellness y Correlación", () => {
-    it("muestra mensaje de datos insuficientes si no hay cruces suficientes (analisis null)", () => {
+    it("muestra mensaje de datos insuficientes si no hay cruces suficientes (analisis null)", async () => {
       const el = mountProgressDOM();
       const rutina = makeRutina([]);
       const perfil = makePerfil([]);
 
       const controller = new AnalyticsController({ el, rutina, perfil });
-      controller.renderWellnessCorrelacion();
+      await controller.renderWellnessCorrelacion();
 
       expect(el.wellnessInsight.querySelector(".small-note")).toBeTruthy();
       expect(el.wellnessInsight.textContent).toContain(
@@ -200,7 +209,7 @@ describe("AnalyticsController", () => {
       expect(ChartsManager.renderCorrelacionWellness).toHaveBeenCalledWith("chartWellness", null);
     });
 
-    it("renderiza insights cuando hay suficientes cruces y métricas con diferencias", () => {
+    it("renderiza insights cuando hay suficientes cruces y métricas con diferencias", async () => {
       const el = mountProgressDOM();
       const hoy = "2026-09-04";
       const ayer = "2026-09-03";
@@ -218,7 +227,7 @@ describe("AnalyticsController", () => {
       const perfil = makePerfil(wellness);
       const controller = new AnalyticsController({ el, rutina, perfil });
 
-      controller.renderWellnessCorrelacion();
+      await controller.renderWellnessCorrelacion();
 
       const lineas = el.wellnessInsight.querySelectorAll(".insight-linea");
       expect(lineas.length).toBeGreaterThan(0);
@@ -226,7 +235,7 @@ describe("AnalyticsController", () => {
       expect(el.wellnessInsight.textContent).toContain("sueño alto vs bajo");
     });
 
-    it("muestra 'Datos insuficientes por métrica todavía' cuando hay cruces pero ningún diffPct computable", () => {
+    it("muestra 'Datos insuficientes por métrica todavía' cuando hay cruces pero ningún diffPct computable", async () => {
       const el = mountProgressDOM();
       const d1 = "2026-09-01";
       const d2 = "2026-09-02";
@@ -241,12 +250,12 @@ describe("AnalyticsController", () => {
       ];
 
       const controller = new AnalyticsController({ el, rutina: makeRutina(historial), perfil: makePerfil(wellness) });
-      controller.renderWellnessCorrelacion();
+      await controller.renderWellnessCorrelacion();
 
       expect(el.wellnessInsight.textContent).toContain("Datos insuficientes por métrica todavía.");
     });
 
-    it("muestra 'Datos insuficientes' cuando el análisis reporta suficienteDatos pero todos los diffPct son null", () => {
+    it("muestra 'Datos insuficientes' cuando el análisis reporta suficienteDatos pero todos los diffPct son null", async () => {
       vi.spyOn(WellnessCorrelation, "analizar").mockReturnValue({
         suficienteDatos: true,
         sueno: { diffPct: null },
@@ -258,7 +267,7 @@ describe("AnalyticsController", () => {
       const el = mountProgressDOM();
       const controller = new AnalyticsController({ el, rutina: makeRutina(), perfil: makePerfil() });
 
-      controller.renderWellnessCorrelacion();
+      await controller.renderWellnessCorrelacion();
 
       const note = el.wellnessInsight.querySelector(".small-note");
       expect(note).not.toBeNull();
@@ -352,7 +361,7 @@ describe("AnalyticsController", () => {
   });
 
   describe("Casos límite y datos atípicos", () => {
-    it("renderRM funciona con fallback seguro si el select está vacío y no hay ejercicios disponibles", () => {
+    it("renderRM funciona con fallback seguro si el select está vacío y no hay ejercicios disponibles", async () => {
       const el = mountProgressDOM();
       el.chartEjercicioSelect.replaceChildren();
       vi.spyOn(Store, "getEjerciciosDisponibles").mockReturnValue([]);
@@ -360,7 +369,7 @@ describe("AnalyticsController", () => {
       const rutina = makeRutina();
       const controller = new AnalyticsController({ el, rutina, perfil: makePerfil() });
 
-      expect(() => controller.renderRM()).not.toThrow();
+      await expect(controller.renderRM()).resolves.toBeUndefined();
       expect(rutina.getProgresoRM).toHaveBeenCalledWith("sentadilla");
     });
 

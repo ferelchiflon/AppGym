@@ -318,7 +318,7 @@ describe("ProfileController", () => {
       await el.importTodoInput.dispatchEvent(new Event("change"));
 
       // Caso con archivo a través del handler del input
-      const changeHandler = vi.spyOn(el.importTodoInput, "addEventListener");
+      vi.spyOn(el.importTodoInput, "addEventListener");
       const controller = new ProfileController({ app, el, perfil: makePerfil(), rutina: makeRutina() });
       await controller._importarBackup(event);
 

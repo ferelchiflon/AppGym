@@ -3,7 +3,7 @@ import { DashboardController } from "../src/controllers/dashboard.controller.js"
 import controllerSrc from "../src/controllers/dashboard.controller.js?raw";
 import eventsSrc from "../src/controllers/renderers/dashboard/events.ts?raw";
 import { Store } from "../src/store.js";
-import * as H from "../src/utils/dashboard-helpers.ts";
+import * as H from "../src/helpers/dashboard-helpers.ts";
 
 /**
  * Regresión de navegación del DashboardController + cobertura de

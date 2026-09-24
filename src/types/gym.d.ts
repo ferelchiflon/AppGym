@@ -54,7 +54,7 @@ export interface Serie {
   peso: number;
   reps: number;
   rpe?: number;
-  rir?: number;
+  rir?: number | null;
   notas?: string;
   timestamp?: number;
   completada?: boolean;
@@ -63,6 +63,7 @@ export interface Serie {
 export interface SesionEntrenamiento {
   id: string;
   fecha: string;
+  fechaISO: string;
   isoDate: string;
   duracionMinutos: number;
   ejercicios: {
@@ -184,6 +185,24 @@ export interface BloquePeriodizacion {
   progresoPct: number;
   totalSemanas: number;
   estado: string;
+}
+
+/** Plantilla de rutina guardada en el perfil activo (Store.crearPlantilla). */
+export interface Plantilla {
+  id: string;
+  nombre: string;
+  ejercicios: string[];
+  creadaEn?: string;
+}
+
+/** Plantilla de entrenamiento predefinida del sistema (data/plantillas-predefinidas.js). */
+export interface PlantillaPredefinida {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  nivel?: string;
+  etiquetas?: string[];
+  ejercicios: string[];
 }
 
 export interface AppStoreData {

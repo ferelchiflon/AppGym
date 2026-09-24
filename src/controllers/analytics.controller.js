@@ -3,12 +3,37 @@
  * Controlador de la vista "Progreso y Métricas".
  * Maneja gráficos de evolución de 1RM, volumen muscular histórico,
  * volumen por sesión y análisis de correlación wellness ↔ rendimiento.
+ *
+ * Code-splitting offline-first: ChartsManager (y Chart.js detrás) NO se
+ * importa estáticamente. Se carga bajo demanda con import() dinámico la
+ * primera vez que esta vista se renderiza (app.js → setOnTabEnter("progress")),
+ * separando del bundle inicial los chunks "charts" y "vendor-chart".
  */
 
 import { Store } from "../store.js";
-import { ChartsManager } from "../charts-manager.js";
 import { WellnessCorrelation } from "../wellness-correlation.js";
 import { VolumeLandmarks } from "../landmarks-volumen.js";
+
+/** Promesa en caché del módulo de gráficos: solo se descarga una vez por sesión. */
+let _ChartsManagerPromise = null;
+
+/**
+ * Carga lazy de ChartsManager vía import() dinámico. Nunca rechaza: si el
+ * chunk no está disponible (p.ej. primera visita offline), devuelve null
+ * para degradar la vista sin romper el render y reintenta en el próximo.
+ */
+function _cargarModuloCharts() {
+  if (!_ChartsManagerPromise) {
+    _ChartsManagerPromise = import("../charts-manager.js")
+      .then((mod) => mod.ChartsManager)
+      .catch((err) => {
+        _ChartsManagerPromise = null; // reintenta en el próximo render
+        console.warn("[Analytics] No se pudo cargar el módulo de gráficos:", err);
+        return null;
+      });
+  }
+  return _ChartsManagerPromise;
+}
 
 export class AnalyticsController {
   constructor({ el, rutina, perfil }) {
@@ -44,12 +69,12 @@ export class AnalyticsController {
     });
   }
 
-  render() {
+  async render() {
     this._renderSelectorGrafico();
-    this.renderRM();
-    this.renderVolumen();
-    this.renderWellnessCorrelacion();
     this.renderLandmarks();
+    // Los tres gráficos se renderizan en paralelo apenas resuelve el import()
+    // dinámico de ChartsManager (la promesa se cachea tras la primera carga).
+    await Promise.all([this.renderRM(), this.renderVolumen(), this.renderWellnessCorrelacion()]);
   }
 
   renderLandmarks() {
@@ -197,7 +222,10 @@ export class AnalyticsController {
     this.el.chartEjercicioSelect.replaceChildren(frag);
   }
 
-  renderRM() {
+  async renderRM() {
+    const ChartsManager = await _cargarModuloCharts();
+    if (!ChartsManager) return;
+
     const todos = Store.getEjerciciosDisponibles();
     const ejercicioId = this.el.chartEjercicioSelect.value || (todos[0] ? todos[0].id : "sentadilla");
     const ej = todos.find(e => e.id === ejercicioId);
@@ -205,12 +233,18 @@ export class AnalyticsController {
     ChartsManager.renderProgresoRM("chartRM", progreso, ej ? ej.nombre : ejercicioId);
   }
 
-  renderVolumen() {
+  async renderVolumen() {
+    const ChartsManager = await _cargarModuloCharts();
+    if (!ChartsManager) return;
+
     ChartsManager.renderVolumenPorMusculo("chartVolumenMusculo", this.rutina.getVolumenPorMusculoHistorico());
     ChartsManager.renderVolumenPorSesion("chartVolumenSesion", this.rutina.getVolumenPorSesion(10));
   }
 
-  renderWellnessCorrelacion() {
+  async renderWellnessCorrelacion() {
+    const ChartsManager = await _cargarModuloCharts();
+    if (!ChartsManager) return;
+
     const analisis = WellnessCorrelation.analizar(this.rutina.historial, this.perfil.data.wellness);
     ChartsManager.renderCorrelacionWellness("chartWellness", analisis);
 

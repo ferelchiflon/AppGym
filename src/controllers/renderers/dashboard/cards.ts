@@ -20,14 +20,71 @@ import {
   dryLast,
 } from "./common.ts";
 import { sparkline } from "./sparkline.ts";
+import type { WellnessRegistro, SesionEntrenamiento, Readiness, SesionCardio, ResumenCardio, BloquePeriodizacion, NutricionRegistro } from "../../../types/gym.d.ts";
+
+/** 1RM destacado (H.bestRM): mejor ejercicio por RM estimado + delta semanal. */
+export interface RmDestacado {
+  nombre: string;
+  rm: number;
+  delta?: number | null;
+}
+
+/** Un PR reciente de los últimos 14 días (H.prsRecientes.recientes). */
+export interface PrReciente {
+  nombre: string;
+  carga: string;
+  delta?: number | null;
+}
+
+/** PRs recientes + mejor PR histórico (H.prsRecientes). */
+export interface PrsResumen {
+  recientes: PrReciente[];
+  mejor: { nombre: string; rm: number } | null;
+}
+
+/** Ratio de carga aguda:crónica (FisiologiaCargas.calcularACWR). */
+export interface AcwrResumen {
+  ratio: number;
+}
+
+/** Landmark de volumen semanal por grupo muscular (VolumeLandmarks.analizarSemana). */
+export interface LandmarkGrupo {
+  musculo: string;
+  efectivas?: number;
+  mev?: number;
+  mav?: number;
+  mrv?: number;
+  estado: string;
+}
+
+/** Último trabajo registrado de un grupo muscular (H.ultimoTrabajoPorMusculo). */
+export interface UltimoTrabajoGrupo {
+  nombre: string;
+  peso: number;
+  reps: number;
+  rpe?: number | null;
+  dias: number;
+}
+
+/** Celda de la franja de calendario de 7 días (H.ultimos7Dias). */
+export interface DiaCalendario {
+  iso: string;
+  entrenado: boolean;
+  weekday: number;
+  numero: number;
+  esHoy: boolean;
+}
 
 /** Tarjeta de inicio rápido con saludo + CTA. */
-export function quickStart(opts: { hist: any[]; ult: string; tieneRutinaHoy: boolean }): {
+export function quickStart(opts: { hist: SesionEntrenamiento[]; ult: string; tieneRutinaHoy: boolean }): {
   modo: "armar" | "continuar";
   html: string;
 } {
   const { hist, ult, tieneRutinaHoy } = opts;
-  const yaEntreno = H.ultimos7Dias(hist)[6] && H.ultimos7Dias(hist)[6].entrenado;
+  const historialConv = hist.map((s) => ({
+    fechaISO: s.fechaISO,
+  }));
+  const yaEntreno = H.ultimos7Dias(historialConv)[6] && H.ultimos7Dias(historialConv)[6].entrenado;
   const nombre = !ult || USUARIOS_ESPECIALES.includes(ult) ? "" : `, ${esc(ult)}`;
   let botonTexto: string;
   let botonInfo: string;
@@ -63,7 +120,7 @@ export function quickStart(opts: { hist: any[]; ult: string; tieneRutinaHoy: boo
 }
 
 /** Tarjeta de wellness con selector por días + sparkline de 7 días. */
-export function wellnessCard(opts: { wellness: any[]; readiness: any }): string {
+export function wellnessCard(opts: { wellness: WellnessRegistro[]; readiness: Readiness }): string {
   const serie = H.wellnessSerie(opts.wellness, 7);
   const sueno = dryLast(opts.wellness);
   const color = opts.readiness ? opts.readiness.color : "#77829C";
@@ -117,7 +174,7 @@ export function wellnessCard(opts: { wellness: any[]; readiness: any }): string 
 }
 
 /** Tarjeta cardio: resumen de la última semana sin romper el layout. */
-export function cardioCard(opts: { sesiones: any[]; resumen: any }): string {
+export function cardioCard(opts: { sesiones: SesionCardio[]; resumen: ResumenCardio }): string {
   const { sesiones, resumen } = opts;
 
   if (!resumen || resumen.sesiones === 0) {
@@ -180,7 +237,7 @@ export function cardioCard(opts: { sesiones: any[]; resumen: any }): string {
 }
 
 /** Tarjeta ACWR con barra semáforo y leyenda. */
-export function acwrCard(acwr: any): string {
+export function acwrCard(acwr: AcwrResumen | null): string {
   const r = acwr && !isNaN(acwr.ratio) ? acwr.ratio : 0;
   const color =
     r === 0 ? "#77829C" : r >= 0.8 && r <= 1.3 ? "#54E08A" : r > 1.3 && r <= 1.5 ? "#FFD166" : "#FF7A7A";
@@ -205,7 +262,7 @@ export function acwrCard(acwr: any): string {
 }
 
 /** Tarjeta de periodización (bloque activo + progreso). */
-export function periodizacionCard(per: any): string {
+export function periodizacionCard(per: BloquePeriodizacion): string {
   if (!per) {
     return `
         <div class="panel-card">
@@ -244,7 +301,7 @@ export function periodizacionCard(per: any): string {
 }
 
 /** Tarjeta de hábitos diarios de nutrición (nivel normal). */
-export function nutricionCard(nutricionHoy: any = null): string {
+export function nutricionCard(nutricionHoy: NutricionRegistro | null = null): string {
   const comidas = nutricionHoy ? Math.max(0, Math.min(8, Number(nutricionHoy.comidas) || 0)) : 0;
   const proteina = Boolean(nutricionHoy && nutricionHoy.proteina);
   const agua = Boolean(nutricionHoy && nutricionHoy.agua);
@@ -279,7 +336,7 @@ export function nutricionCard(nutricionHoy: any = null): string {
 }
 
 /** Fila horizontal scrolleable (scroll-snap) con 5 mini-cards de stats. */
-export function quickStatsRow(opts: { vol: any; se: any; stre: any; best: any; acwr: any }): string {
+export function quickStatsRow(opts: { vol: { esta: number; anterior: number; deltaPct: number }; se: number; stre: number; best: RmDestacado | null; acwr: AcwrResumen | null }): string {
   const { vol, se, stre, best, acwr } = opts;
   // --- 1. 1RM Estimado ---
   const rmIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18V6"/><path d="M18 18V6"/><rect x="2" y="8" width="8" height="8" rx="1"/><rect x="14" y="8" width="8" height="8" rx="1"/><path d="M6 12h12"/></svg>';
@@ -289,13 +346,14 @@ export function quickStatsRow(opts: { vol: any; se: any; stre: any; best: any; a
   if (best) {
     rmValue = `${best.rm}<small>kg</small>`;
     rmLabel = esc(best.nombre);
-    const noDelta = best.delta === null || best.delta === undefined;
+    const delta = best.delta;
+    const noDelta = delta === null || delta === undefined;
     if (noDelta) {
       rmDelta = '<span class="qs-delta muted">—</span>';
     } else {
-      const arrow = best.delta >= 0 ? "↑" : "↓";
-      const cls = best.delta >= 0 ? "pos" : "neg";
-      rmDelta = `<span class="qs-delta ${cls}">${arrow} ${best.delta >= 0 ? "+" : ""}${formatNum(best.delta)}kg</span>`;
+      const arrow = delta >= 0 ? "↑" : "↓";
+      const cls = delta >= 0 ? "pos" : "neg";
+      rmDelta = `<span class="qs-delta ${cls}">${arrow} ${delta >= 0 ? "+" : ""}${formatNum(delta)}kg</span>`;
     }
   } else {
     rmValue = "—";
@@ -371,7 +429,7 @@ export function quickStatsRow(opts: { vol: any; se: any; stre: any; best: any; a
 }
 
 /** Tarjeta 1RM estimado destacado con tendencia semanal. */
-export function rmCard(best: any): string {
+export function rmCard(best: RmDestacado | null): string {
   if (!best) {
     return `
         <div class="panel-card">
@@ -402,7 +460,7 @@ export function rmCard(best: any): string {
 }
 
 /** Tarjeta de PRs recientes (14 días) + mejor histórico. */
-export function prsCard(prs: any): string {
+export function prsCard(prs: PrsResumen): string {
   if (!prs || (!prs.recientes.length && !prs.mejor)) {
     return `
         <div class="panel-card">
@@ -413,7 +471,7 @@ export function prsCard(prs: any): string {
   const recientesHtml = prs.recientes.length
     ? prs.recientes
         .map(
-          (pr: any) => `
+          (pr: PrReciente) => `
         <div class="pr-item">
           <strong>${esc(pr.nombre)}</strong>
           <span>${esc(pr.carga)}</span>
@@ -439,13 +497,13 @@ export function prsCard(prs: any): string {
 }
 
 /** Landmarks MGV por grupo con sectores MEV/MAV/MRV. */
-export function landmarksCard(lmks: any[]): string {
+export function landmarksCard(lmks: LandmarkGrupo[]): string {
   const items = lmks.slice(0, 4);
   const head =
     items.length === 0
       ? `<p class="muted">Datos insuficientes esta semana.</p>`
       : items
-          .map((l: any) => {
+          .map((l: LandmarkGrupo) => {
             const max = Math.max(25, l.mrv || l.mav || 1);
             const width = Math.min(100, Math.round(((l.efectivas || 0) / max) * 100));
             const zona = zonaVolumen(l);
@@ -479,14 +537,14 @@ export function landmarksCard(lmks: any[]): string {
 }
 
 /** Sugerencia del grupo muscular del día. */
-export function sugerenciaCard(opts: { grupo: any; ultimo: any }): string {
+export function sugerenciaCard(opts: { grupo: string; ultimo: UltimoTrabajoGrupo | null }): string {
   const nombre = H.nombreMusculo(opts.grupo);
   const ult = opts.ultimo
     ? `Última vez: ${esc(opts.ultimo.nombre)} ${opts.ultimo.peso}kg x${opts.ultimo.reps} hace ${opts.ultimo.dias === 0 ? "hoy" : opts.ultimo.dias + " días"}`
     : "Aún no hay registros de este grupo.";
 
   // "Ver técnica": abre la guía del primer ejercicio del grupo que la tenga.
-  const guiado = (EJERCICIOS_DISPONIBLES || []).find((e: any) => e.musculo === opts.grupo && ExerciseGuide.porId(e.id));
+  const guiado = (EJERCICIOS_DISPONIBLES || []).find((e) => e.musculo === opts.grupo && ExerciseGuide.porId(e.id));
   const tecnicaBtn = guiado
     ? `<button class="btn-scale secondary w-100 mt-1" id="sugerenciaGuiaBtn" data-ej-id="${esc(guiado.id)}">Ver técnica · ${esc(guiado.nombre)}</button>`
     : "";
@@ -507,9 +565,9 @@ export function sugerenciaCard(opts: { grupo: any; ultimo: any }): string {
 }
 
 /** Franja de calendario (7 días). */
-export function calendario(days: any[]): string {
+export function calendario(days: DiaCalendario[]): string {
   const cells = days
-    .map((d: any) => {
+    .map((d: DiaCalendario) => {
       const cls = ["day-cell", d.entrenado ? "trained" : "", d.esHoy ? "today" : ""]
         .filter(Boolean)
         .join(" ");

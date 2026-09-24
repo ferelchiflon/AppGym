@@ -29,5 +29,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2) Arrancar la app (Toast.init es idempotente; se mantiene por compat).
     Toast.init();
     window.app = new AppGymPro();
-    console.log('GYM PRO v5 iniciado (modular)');
+    console.log('GYM PRO v6.0.0 iniciado (modular)');
 });

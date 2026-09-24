@@ -9,7 +9,7 @@ export default `    <header class="app-header">
         </button>
         <span class="brand" aria-hidden="true">
             <svg class="brand-logo" viewBox="0 0 24 24"><path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12"/></svg>
-            <span class="brand-name">GYM PRO <span class="version-tag">v6.0</span></span>
+            <span class="brand-name">GYM PRO <span class="version-tag">v6.0.0</span></span>
         </span>
         <span id="headerTitle" class="header-title" role="status" data-i18n="nav.header.dashboard">Entrenamiento</span>
         <button type="button" id="syncStatusBtn" class="sync-status" data-estado="online" aria-label="Estado de sincronización" title="Sincronización activa">

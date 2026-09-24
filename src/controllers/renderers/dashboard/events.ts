@@ -16,7 +16,7 @@ import { ExerciseGuide } from "../../../components/exercise-guide.js";
 import { CardioForm } from "../../../components/cardio-form.js";
 import { GestorTimer } from "../../../gestor-timer.js";
 import { WELLNESS_KEYS } from "./common.ts";
-import { DashboardController } from "../../dashboard.controller";
+import type { DashboardController } from "../../dashboard.controller";
 
 /** Vincula todos los eventos tras renderizar. Recibe el DashboardController. */
 export function bindDashboardActions(c: DashboardController): void {

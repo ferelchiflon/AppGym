@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { Store } from "../src/store.js";
 import { GestorTimer } from "../src/gestor-timer.js";
 

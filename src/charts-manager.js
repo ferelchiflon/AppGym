@@ -1,8 +1,8 @@
 /**
  * src/charts-manager.js
  * Renderizado de gráficos con Chart.js (cargado bajo demanda vía import dinámico).
- * Code-splitting: este módulo y chart.js se cargan solo cuando se hace scroll
- * hasta la sección "Progreso" (ver app.js → _cargarModuloCharts).
+ * Code-splitting: este módulo y chart.js se cargan solo cuando se entra a la
+ * pestaña "Progreso" (ver controllers/analytics.controller.js → _cargarModuloCharts).
  */
 
 let _ChartPromise = null;

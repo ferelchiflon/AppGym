@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * src/store.js
  * Persistencia unificada con versionado y migración desde v4.
@@ -42,6 +43,16 @@ const CLAVES_PERFIL = new Set([
 const CLAVES_PROHIBIDAS = new Set(['__proto__', 'prototype', 'constructor']);
 
 /**
+ * Forma mínima verificable de la estructura persistida (tipado gradual,
+ * Fase 2 del ADR-001). `profiles` es un diccionario abierto: la forma
+ * completa de cada perfil se tipa al migrar sus módulos consumidores.
+ * @typedef {object} AppData
+ * @property {string|number} version
+ * @property {string} activeProfileId
+ * @property {Object.<string, any>} profiles
+ */
+
+/**
  * Acceso seguro a localStorage. En entornos sin storage (p. ej. Node >20
  * sin --localstorage-file, o tests sin polyfill), devuelve null en lugar de
  * lanzar ReferenceError. Así Store sigue funcionando en memoria.
@@ -51,23 +62,43 @@ function _ls() {
 }
 
 export const Store = {
+    /** Cache del estado ya cargado. @type {AppData|null} */
     _cache: null,
-    _modoIDB: false, // se activa cuando los datos pasan el umbral
+    /** Se activa cuando los datos pasan el umbral de localStorage. @type {boolean} */
+    _modoIDB: false,
+    /** Conexión lazy a IndexedDB. @type {IDBDatabase|null} */
     _idb: null,
-    _listeners: {}, // event bus reactivo
+    /** Event bus reactivo. @type {Object.<string, Function[]>} */
+    _listeners: {},
 
     // Sistema de eventos reactivo
+    /**
+     * Registra un listener para un evento del bus.
+     * @param {string} event
+     * @param {Function} callback
+     * @returns {Function} Des-registrador (llamarlo equivale a off).
+     */
     on(event, callback) {
         if (!Store._listeners[event]) Store._listeners[event] = [];
         Store._listeners[event].push(callback);
         return () => Store.off(event, callback);
     },
 
+    /**
+     * Des-registra un listener del bus.
+     * @param {string} event
+     * @param {Function} callback
+     */
     off(event, callback) {
         if (!Store._listeners[event]) return;
         Store._listeners[event] = Store._listeners[event].filter(cb => cb !== callback);
     },
 
+    /**
+     * Emite un evento a todos sus listeners registrados.
+     * @param {string} event
+     * @param {*} [payload]
+     */
     emit(event, payload) {
         if (!Store._listeners[event]) return;
         Store._listeners[event].forEach(cb => {
@@ -75,6 +106,7 @@ export const Store = {
         });
     },
 
+    /** @returns {AppData} Estructura raíz con el perfil inicial. */
     _estructuraVacia() {
         return {
             version: CONFIG.VERSION,
@@ -85,6 +117,11 @@ export const Store = {
         };
     },
 
+    /**
+     * Crea la estructura de un perfil vacío.
+     * @param {string} nombre
+     * @param {string|null} [id] Si se omite, se genera uno nuevo.
+     */
     _perfilVacio(nombre, id = null) {
         return {
             id: id || Utils.generarId(),
@@ -125,6 +162,9 @@ export const Store = {
         return [...EJERCICIOS_DISPONIBLES, ...customs];
     },
 
+    /**
+     * @param {Object.<string, any>} ejercicio Definición de ejercicio personalizado.
+     */
     agregarEjercicioPersonalizado(ejercicio) {
         const perfil = Store.getPerfilActivo();
         if (!perfil.ejerciciosPersonalizados) perfil.ejerciciosPersonalizados = [];
@@ -214,6 +254,10 @@ export const Store = {
         });
     },
 
+    /**
+     * @param {string} json Payload serializado a persistir.
+     * @returns {Promise<boolean>}
+     */
     async _guardarEnIDB(json) {
         const db = await Store._abrirIDB();
         if (!db) return false;
@@ -260,6 +304,7 @@ export const Store = {
      * Backfill de colecciones añadidas en versiones posteriores (p. ej.
      * `sesionesCardio` en Fase 2). Se ejecuta al cargar cualquier perfil para
      * que los datos legacy convivan con las colecciones nuevas sin migrar bytes.
+     * @param {AppData} data
      */
     _asegurarColeccionesNuevas(data) {
         if (!data || !data.profiles || typeof data.profiles !== 'object') return;
@@ -302,7 +347,7 @@ export const Store = {
         // Si ya estamos en modo IDB, vamos directo a IDB.
         if (Store._modoIDB) {
             Store._guardarEnIDB(json).then((ok) => {
-                if (!ok) Store._escribirLocalStorage(json, true);
+                if (!ok) Store._escribirLocalStorage(json);
             });
             return;
         }
@@ -324,14 +369,18 @@ export const Store = {
         Store._escribirLocalStorage(json);
     },
 
+    /**
+     * @param {string} json Payload serializado a persistir.
+     */
     _escribirLocalStorage(json) {
         const ls = _ls();
         if (!ls) return;
         try {
             ls.setItem(CONFIG.STORAGE_KEY, json);
         } catch (e) {
-            console.error('No se pudo guardar en localStorage', e);
-            if (e && (e.name === 'QuotaExceededError' || e.code === 22)) {
+            const err = /** @type {Error & {code?: number}} */ (e);
+            console.error('No se pudo guardar en localStorage', err);
+            if (err && (err.name === 'QuotaExceededError' || err.code === 22)) {
                 Store._modoIDB = true;
                 Store._guardarEnIDB(json);
                 Toast.mostrar('Datos migrados a IndexedDB (localStorage lleno).', 'info');
@@ -368,6 +417,7 @@ export const Store = {
         return Store.cargar();
     },
 
+    /** @param {string} nombre */
     crearPerfil(nombre) {
         const data = Store.cargar();
         const nuevo = Store._perfilVacio(nombre || `Atleta ${Object.keys(data.profiles).length + 1}`);
@@ -377,6 +427,7 @@ export const Store = {
         return nuevo;
     },
 
+    /** @param {string} id */
     cambiarPerfil(id) {
         const data = Store.cargar();
         if (data.profiles[id]) {
@@ -393,6 +444,7 @@ export const Store = {
         return false;
     },
 
+    /** @param {string} id */
     eliminarPerfil(id) {
         const data = Store.cargar();
         const targetKey = data.profiles[id] ? id : Object.keys(data.profiles).find(k => data.profiles[k].id === id);
@@ -415,6 +467,10 @@ export const Store = {
     // Viven dentro del perfil activo como `planillas: []`. Cada plantilla es
     // { id, nombre, ejercicios: [idEjercicio, ...], creadaEn: fechaISO }.
 
+    /**
+     * @param {string} nombre
+     * @param {string[]} ejercicios IDs de ejercicios.
+     */
     crearPlantilla(nombre, ejercicios) {
         const perfil = Store.getPerfilActivo();
         if (!perfil) return null;
@@ -438,12 +494,13 @@ export const Store = {
         return Array.isArray(perfil.plantillas) ? perfil.plantillas : [];
     },
 
+    /** @param {string} id */
     eliminarPlantilla(id) {
         const perfil = Store.getPerfilActivo();
         if (!perfil) return false;
         if (!Array.isArray(perfil.plantillas)) return false;
 
-        const idx = perfil.plantillas.findIndex(p => p.id === id);
+        const idx = perfil.plantillas.findIndex(/** @param {Object.<string, any>} p */ (p) => p.id === id);
         if (idx === -1) return false;
 
         perfil.plantillas.splice(idx, 1);
@@ -452,12 +509,16 @@ export const Store = {
         return true;
     },
 
+    /**
+     * @param {string} id
+     * @param {Object.<string, any>} cambios Campos a actualizar ({nombre, ejercicios, creadaEn}).
+     */
     actualizarPlantilla(id, cambios) {
         const perfil = Store.getPerfilActivo();
         if (!perfil) return null;
         if (!Array.isArray(perfil.plantillas)) return null;
 
-        const plantilla = perfil.plantillas.find(p => p.id === id);
+        const plantilla = perfil.plantillas.find(/** @param {Object.<string, any>} p */ (p) => p.id === id);
         if (!plantilla) return null;
 
         if (cambios && typeof cambios === 'object') {
@@ -507,6 +568,7 @@ export const Store = {
         }
         const proto = Object.getPrototypeOf(valor);
         if (proto !== Object.prototype && proto !== null) return undefined;
+        /** @type {Object.<string, any>} */
         const out = {};
         for (const k of Object.keys(valor)) {
             if (CLAVES_PROHIBIDAS.has(k)) continue;
@@ -522,7 +584,7 @@ export const Store = {
      * elimina claves no permitidas/prohibidas y repara el activeProfileId si
      * apuntaba a un perfil inexistente. Lanza si la estructura es inválida.
      * @param {*} data estructura parseada (aún sin tocar)
-     * @returns {object} backup "limpio"
+     * @returns {AppData} backup "limpio"
      */
     _sanitizarImport(data) {
         if (!data || typeof data !== 'object' || Array.isArray(data)) {
@@ -542,12 +604,13 @@ export const Store = {
             throw new Error('Formato de backup inválido: falta la sección "profiles"');
         }
 
-        raiz.profiles = {};
+        raiz.profiles = /** @type {Object.<string, any>} */ ({});
         ids.forEach((k) => {
             const p = perfilesOrigen[k];
             if (!p || typeof p !== 'object' || Array.isArray(p)) return;
             // Allowlist: solo claves conocidas de perfil (elimina las claves
             // prohibidas, que ya se descartaron en el clonado, y las desconocidas).
+            /** @type {Object.<string, any>} */
             const perfil = {};
             Object.keys(p).forEach((ck) => {
                 if (CLAVES_PERFIL.has(ck)) perfil[ck] = p[ck];
@@ -572,6 +635,10 @@ export const Store = {
         return raiz;
     },
 
+    /**
+     * Importa y sanitiza un backup completo (JSON), reemplazando el estado.
+     * @param {string} jsonStr Contenido del archivo de backup.
+     */
     importarTodo(jsonStr) {
         // Defensa en profundidad: límite de tamaño aunque el caller no lo valide.
         const bytes = (typeof TextEncoder !== 'undefined')

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { DashboardController } from "../src/controllers/dashboard.controller.js";
-import { COLORS_SPARKLINE, calcularReadiness, senalesFatiga } from "../src/utils/dashboard-helpers.ts";
+import { COLORS_SPARKLINE, calcularReadiness, senalesFatiga } from "../src/helpers/dashboard-helpers.ts";
 import { PerfilAtleta } from "../src/perfil-atleta.js";
 import { Store } from "../src/store.js";
 import { Toast } from "../src/toast.js";

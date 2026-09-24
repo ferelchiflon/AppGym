@@ -1,5 +1,5 @@
 /**
- * src/utils/dashboard-helpers.ts
+ * src/helpers/dashboard-helpers.ts
  * Cálculos puros del Dashboard. Reutiliza la lógica existente de
  * FisiologiaCargas (ACWR), VolumeLandmarks (MEV/MAV/MRV) y FormulasRM (1RM).
  * No muta ningún modelo: sólo lee y devuelve datos listos para renderizar.

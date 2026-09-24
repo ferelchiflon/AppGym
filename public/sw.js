@@ -1,11 +1,13 @@
-// Service Worker — GYM PRO v6.0 (rendimiento + frescura del diseño)
+// Service Worker — GYM PRO v6.0.0 (rendimiento + frescura del diseño)
 // Estrategias:
 //   - Fuentes y assets versionados de Vite (con hash ?v=/?t=/?import): cache-first.
 //   - Resto de assets same-origin (HTML, CSS, JS de src, JSON): network-first,
 //     por lo que Chrome SIEMPRE recibe la última versión del diseño y re-cachea.
 //   - Solo interceptamos GET same-origin; lo cross-origin va directo a la red.
 
-const CACHE_VERSION = 'gympro-v8.0-pwa';
+// Versionada junto con package.json y src/config.ts (CONFIG.VERSION) para que
+// cada release sincronizado invalide los cachés viejos al activarse el SW nuevo.
+const CACHE_VERSION = 'gympro-v6.0.0-pwa';
 const CACHE_RUNTIME = `${CACHE_VERSION}-runtime`;
 const CACHE_FUENTES = `${CACHE_VERSION}-fuentes`;
 

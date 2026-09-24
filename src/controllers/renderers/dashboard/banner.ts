@@ -6,6 +6,7 @@
 import * as H from "../../../utils/dashboard-helpers.ts";
 import { esc } from "../../../utils.ts";
 import { WellnessCorrelation } from "../../../wellness-correlation.js";
+import type { SesionEntrenamiento, PerfilAtletaData, Readiness, TendenciaReadiness } from "../../../types/gym.d.ts";
 
 /** Banner vacío cuando no hay readiness calculable. */
 export function noReadiness(): string {
@@ -17,7 +18,7 @@ export function noReadiness(): string {
 }
 
 /** Sugerencia textual según el score de readiness. */
-export function sugerenciaReadiness(opts: { score: any }): string {
+export function sugerenciaReadiness(opts: { score: number }): string {
   const { score } = opts;
   if (score >= 70) return "Listo para rendir a plena capacidad 💪";
   if (score >= 50) return "Cuidá la fatiga antes de cargar pesado.";
@@ -37,7 +38,10 @@ function circuloEstado(varCss: string): string {
 }
 
 /** Banner de correlación bienestar ↔ rendimiento (top 2 variables). */
-export function correlacionWellnessBanner(opts: { rutina: any; perfil: any }): string {
+export function correlacionWellnessBanner(opts: { 
+  rutina: { historial: SesionEntrenamiento[] }; 
+  perfil: { data: PerfilAtletaData } | null 
+}): string {
   const { rutina, perfil } = opts;
   const hist = rutina ? rutina.historial || [] : [];
   const wellness = (perfil && perfil.data && perfil.data.wellness) || [];
@@ -72,10 +76,10 @@ export function correlacionWellnessBanner(opts: { rutina: any; perfil: any }): s
 
   if (!lineas.length) return "";
   // Solo las 2 asociaciones más fuertes (mayor |%| primero) para no saturar el banner.
-  lineas.sort((a: any, b: any) => b.fuerza - a.fuerza);
+  lineas.sort((a, b) => b.fuerza - a.fuerza);
   const top = lineas
     .slice(0, 2)
-    .map((l: any) => `<p>${l.html}</p>`)
+    .map((l) => `<p>${l.html}</p>`)
     .join("");
 
   return `
@@ -85,20 +89,27 @@ export function correlacionWellnessBanner(opts: { rutina: any; perfil: any }): s
       </div>`;
 }
 /** Banner principal "Estado del atleta · HOY". */
-export function estadoAtletaBanner(opts: { rutina: any; perfil: any }): string {
+export function estadoAtletaBanner(opts: { rutina: { historial: SesionEntrenamiento[] }; perfil: ({ data: PerfilAtletaData } | null) }): string {
   const { rutina, perfil } = opts;
   const hist = rutina ? rutina.historial || [] : [];
+  const historialConv = hist.map((s) => ({
+    fechaISO: s.isoDate,
+    fecha: s.fecha,
+    timestamp: undefined,
+    volumenTotal: s.volumenTotal,
+    ejercicios: undefined,
+  }));
   const wellness = (perfil && perfil.data && perfil.data.wellness) || [];
   const saltos = (perfil && perfil.data && perfil.data.saltos) || [];
 
-  const hoy: any = H.calcularReadiness({ wellness, saltos, historial: hist });
+  const hoy: Readiness | null = H.calcularReadiness({ wellness, saltos, historial: historialConv });
   if (!hoy) return `<div class="panel-card card--hero estado-banner">${noReadiness()}</div>`;
 
-  const senales = H.senalesFatiga({ perfil, historial: hist });
-  const acwr = H.acwrDatos(hist);
-  const ventana = H.ventanaAnteriorReadiness({ wellness, saltos, historial: hist }, 4);
-  const anterior: any = H.calcularReadiness(ventana);
-  const tend: any = H.tendenciaReadiness(hoy, anterior);
+  const senales = H.senalesFatiga({ perfil, historial: historialConv });
+  const acwr = H.acwrDatos(historialConv);
+  const ventana = H.ventanaAnteriorReadiness({ wellness, saltos, historial: historialConv }, 4);
+  const anterior: Readiness | null = H.calcularReadiness(ventana);
+  const tend: TendenciaReadiness = H.tendenciaReadiness(hoy, anterior);
 
   const color = hoy.color;
   let titulo: string;
@@ -121,7 +132,7 @@ export function estadoAtletaBanner(opts: { rutina: any; perfil: any }): string {
   ];
 
   const desglose = filas
-    .map((f: any) => {
+    .map((f: { key: string; icon: string; label: string }) => {
       const t = tend[f.key] || { actual: null, anterior: null, direccion: "nuevo", delta: null };
       const actual = t.actual;
       const bar =
@@ -149,7 +160,7 @@ export function estadoAtletaBanner(opts: { rutina: any; perfil: any }): string {
     .join("");
 
   const alertas = senales.length
-    ? `<div class="estado-alertas">${senales.map((s: any) => `<p>⚠️ ${esc(s)}</p>`).join("")}</div>`
+    ? `<div class="estado-alertas">${senales.map((s: string) => `<p>⚠️ ${esc(s)}</p>`).join("")}</div>`
     : "";
 
   const insight = correlacionWellnessBanner({ rutina, perfil });

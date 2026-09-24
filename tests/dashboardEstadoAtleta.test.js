@@ -2,9 +2,8 @@ import { describe, it, expect } from "vitest";
 import { DashboardController } from "../src/controllers/dashboard.controller.js";
 import {
   tendenciaReadiness,
-  ventanaAnteriorReadiness,
   UMBRAL_TENDENCIA,
-} from "../src/utils/dashboard-helpers.ts";
+} from "../src/helpers/dashboard-helpers.ts";
 
 /**
  * Tests del banner único de estado del atleta: los 3 colores del semáforo, las

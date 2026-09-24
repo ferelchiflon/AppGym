@@ -189,7 +189,8 @@
   <link rel="preload" href="styles/index.css" as="style">
   <link rel="stylesheet" href="styles/index.css">
 
-  <link rel="modulepreload" href="src/charts-manager.js">
+  <!-- charts-manager.js NO se pre-carga: es un chunk lazy que se descarga con
+       import() dinámico al entrar a la pestaña "Progreso" (code-splitting). -->
   <link rel="modulepreload" href="src/gestor-periodizacion.js">
 </head>
 

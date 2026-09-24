@@ -7,7 +7,7 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { readFileSync } from "node:fs";
 
 describe("Arranque real de la app", () => {
-  let errores = [];
+  const errores = [];
   let appCreado = false;
 
   beforeAll(async () => {
@@ -24,7 +24,7 @@ describe("Arranque real de la app", () => {
     window.addEventListener("error", (e) => errores.push("window.error: " + e.message));
 
     // Importar main.js (que define el listener de DOMContentLoaded)
-    const main = await import("../src/main.js");
+    await import("../src/main.js");
     document.dispatchEvent(new Event("DOMContentLoaded"));
     appCreado = typeof window.app !== "undefined" && !!window.app;
   });

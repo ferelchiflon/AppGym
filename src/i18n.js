@@ -4,7 +4,7 @@
  * sin dependencias, síncrono y testable).
  *
  * - t(clave, params): traduce con fallback al español y luego a la clave.
- * - aplicarIdioma(lang): persiste en localStorage (gympro:lang), actualiza
+ * - aplicarIdioma(lang): persiste vía prefs.js (localStorage gympro:lang), actualiza
  *   <html lang/data-lang> y repinta las cadenas estáticas [data-i18n].
  * - aplicarTraduccionesEstaticas(raiz): reemplaza textContent/placeholder/
  *   title/aria-label de elementos marcados con data-i18n, data-i18n-placeholder,
@@ -16,6 +16,8 @@
 
 import { es } from "./locales/es.js";
 import { en } from "./locales/en.js";
+// Preferencias de UI centralizadas (capa canónica de acceso a localStorage).
+import { getPref, setPref } from "./prefs.js";
 
 const DICT = { es, en };
 const FALLBACK = "es";
@@ -34,12 +36,8 @@ export function idiomaActual() {
  * sorprender a la base de usuarios hispanohablantes; el selector lo permite.
  */
 export function detectarIdioma() {
-  try {
-    const guardado = localStorage.getItem(STORAGE_KEY);
-    if (guardado === "es" || guardado === "en") return guardado;
-  } catch {
-    /* almacenamiento no disponible */
-  }
+  const guardado = getPref(STORAGE_KEY);
+  if (guardado === "es" || guardado === "en") return guardado;
   return FALLBACK;
 }
 
@@ -88,11 +86,7 @@ export function aplicarIdioma(lang, persistir = true) {
   }
 
   if (persistir) {
-    try {
-      localStorage.setItem(STORAGE_KEY, lang);
-    } catch {
-      /* almacenamiento no disponible */
-    }
+    setPref(STORAGE_KEY, lang);
   }
   return lang;
 }

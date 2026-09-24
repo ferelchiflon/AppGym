@@ -63,7 +63,7 @@ describe("Drawer · íconos SVG del menú (regresión i18n/XSS)", () => {
   });
 
   it("el data-i18n vive en el <span> interno, NO en el contenedor del <svg>", () => {
-    const host = mount();
+    mount();
     document.querySelectorAll(".drawer-icon").forEach((svg) => {
       // El contenedor donde vive el svg no debe tener data-i18n.
       expect(svg.parentElement.hasAttribute("data-i18n")).toBe(false);

@@ -243,7 +243,7 @@ describe("WorkoutController", () => {
     it("agrega una serie al hacer clic en addSerieBtn", () => {
       const el = mountWorkoutDOM();
       const rutina = makeRutina();
-      const controller = new WorkoutController({ app: {}, el, rutina, timer: makeTimer() });
+      new WorkoutController({ app: {}, el, rutina, timer: makeTimer() });
 
       el.seriePeso.value = "90";
       el.serieReps.value = "6";

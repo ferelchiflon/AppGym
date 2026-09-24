@@ -44,4 +44,6 @@ npm run typecheck # Chequeo de tipos (tsc --noEmit)
   TypeScript (`type`, `interface`, uniones `|`, etc.).
 - Se degradó a una versión estable y se añadió `typescript-eslint` para habilitar el linting
   completo de `.ts`.
-- `src/types/gym.d.ts` es, actualmente, el único archivo `.ts` de `src/`.
+- La migración a TypeScript está en curso (Fase 1): hoy `src/` combina `.js` con
+  `.ts` (`src/utils.ts`, `src/config.ts`, helpers del dashboard en `src/helpers/`,
+  renderers en `src/controllers/renderers/` y tipos en `src/types/`).

@@ -1,5 +1,5 @@
 /**
- * src/utils/backup-reminder.ts
+ * src/helpers/backup-reminder.ts
  * Recordatorio periódico de backup (toast con acción "Exportar backup ahora").
  *  - Caso 1: nunca hizo backup y pasaron 14+ días desde el primer registro
  *    (proxy: fecha más vieja del historial de todos los perfiles).

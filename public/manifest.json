@@ -1,6 +1,7 @@
 {
   "name": "GYM PRO — Registro de Entrenamiento",
   "short_name": "GYM PRO",
+  "version": "6.0.0",
   "id": "./",
   "description": "Registro de entrenamiento profesional, periodización y cálculo de 1RM",
   "start_url": "./index.html",
