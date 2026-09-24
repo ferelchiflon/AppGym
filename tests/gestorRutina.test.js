@@ -11,7 +11,6 @@ import { GestorRutina } from "../src/gestor-rutina.js";
 import { FormulasRM } from "../src/formulas.js";
 import { Autoregulacion } from "../src/autorregulacion.js";
 import { Store } from "../src/store.js";
-import { reordenarArrayEjercicios } from "../src/dnd.js";
 
 vi.mock("../src/utils.ts", () => {
   // Contador interno (closure de fábrica) para ids únicos por llamada.

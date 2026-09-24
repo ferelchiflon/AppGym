@@ -1,13 +1,6 @@
-/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  // ── Vitest ──────────────────────────────────────────────────────
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    include: ['tests/**/*.test.js'],
-  },
   root: '.',
   base: './',
   publicDir: 'public',
